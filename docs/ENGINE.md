@@ -73,6 +73,13 @@ the Horizons files. The planets ran 64.184 s ahead of the small bodies, about 2,
 correction DE440 and Horizons agree within 10 m. The earlier 10-day Horizons interpolation missed the true positions by
 up to 304 km for Eros, 1,300 km for Ryugu and 8,700 km for Bennu near their Earth encounters; daily states remove that.
 
+**A second Lambert solver.** `engine/vlambert.py` solves many transfers at once with numpy (universal variables,
+bisection, single revolution, prograde). On 20,000 random transfers from 10 days to 100 years across 0.3 to 40 AU it
+returns the same velocities as pykep within 4e-10 (relative) and solves the same set. It is no faster than pykep's
+compiled solver (about 250,000 against 420,000 transfers per second on one core), so pykep stays in production and the
+numpy solver serves as an independent check. Positions are the cheaper half of the work: two-body positions for all
+1.58 million catalogue orbits at one date take 0.76 s.
+
 **Independent checks of the transfer data.** On 400 random published entries: the stored costs reproduce within
 0.0055 km/s; integrating each chosen transfer with scipy (two-body, DOP853) lands a median 43 m and at most 9.5 km from
 the target; a separate universal-variable Lambert solver (`network/engine.js`) gives the same departure velocities
