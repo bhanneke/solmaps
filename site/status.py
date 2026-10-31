@@ -14,7 +14,8 @@ def mini():
     """queue logs and result counts from the Mac Mini, or None"""
     cmd = ('cd ~/solmaps && for q in queue.log queue2.log; do echo "== $q"; cat $q 2>/dev/null; done; '
            'echo "== counts"; for f in flyby/run3_*.log flyby/q2_*.log; do echo "$(basename $f) $(grep -c "^{" $f)"; done; '
-           'echo "== lt"; python3 -c "import json;print(len(json.load(open(\'data/lowthrust_atlas.json\'))))" 2>/dev/null || echo 0')
+           'echo "== lt"; python3 -c "import json;print(len(json.load(open(\'data/lowthrust_atlas.json\'))))" 2>/dev/null || echo 0; '
+           'echo "== screen"; ls ~/solmaps-screen/data/screen 2>/dev/null | grep -c "^unit_.*npz$"')
     try:
         out = subprocess.run(['ssh', '-o', 'ConnectTimeout=8', '-o', 'BatchMode=yes', 'bjoernmacmini', cmd],
                              capture_output=True, text=True, timeout=60).stdout
@@ -40,6 +41,7 @@ def mini():
                     j['ended'], j['exit'] = m.group(1), int(m.group(4) or 1)
     counts = dict(l.rsplit(' ', 1) for l in sec.get('counts', []) if ' ' in l)
     return {'jobs': jobs, 'counts': {k: int(v) for k, v in counts.items()}, 'lowthrust_rows': int((sec.get('lt') or ['0'])[0] or 0),
+            'screen_units': int((sec.get('screen') or ['0'])[0] or 0),
             'checked': time.strftime('%Y-%m-%d %H:%M')}
 
 # the Mini queues as planned (flyby/run_queue_mini.sh, run_queue_mini2.sh); problems per job from the measured run times
@@ -76,6 +78,9 @@ def build():
         n = (m or {}).get('counts', {}).get(log)
         rows.append({'group': 'Mac Mini, queue ' + str(q), 'name': label, 'state': state, 'since': j.get('started', ''),
                      'note': f'{n:,} searches finished' if n and state != 'queued' else ''})
+    rows.append({'group': 'Mac Mini, screening', 'name': 'Every object of the JPL Small-Body Database (1,580,428 bound orbits) against Earth, Mars '
+                 'and Ceres, both directions, every 10 days to 2100', 'done': (m or {}).get('screen_units', 0), 'total': 791,
+                 'unit': 'work units of 2,000 objects', 'note': 'near-Earth objects first, then by brightness; two-body orbits, for ranking'})
     open_pairs = len(HELIO) * (len(HELIO) - 1) - 52
     rows.append({'group': 'Open for contributors', 'name': 'Flyby search for the remaining body pairs (36 two-year windows each)',
                  'done': 0, 'total': open_pairs, 'unit': 'pairs', 'note': 'work units and verification in preparation'})

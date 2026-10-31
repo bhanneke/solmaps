@@ -1,5 +1,5 @@
 {
- "built": "2026-10-31 23:16",
+ "built": "2026-11-01 00:38",
  "mini": {
   "jobs": {
    "ceres:earth,mars": {
@@ -12,11 +12,12 @@
    }
   },
   "counts": {
-   "run3_ceres_earth_mars.log": 150,
-   "q2_flyby_mars.log": 169
+   "run3_ceres_earth_mars.log": 171,
+   "q2_flyby_mars.log": 198
   },
   "lowthrust_rows": 0,
-  "checked": "2026-10-31 23:16"
+  "screen_units": 0,
+  "checked": "2026-11-01 00:38"
  },
  "rows": [
   {
@@ -41,7 +42,7 @@
    "name": "Flyby search, returns from Ceres",
    "state": "running",
    "since": "2026-10-31 14:28:28",
-   "note": "150 searches finished"
+   "note": "171 searches finished"
   },
   {
    "group": "Mac Mini, queue 1",
@@ -97,7 +98,7 @@
    "name": "Flyby search, Mars to Earth, Venus, Mercury",
    "state": "running",
    "since": "2026-10-31 15:39:44",
-   "note": "169 searches finished"
+   "note": "198 searches finished"
   },
   {
    "group": "Mac Mini, queue 2",
@@ -133,6 +134,14 @@
    "state": "queued",
    "since": "",
    "note": ""
+  },
+  {
+   "group": "Mac Mini, screening",
+   "name": "Every object of the JPL Small-Body Database (1,580,428 bound orbits) against Earth, Mars and Ceres, both directions, every 10 days to 2100",
+   "done": 0,
+   "total": 791,
+   "unit": "work units of 2,000 objects",
+   "note": "near-Earth objects first, then by brightness; two-body orbits, for ranking"
   },
   {
    "group": "Open for contributors",
