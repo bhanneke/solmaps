@@ -24,6 +24,7 @@ html,body{height:100%}
 body{margin:0;background:var(--void);color:var(--ink);font-family:var(--f-body);font-size:14px;overflow:hidden;
   padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px));padding-block:0}
 button,select,input{font:inherit;color:inherit}
+[hidden]{display:none !important}
 button{background:rgba(18,26,41,.9);border:1px solid var(--rule);border-radius:4px;padding:5px 10px;cursor:pointer}
 button:hover{border-color:var(--dim)}
 button[aria-pressed=true]{border-color:var(--sun);color:var(--sun)}
@@ -101,7 +102,7 @@ a{color:var(--c-water)}
     <select id="evMin" aria-label="Minimum evidence"><option value="0">all evidence</option><option value="1">inferred and better</option><option value="2">strong and better</option><option value="3">confirmed only</option></select></div>
   <div class="grp"><select id="routeMode" aria-label="Route direction"><option value="from">Routes from</option><option value="to">Routes to</option></select><select id="routeFrom" aria-label="Site for routes"><option value="">none</option></select>
     <select id="horizon" aria-label="Waiting horizon"><option value="18">wait up to 6 months</option><option value="37" selected>wait up to 1 year</option><option value="79">wait up to 26 months</option></select><label class="sl"><input type="checkbox" id="sling" checked> slingshots</label></div>
-  <div class="grp"><button type="button" id="btnJourney" aria-pressed="false">Journeys</button><button type="button" id="btnNet" aria-pressed="false">Network view</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button><span id="n3ctl" class="grp" hidden><select id="n3Color" aria-label="Line colour in the whole-network view"><option value="imbalance">colour = go-return imbalance</option><option value="time">colour = travel time</option><option value="cost">colour = km/s</option></select><select id="n3Scale" aria-label="Distance scale"><option value="sqrt">square-root scale</option><option value="linear">linear scale</option></select></span><select id="nvMetric" aria-label="Distance in the network view" hidden><option value="time">distance = travel time</option><option value="fuel">distance = fuel</option></select><button type="button" id="btnTop">Top view</button><button type="button" id="btnReset">Whole system</button><button type="button" id="btnLabels" aria-pressed="true">Labels</button></div>
+  <div class="grp"><button type="button" id="btnJourney" aria-pressed="false">Journeys</button><button type="button" id="btnNet" aria-pressed="false">Network view</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button><span id="n3ctl" class="grp" hidden><select id="n3Color" aria-label="Line colour in the whole-network view"><option value="imbalance">colour = go-return imbalance</option><option value="time">colour = travel time</option><option value="cost">colour = km/s</option></select></span><select id="n3Scale" aria-label="Distance scale in the network views" hidden><option value="log">log scale</option><option value="sqrt">square-root scale</option><option value="linear">linear scale</option></select><select id="nvMetric" aria-label="Distance in the network view" hidden><option value="time">distance = travel time</option><option value="fuel">distance = fuel</option></select><button type="button" id="btnTop">Top view</button><button type="button" id="btnReset">Whole system</button><button type="button" id="btnLabels" aria-pressed="true">Labels</button></div>
 </header>
 
 <aside class="panel" id="panel" aria-live="polite"></aside>
@@ -1046,7 +1047,16 @@ function reachAll(from, k0, mode, B, years) {
   }
   return { first, cheap, k0 };
 }
-Object.assign(state, { netView: false, nvMetric: 'time' });
+Object.assign(state, { netView: false, nvMetric: 'time', n3Scale: 'log' });
+// distance scale shared by both network views. Log: ln(1 + v / tau), with tau = 0.1 years (or 1 km/s for fuel), so a
+// 4-day hop, a 1-year transfer and a 15-year flight all stay readable and zero stays at the centre.
+function scaleOf(v, fuel) {
+  const x = Math.max(0, v);
+  if (state.n3Scale === 'log') return Math.log1p(x / (fuel ? 1 : 0.1));
+  return state.n3Scale === 'sqrt' ? Math.sqrt(x) : x;
+}
+const scaleWords = () => ({ log: 'on a log scale', sqrt: 'on a square-root scale', linear: 'on a linear scale' }[state.n3Scale]);
+const showScale = () => { $('n3Scale').hidden = !(state.netView || state.net3d); };
 function drawNetView() {
   const svg = $('netview'); if (!state.netView) { svg.style.display = 'none'; return; }
   svg.style.display = 'block';
@@ -1055,38 +1065,42 @@ function drawNetView() {
   const byTime = state.nvMetric === 'time', pick = res[byTime ? 'first' : 'cheap'];
   const maxV = byTime ? state.jYears : Math.max(10, ...pick.filter(Boolean).map(p => p.c));
   const val = p => byTime ? (jdOfK(p.k) - jdOfK(k0)) / 365.25 : p.c;
-  const rad = v => R * Math.sqrt(Math.max(0, v) / maxV);
+  const rad = v => R * scaleOf(v, !byTime) / scaleOf(maxV, !byTime);
   const ang = id => { const b = bodyOf(id), st = b && ENG.stateAt(b, state.jd); return st ? Math.atan2(st.r[1], st.r[0]) : 0; };
   const ink = '#dfe5ef', dim = '#8a96ad', grid = '#233049', gold = '#f0b347';
   const pos = {};
   SITE_IDS.forEach((id, i) => { if (id === state.jFrom) { pos[id] = [cx, cy]; return; } const p = pick[i]; if (!p) return; const a = ang(id), r = rad(val(p)); pos[id] = [cx + r * Math.cos(a), cy - r * Math.sin(a)]; });
   let g = `<rect width="${W}" height="${H}" fill="#05070d" opacity="0.94"/>`;
-  const rings = byTime ? [1, 2, 5, 10, 15, 25].filter(v => v <= state.jYears) : [2, 5, 10, 15, 20, 30].filter(v => v <= maxV);
-  for (const v of rings) g += `<circle cx="${cx}" cy="${cy}" r="${rad(v)}" fill="none" stroke="${grid}"/><text x="${cx + 4}" y="${cy - rad(v) - 4}" font-size="11" fill="${dim}">${v} ${byTime ? (v === 1 ? 'year' : 'years') : 'km/s'}</text>`;
+  const rings = byTime ? (state.n3Scale === 'log' ? [0.25, 0.5] : []).concat([1, 2, 5, 10, 15, 25]).filter(v => v <= state.jYears) : [2, 5, 10, 15, 20, 30].filter(v => v <= maxV);
+  for (const v of rings) g += `<circle cx="${cx}" cy="${cy}" r="${rad(v)}" fill="none" stroke="${grid}"/><text x="${cx + 0.5 * rad(v) + 4}" y="${cy + 0.866 * rad(v) + 4}" font-size="11" fill="${dim}">${byTime && v < 1 ? Math.round(v * 12) + ' months' : v + ' ' + (byTime ? (v === 1 ? 'year' : 'years') : 'km/s')}</text>`;
   SITE_IDS.forEach((id, i) => {                     // the last leg into each node, from its previous stop
     const p = pick[i]; if (!p || !p.e || !pos[id]) return; const from = SITE_IDS[p.e.u]; if (!pos[from]) return;
     const col = new THREE.Color(rampColor(p.e.cost)).getStyle();
     g += `<line x1="${pos[from][0]}" y1="${pos[from][1]}" x2="${pos[id][0]}" y2="${pos[id][1]}" stroke="${col}" stroke-width="1.6" opacity="0.85"/>`;
   });
-  const unreached = [];
+  const unreached = [], placed = [];
   SITE_IDS.forEach((id, i) => {
     if (i >= NSITE && !activeStations().has(id)) return;
     if (!pos[id]) { unreached.push(nodeName(id)); return; }
     const [x, y] = pos[id], p = pick[i], isO = id === state.jFrom, stn = id.startsWith('stn');
     const label = isO ? nodeName(id) : `${nodeName(id)} · ${byTime ? val(p).toFixed(1) + ' yr' : p.c.toFixed(1) + ' km/s'}`;
     g += stn ? `<path d="M${x} ${y - 6}l6 6l-6 6l-6 -6z" fill="${gold}"/>` : `<circle cx="${x}" cy="${y}" r="${isO ? 8 : 5}" fill="${isO ? gold : ink}"/>`;
-    g += `<text x="${x + 9}" y="${y + 4}" font-size="12" fill="${isO ? gold : ink}">${esc(label)}</text>`;
+    let ly = y + 4; const lw = 7 * label.length;          // move a label down until it clears the ones placed before
+    while (placed.some(b => x + 9 < b[0] + b[2] && b[0] < x + 9 + lw && Math.abs(ly - b[1]) < 13)) ly += 14;
+    placed.push([x + 9, ly, lw]);
+    if (ly !== y + 4) g += `<line x1="${x}" y1="${y}" x2="${x + 8}" y2="${ly - 4}" stroke="${dim}" stroke-width="1"/>`;   // leader to a moved label
+    g += `<text x="${x + 9}" y="${ly}" font-size="12" fill="${isO ? gold : ink}">${esc(label)}</text>`;
   });
   const y0 = (document.querySelector('.top') || { offsetHeight: 90 }).offsetHeight + 24;
   g += `<text x="16" y="${y0}" font-size="15" font-weight="600" fill="${ink}">Network view from ${esc(nodeName(state.jFrom))}</text>
-    <text x="16" y="${y0 + 20}" font-size="12" fill="${dim}">Distance from the centre: ${byTime ? 'earliest arrival, in years from ' + isoOf(jdOfK(k0)) : 'least fuel to arrive within ' + state.jYears + ' years, in km/s'}, on a square-root scale. Direction: the angle from the Sun to each place on this date.</text>
+    <text x="16" y="${y0 + 20}" font-size="12" fill="${dim}">Distance from the centre: ${byTime ? 'earliest arrival, in years from ' + isoOf(jdOfK(k0)) : 'least fuel to arrive within ' + state.jYears + ' years, in km/s'}, ${scaleWords()}. Direction: the angle from the Sun to each place on this date.</text>
     <text x="16" y="${y0 + 38}" font-size="12" fill="${dim}">${state.jMode === 'refuel' ? 'Refuel at stops, at most ' + state.jB + ' km/s per leg' : 'One tank, at most ' + state.jB + ' km/s in total'}${state.jStations ? ', with the best ' + state.jStations + ' stations' : ''}. Lines show the last leg of the route to each place, coloured by its cost.</text>`;
   if (unreached.length) g += `<text x="16" y="${H - 18}" font-size="12" fill="${dim}">Not reachable with these settings: ${esc(unreached.join(', '))}</text>`;
   svg.innerHTML = g;
 }
 
 $('btnNet').addEventListener('click', () => {
-  state.netView = !state.netView; $('btnNet').setAttribute('aria-pressed', state.netView); $('nvMetric').hidden = !state.netView;
+  state.netView = !state.netView; $('btnNet').setAttribute('aria-pressed', state.netView); $('nvMetric').hidden = !state.netView; showScale();
   if (state.netView && !state.journey) { state.journey = true; state.jTab = 'journey'; $('btnJourney').setAttribute('aria-pressed', true); state.sel = null; renderPanel(); }
   drawNetView();
 });
@@ -1107,7 +1121,7 @@ function bindTabs() {
 // from the previous date so the picture moves smoothly). The antisymmetric part cannot appear in any layout; the view
 // reports it as the go-return imbalance, per pair I = (T_ab - T_ba) / (T_ab + T_ba) and for the whole network
 // A = ||T - T'|| / ||T + T'||.
-Object.assign(state, { net3d: false, n3Color: 'imbalance', n3Scale: 'sqrt', n3Focus: null, n3K: null });
+Object.assign(state, { net3d: false, n3Color: 'imbalance', n3Focus: null, n3K: null });
 const N3 = { el: $('net3d'), canvas: $('n3canvas'), labels: {}, coords: null, data: null, curve: null, curveKey: null };
 const n3renderer = new THREE.WebGLRenderer({ canvas: N3.canvas, antialias: true });
 n3renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -1126,7 +1140,7 @@ function n3matrix(k0) {
   });
   return { ids, T, C, k0 };
 }
-const n3f = y => state.n3Scale === 'sqrt' ? Math.sqrt(y) : y;
+const n3f = y => scaleOf(y, false);
 function n3target(T) {                                   // symmetric target distances and weights (0 where unknown)
   const n = T.length, D = T.map(() => new Array(n).fill(0)), W = T.map(() => new Array(n).fill(0));
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
@@ -1243,7 +1257,7 @@ const n3fmt = y => isNaN(y) ? 'not within the time limit' : y < 0.1 ? Math.round
 function n3card() {
   const d = N3.data, fi = state.n3Focus ? d.ids.indexOf(state.n3Focus) : -1, cv = N3.curve;
   let h = `<h3>Whole network · ${isoOf(jdOfK(d.k0))}</h3>
-    <p>Distance between two places: travel time in years${state.n3Scale === 'sqrt' ? ' on a square-root scale' : ''}, the average of both directions (earliest arrival, ${state.jMode === 'refuel' ? 'refuelling at stops, at most ' + state.jB + ' km/s per leg' : 'one tank, at most ' + state.jB + ' km/s in total'}, within ${state.jYears} years).</p>
+    <p>Distance between two places: travel time in years ${scaleWords()}, the average of both directions (earliest arrival, ${state.jMode === 'refuel' ? 'refuelling at stops, at most ' + state.jB + ' km/s per leg' : 'one tank, at most ' + state.jB + ' km/s in total'}, within ${state.jYears} years).</p>
     <p><strong>Go-return imbalance of the network: ${isNaN(d.asym) ? '–' : (100 * d.asym).toFixed(0) + '%'}</strong> of its travel times differ by direction (‖T − Tᵀ‖ / ‖T + Tᵀ‖). No layout can show that part. <strong>Layout error: ${(100 * d.stress).toFixed(0)}%</strong> (stress of the shown distances against the two-way averages).</p>`;
   if (cv && cv.A.length > 1) {
     const w = 300, hh = 46, xs = i => 4 + (w - 8) * i / (cv.A.length - 1), mx = Math.max(...cv.A.filter(x => !isNaN(x)), 0.01);
@@ -1321,16 +1335,16 @@ N3.canvas.addEventListener('click', ev => { const p = n3pick(ev); state.n3Focus 
   if (state.n3Focus) { const i = N3.data.ids.indexOf(state.n3Focus); n3controls.target.copy(N3.P[i]); } else n3controls.target.set(0, 0, 0);
   n3draw(); });
 N3.canvas.addEventListener('dblclick', ev => { const p = n3pick(ev); if (!p || !p.node) return;
-  state.jFrom = p.node; state.net3d = false; $('btnNet3').setAttribute('aria-pressed', false); $('n3ctl').hidden = true; drawNet3d();
+  state.jFrom = p.node; state.net3d = false; $('btnNet3').setAttribute('aria-pressed', false); $('n3ctl').hidden = true; showScale(); drawNet3d();
   if (!state.netView) $('btnNet').click(); else drawNetView(); renderPanel(); });
 $('btnNet3').addEventListener('click', () => {
-  state.net3d = !state.net3d; $('btnNet3').setAttribute('aria-pressed', state.net3d); $('n3ctl').hidden = !state.net3d;
+  state.net3d = !state.net3d; $('btnNet3').setAttribute('aria-pressed', state.net3d); $('n3ctl').hidden = !state.net3d; showScale();
   if (state.net3d && state.netView) $('btnNet').click();
   if (state.net3d && !state.journey) { state.journey = true; state.jTab = 'journey'; $('btnJourney').setAttribute('aria-pressed', true); state.sel = null; renderPanel(); }
   state.n3K = kOf(state.jd); drawNet3d();
 });
 $('n3Color').addEventListener('change', e => { state.n3Color = e.target.value; if (state.net3d) n3draw(); });
-$('n3Scale').addEventListener('change', e => { state.n3Scale = e.target.value; N3.coords = null; if (state.net3d) drawNet3d(); });
+$('n3Scale').addEventListener('change', e => { state.n3Scale = e.target.value; N3.coords = null; if (state.net3d) drawNet3d(); if (state.netView) drawNetView(); });
 addEventListener('resize', () => { if (state.net3d) n3resize(); });
 requestAnimationFrame(n3frame);
 
