@@ -1,8 +1,9 @@
 """Daily transfer alternatives for every ordered pair of the heliocentric bodies (precompute).
 
 For each pair of conventions.HELIO (30 bodies, 870 ordered pairs) and each day from 2026-11-01 to 2100-12-31, the module
-solves Lambert's problem (single revolution, prograde, pykep) over 100 flight times, log-spaced from 0.3 to 2.5 Hohmann
-times and capped at 100 years, and keeps the Pareto front of flight time against cost, thinned to at most K. The cost
+solves Lambert's problem (prograde, pykep, up to 5 revolutions around the Sun, the cheapest kept) over 100 flight
+times, log-spaced from 0.3 Hohmann times to the longer of 2.5 Hohmann times and three orbits of the faster body, capped
+at 100 years, and keeps the Pareto front of flight time against cost, thinned to at most K. The cost
 for the front uses each body's own end state (conventions.end_state); moons and Earth-Moon L1 share their planet's
 front and are priced at query time. Arrivals after the end of a body's ephemeris (Bennu: 2135-09-30) are skipped.
 
@@ -22,7 +23,7 @@ import numpy as np
 from engine.conventions import HELIO, SITES, NAMES, PARKING, planet_side_dv, end_state
 
 JD0, JD1 = 2461345.5, 2488433.5                    # 2026-11-01 to 2100-12-31, every day
-K, NTOF, TOF_MAX = 6, 100, 100 * 365.25
+K, NTOF, TOF_MAX, MAX_REVS = 6, 100, 100 * 365.25, 5
 K2 = 2.9591220828e-4
 OUT = '/work/data/daily'
 SMALL = json.load(open('/work/engine/small_bodies.json'))['bodies']
@@ -34,9 +35,12 @@ def semi_major_axis(node):
     return {b['id']: b for b in bodies.load_atlas()['bodies']}[node]['orbit']['semi_major_axis_au']
 
 def tof_grid(a1, a2):
-    """100 flight times, log-spaced from 0.3 to 2.5 Hohmann times (at least 10 days, at most 100 years)"""
+    """100 flight times, log-spaced from 0.3 Hohmann times to the longer of 2.5 Hohmann times and three orbits of the
+    faster body (at least 10 days, at most 100 years). Flights longer than an orbit can go around the Sun several times
+    on the way (multi-revolution transfers), often far cheaper; the range covers them."""
     tH = math.pi * math.sqrt(((a1 + a2) / 2) ** 3 / K2)
-    lo, hi = max(10.0, 0.3 * tH), min(TOF_MAX, 2.5 * tH)
+    p_min = 2 * math.pi * math.sqrt(min(a1, a2) ** 3 / K2)
+    lo, hi = max(10.0, 0.3 * tH), min(TOF_MAX, max(2.5 * tH, 3 * p_min))
     return [lo * (hi / lo) ** (i / (NTOF - 1)) for i in range(NTOF)]
 
 def pareto_thin(T, cost, vd, va):
@@ -60,35 +64,36 @@ def route(args):
     dates = np.arange(JD0, JD1 + 0.5, 1.0)
     tof = np.full((len(dates), K), np.nan, np.float32)
     vinf = np.full((len(dates), K, 2), np.nan, np.float16)
+    revs = np.zeros((len(dates), K), np.uint8)
     for j, jd in enumerate(dates):
         t0 = jd - 2451544.5
         ra, va = A.eph(t0)
-        T, cost, vd, vr = [], [], [], []
+        T, cost, vd, vr, NR = [], [], [], [], []
+        def solve(t):
+            """the cheapest of the single- and multi-revolution solutions (up to MAX_REVS) at flight time t"""
+            if t0 + t > end_b or t in T:
+                return
+            rb, vb = B.eph(t0 + t)
+            try:
+                l = pk.lambert_problem(r0=ra, r1=rb, tof=t * 86400.0, mu=pk.MU_SUN, multi_revs=MAX_REVS)
+            except Exception:
+                return
+            best = None
+            for q, (w0, w1) in enumerate(zip(l.v0, l.v1)):     # solution 0: one revolution at most; 2n-1, 2n: n full revolutions
+                d = math.dist(w0, va) / 1000; r = math.dist(w1, vb) / 1000
+                c = planet_side_dv(a, d) + planet_side_dv(b, r)
+                if best is None or c < best[2]:
+                    best = (d, r, c, (q + 1) // 2)
+            T.append(t); vd.append(best[0]); vr.append(best[1]); cost.append(best[2]); NR.append(best[3])
         for t in grid:
             if t0 + t > end_b:
                 break
-            rb, vb = B.eph(t0 + t)
-            try:
-                l = pk.lambert_problem(r0=ra, r1=rb, tof=t * 86400.0, mu=pk.MU_SUN)
-            except Exception:
-                continue
-            d = math.dist(l.v0[0], va) / 1000; r = math.dist(l.v1[0], vb) / 1000
-            T.append(t); vd.append(d); vr.append(r); cost.append(planet_side_dv(a, d) + planet_side_dv(b, r))
+            solve(t)
         if not T:
             continue
         # refine the three cheapest local minima of the grid, each between its grid neighbours (two rounds of halving
         # in log time). Cost valleys next to the 180-degree transfer singularity can be narrower than the grid spacing:
         # Psyche to Mercury has one about 10 days wide at 378 days of flight.
-        def solve(t):
-            if t0 + t > end_b or t in T:
-                return
-            rb, vb = B.eph(t0 + t)
-            try:
-                l = pk.lambert_problem(r0=ra, r1=rb, tof=t * 86400.0, mu=pk.MU_SUN)
-            except Exception:
-                return
-            d = math.dist(l.v0[0], va) / 1000; r = math.dist(l.v1[0], vb) / 1000
-            T.append(t); vd.append(d); vr.append(r); cost.append(planet_side_dv(a, d) + planet_side_dv(b, r))
         n = len(T)
         minima = [q for q in range(n) if (q == 0 or cost[q] <= cost[q - 1]) and (q == n - 1 or cost[q] <= cost[q + 1])]
         for q in sorted(minima, key=lambda q: cost[q])[:3]:
@@ -101,8 +106,8 @@ def route(args):
                 lo, hi = near[max(m - 1, 0)], near[min(m + 1, len(near) - 1)]
         idx = pareto_thin(np.array(T), np.array(cost), vd, vr)
         for i, p in enumerate(idx):
-            tof[j, i] = T[p]; vinf[j, i, 0] = vd[p]; vinf[j, i, 1] = vr[p]
-    return a, b, tof, vinf
+            tof[j, i] = T[p]; vinf[j, i, 0] = vd[p]; vinf[j, i, 1] = vr[p]; revs[j, i] = NR[p]
+    return a, b, tof, vinf, revs
 
 def main(procs=8):
     os.makedirs(OUT, exist_ok=True)
@@ -111,12 +116,13 @@ def main(procs=8):
     print('origins to do', len(todo), 'pairs', len(pairs), flush=True)
     t = time.time(); got = {}
     with Pool(procs) as p:
-        for a, b, tof, vinf in p.imap_unordered(route, pairs):
-            got.setdefault(a, {})[b] = (tof, vinf)
+        for a, b, tof, vinf, revs in p.imap_unordered(route, pairs):
+            got.setdefault(a, {})[b] = (tof, vinf, revs)
             if len(got[a]) == len(HELIO) - 1:            # origin complete: write it and free the memory
                 targets = [x for x in HELIO if x != a]
                 np.savez_compressed(f'{OUT}/{a}.tmp.npz', targets=np.array(targets), jd0=JD0, step=1.0, k=K,
-                                    tof=np.stack([got[a][x][0] for x in targets]), vinf=np.stack([got[a][x][1] for x in targets]))
+                                    tof=np.stack([got[a][x][0] for x in targets]), vinf=np.stack([got[a][x][1] for x in targets]),
+                                    revs=np.stack([got[a][x][2] for x in targets]))
                 os.replace(f'{OUT}/{a}.tmp.npz', f'{OUT}/{a}.npz')
                 del got[a]
                 print(f'{a} done, {time.time() - t:.0f} s', flush=True)
