@@ -8,7 +8,7 @@
 #   make pairs   station-to-station edges from the committed station ranking (about 20 seconds; the 3D atlas needs them)
 #   make depots  depot-orbit search for the growth map (Node, a few minutes)
 #   make stations  recompute the station candidates and ranking from scratch (about 10 minutes), then the edges
-IMAGE ?= solmaps-env:2
+IMAGE ?= solmaps-env:3
 RUN = docker run --rm -v "$(CURDIR)":/work -w /work $(IMAGE)
 
 .PHONY: all image data network alternatives test serve site stations pairs depots ephemeris

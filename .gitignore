@@ -19,3 +19,16 @@ stations/pairs.json
 data/
 .pytest_cache/
 flyby/horizons/*.json
+
+# credentials never go into git (tokens live in the home folder: ~/.cache/huggingface/token, ~/.zenodo_token)
+.env
+.env.*
+*.env
+*.pem
+*.key
+secrets/
+.huggingface/
+.zenodo_token
+token
+*.token
+*_token
