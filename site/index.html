@@ -1,5 +1,5 @@
-<title>Deep Space Strategy</title>
-<meta name="description" content="Deep Space Strategy studies where humanity should build in the solar system, and in which order.">
+<title>solmaps</title>
+<meta name="description" content="solmaps computes what it costs to travel between places in the solar system on any day until 2100, and draws the maps that follow from it.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
@@ -7,34 +7,30 @@
 <style>
 .hero{display:flex;flex-direction:column;gap:14px;padding:28px 0 6px}
 .hero h1{font-size:60px}
-.hero .lede{font-size:23px;color:var(--ink);max-width:32ch;line-height:1.35}
+.hero .lede{font-size:21px;color:var(--ink);max-width:40ch;line-height:1.4}
 .area{display:grid;grid-template-columns:190px 1fr;gap:4px 18px;padding:12px 0;border-top:1px solid var(--rule)}
 .area h3{font-family:var(--f-display);font-size:21px;letter-spacing:.04em;text-transform:uppercase;color:var(--sun);margin:0}
+.area h3 a{color:inherit;text-decoration:none}
 .area p{font-size:15.5px}
-.area .links{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14.5px;margin-top:4px}
-.area .soon{color:var(--dim);font-size:14px;margin-top:4px}
-@media (max-width:560px){.area{grid-template-columns:1fr}.hero h1{font-size:44px}.hero .lede{font-size:20px}}
+@media (max-width:560px){.area{grid-template-columns:1fr}.hero h1{font-size:44px}.hero .lede{font-size:19px}}
 </style>
 <main>
+  <p><a href="https://bhanneke.github.io/deep-space-strategy/">Deep Space Strategy</a> · maps and route engine</p>
   <div class="hero">
-    <h1>Deep Space Strategy</h1>
-    <p class="lede">We study where humanity should build in the solar system, and in which order.</p>
-    <p>Deep Space Strategy is a primer for settling the solar system, based on evidence.</p>
+    <h1>solmaps</h1>
+    <p class="lede">solmaps computes what it costs to travel between places in the solar system on any day until 2100, and draws the maps that follow from it.</p>
+    <p>It is the open engine of <a href="https://bhanneke.github.io/deep-space-strategy/">Deep Space Strategy</a>.</p>
   </div>
 
-  <h2>Contents</h2>
-  <div class="area"><h3>Settlement</h3><div><p>Where the first bases and stations should go, and what comes after them.</p><p class="links"><a href="station-siting.html">Station siting</a><a href="growth-map.html">Growth map</a></p></div></div>
-  <div class="area"><h3>Resources and energy</h3><div><p>Where water and metals are. Which energy sources each step needs, from solar power to fusion.</p><p class="links"><a href="atlas.html">Resource atlas</a></p></div></div>
-  <div class="area"><h3>Transport</h3><div><p>How ships travel between the planets, and where they refuel.</p><p class="links"><a href="solar-system-3d.html">3D atlas</a><a href="growth-map.html">Growth map</a></p></div></div>
-  <div class="area"><h3>Machines and AI</h3><div><p>What autonomous systems build before people arrive.</p><p class="soon">In preparation</p></div></div>
-  <div class="area"><h3>Cooperation and law</h3><div><p>Shared infrastructure and the rules for using it.</p><p class="soon">In preparation</p></div></div>
-  <div class="area"><h3>Competition and conflict</h3><div><p>Competition between states and companies, and how to prevent armed conflict.</p><p class="soon">In preparation</p></div></div>
-  <div class="area"><h3>Simulation</h3><div><p>Computer simulations in which many actors pursue different strategies.</p><p class="soon">In preparation</p></div></div>
+  <h2>Maps</h2>
+  <div class="area"><h3><a href="atlas.html">Resource atlas</a></h3><div><p>Where water and metals are, with the evidence for each entry.</p></div></div>
+  <div class="area"><h3><a href="solar-system-3d.html">3D atlas</a></h3><div><p>How ships travel between the planets and where they refuel, with the whole transfer network in 3D.</p></div></div>
+  <div class="area"><h3><a href="growth-map.html">Growth map</a></h3><div><p>Transfer costs over time, and which propellant hubs save the most.</p></div></div>
+  <div class="area"><h3><a href="station-siting.html">Station siting</a></h3><div><p>Where the first stations should go, ranked by the objective you choose.</p></div></div>
 
-  <h2>Method</h2>
-  <p>The maps and route tools run on solmaps, our open-source engine. <a href="how-it-works.html">How solmaps works</a> gives an overview; the <a href="technical.html">technical documentation</a> gives the formulas and references.</p>
-  <p>The route calculations use the standard methods of early mission planning. They match the launch and flyby dates of the Cassini mission to within a month, and those of Juno, Galileo and Dawn to within three months.</p>
+  <h2>Documentation</h2>
+  <p><a href="how-it-works.html">How solmaps works</a> gives an overview. The <a href="technical.html">technical documentation</a> gives the formulas and references, and the <a href="https://github.com/bhanneke/solmaps/blob/main/docs/ENGINE.md">engine documentation</a> the routing engine's models, checks and limits. The <a href="status.html">computation status</a> page lists what solmaps has computed so far.</p>
 
-  <h2>About</h2>
-  <p>Björn Hanneke, information systems researcher at Goethe University Frankfurt, leads Deep Space Strategy. You can send questions and corrections through the <a href="https://github.com/bhanneke/deep-space-strategy/issues">GitHub repository</a>. The code is open under MIT, the data and texts under CC BY 4.0.</p>
+  <h2>Code and data</h2>
+  <p>The code is on <a href="https://github.com/bhanneke/solmaps">GitHub</a> under MIT; the data and texts are under CC BY 4.0. Zenodo archives each release with a DOI. Questions and corrections go to the <a href="https://github.com/bhanneke/solmaps/issues">issue tracker</a>.</p>
 </main>

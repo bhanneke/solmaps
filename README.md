@@ -1,24 +1,38 @@
-# Deep Space Strategy (engine: solmaps)
+# solmaps
 
-Deep Space Strategy studies strategy for a settled solar system in five modules: Geography, Resources, Topology, Infrastructure and Strategy. solmaps is its open map and route engine: a queryable timetable of routes through the solar system, and the strategy analysis built on it.
+solmaps computes what it costs to travel between places in the solar system on any day until 2100, and draws the maps
+that follow from it. It is the open map and route engine of [Deep Space Strategy](https://bhanneke.github.io/deep-space-strategy/),
+which studies where humanity should build in the solar system, and in which order.
 
-solmaps computes transfer costs between solar-system sites for every departure date, ranks propellant hubs by how much Earth-launched mass they save, and searches for depot orbits around the Sun. The technical documentation (concept, formulas, references) is at https://bhanneke.github.io/deep-space-strategy/technical.html.
+Maps and documentation: https://bhanneke.github.io/solmaps/ · computation status: https://bhanneke.github.io/solmaps/status.html
+
+## What it computes
+
+- Daily transfer alternatives between 30 bodies (planets, Pluto, 18 asteroids including near-Earth asteroids and Jupiter
+  Trojans), every day from November 2026 to 2100, flights up to 100 years: about 2.6 billion Lambert solutions. Nine
+  moons and Earth–Moon L1 share their planet's legs; 40 places in all.
+- Flyby (slingshot) routes with an evolutionary optimiser, Earth–Mars cyclers, low-thrust transfers with an
+  independent check, station siting, and chronological journeys for ships with fuel, payload and refuelling.
+- The JPL Small-Body Database catalogue (1,582,717 objects) as the basis for screening every asteroid and comet.
+
+Positions come from JPL DE440 and daily JPL Horizons states. The checks include NASA NHATS round trips (asteroid legs
+within 0.001 km/s), an independent integrator and a second Lambert solver; `docs/ENGINE.md` lists them with the models,
+assumptions and limits.
 
 ## Contents
 
 | Folder | What it holds |
 | --- | --- |
-| `atlas/` | Resource atlas: verified dataset (`atlas_dataset.json`, every entry with evidence level and source) and the interactive map (`build.py` renders `solar-system-atlas.html`) |
-| `network/` | Temporal transfer network: Lambert solver and parking-orbit costs (`engine.js`), route precomputation (`compute.js`), depot-orbit search (`stations.js`), validation (`validate.js`), growth-map page (`build.py`) |
-| `env/` | Container environment with ESA pykep 3.0.0 and pygmo from conda-forge, for flyby sequences |
-| `flyby/` | DE440 bodies, the Python direct network to 2100, the flyby search (Earth and Mars origins), cycler metric, mission validation |
-| `atlas3d/` | The 3D atlas with transfer arcs and launchable ships |
-| `surrogate/` | Route dataset generator and the first learned surrogate (PyTorch, separate container) |
-| `engine/` | Routing engine: end-state conventions, transfer alternatives, ships, journeys, low thrust, refinement cache, comparison service (`docs/ENGINE.md`) |
-| `tests/` | Test suite (`make test`) |
-| `site/` | Landing page, documentation and `build_site.py`, which writes the public site into `docs/` for GitHub Pages |
-
-The public site and its documentation ("How solmaps works") live at https://bhanneke.github.io/deep-space-strategy/. The site is an experimental research prototype.
+| `engine/` | Routing engine: end-state conventions, daily precompute (`daily.py`), transfer alternatives, ships, journeys, low thrust, refinement cache, comparison service (`docs/ENGINE.md`) |
+| `flyby/` | Bodies (DE440, JPL Horizons), ephemeris and catalogue fetchers, flyby search, cyclers, trajectories, Mac Mini queues |
+| `atlas/` | Resource atlas: verified dataset (`atlas_dataset.json`, every entry with evidence level and source) and its map |
+| `atlas3d/` | The 3D atlas: routes, slingshots, journeys, round trips, network views |
+| `network/` | Growth map and the JavaScript transfer engine used by the pages |
+| `stations/` | Station siting: candidate orbits, objectives, station-to-station edges |
+| `surrogate/` | Route dataset generator and a first learned surrogate |
+| `env/` | Pinned container (ESA pykep, pygmo, heyoka) |
+| `tests/` | Test suite (`make test`) and external checks |
+| `site/` | Start page, documentation, status page and `build_site.py`, which writes the public site into `docs/` |
 
 ## Build from a fresh checkout
 
@@ -27,20 +41,18 @@ Needs Docker, Python 3 and Node. All orbital computation runs in the pinned cont
 ```sh
 make image      # build the container
 make ephemeris  # fetch daily JPL Horizons states (small bodies to 2205, planets 2140-2205; about 200 MB, not in git)
-make data       # direct network to 2100 and transfer alternatives
-make test    # test suite
-make serve   # ship comparison page at http://localhost:8077/
-make site    # public pages into docs/
+make data       # transfer network and alternatives
+make test       # test suite
+make serve      # ship comparison page at http://localhost:8077/
+make site       # public pages into docs/
 ```
 
-The routing engine (`engine/`: transfer alternatives, ships with mass accounting, chronological journeys, low thrust,
-comparison service) is documented in `docs/ENGINE.md`, with its assumptions, checks and limits.
+The daily data for all 30 bodies: `docker run --rm -v "$PWD":/work -w /work solmaps-env:2 python -m engine.daily 12`
+(about an hour on 12 cores, 450 MB in `data/daily/`).
 
-## Status
+## Citing
 
-- Direct transfers validated: departure from a 300 km Earth orbit to Mars 3.61 km/s against 3.59 km/s derived for the Hohmann transfer; pykep Lambert agrees (vinf 3.03 km/s, 2026-10-30, 308 days).
-- Planet positions use JPL Table 1 (valid 1800 to 2050). Release 1 covers departures to 2050.
-- Not yet included: gravity assists, low thrust, the learned surrogate.
+Zenodo archives every release with a DOI; `CITATION.cff` gives the citation.
 
 ## Licence
 

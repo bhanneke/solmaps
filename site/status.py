@@ -108,7 +108,7 @@ def page(st):
 .state{{font-size:12.5px;padding:1px 7px;border-radius:9px;border:1px solid currentColor}}.state.done{{color:#5cc28a}}.state.running{{color:#f2b84b}}.state.queued{{color:#8d99b0}}.state.failed{{color:#e0645a}}
 </style>
 <main>
-  <p><a href="index.html">Deep Space Strategy</a> · <a href="how-it-works.html">How solmaps works</a> · <a href="technical.html">Technical documentation</a></p>
+  <p><a href="https://bhanneke.github.io/deep-space-strategy/">Deep Space Strategy</a> · <a href="index.html">solmaps</a> · <a href="how-it-works.html">How solmaps works</a> · <a href="technical.html">Technical documentation</a></p>
   <h1>Computation status</h1>
   <p class="lede">What solmaps has computed, what runs now and what waits. Updated {e(st["built"])}. {mini_line}</p>
   <div class="tablewrap"><table>

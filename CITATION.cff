@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use solmaps or its data in your research, please cite it as below."
+type: software
+title: "solmaps: transfer maps and route engine for the solar system"
+abstract: >
+  solmaps computes what it costs to travel between places in the solar system on any day until 2100: daily transfer
+  alternatives between 30 bodies with flights up to 100 years, flyby routes, low-thrust transfers, station siting and
+  chronological journeys for ships with fuel, payload and refuelling. It is the open map and route engine of
+  Deep Space Strategy.
+license: MIT
+repository-code: "https://github.com/bhanneke/solmaps"
+url: "https://bhanneke.github.io/solmaps/"
+authors:
+  - family-names: Hanneke
+    given-names: Björn
+    orcid: "https://orcid.org/0009-0000-7466-9581"
+    affiliation: "Goethe University Frankfurt, Chair of Information Systems and Information Management"
+    email: hanneke@wiwi.uni-frankfurt.de
+keywords:
+  - astrodynamics
+  - Lambert's problem
+  - temporal networks
+  - space logistics
+  - solar system

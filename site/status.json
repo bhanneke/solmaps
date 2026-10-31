@@ -1,5 +1,5 @@
 {
- "built": "2026-10-31 23:02",
+ "built": "2026-10-31 23:16",
  "mini": {
   "jobs": {
    "ceres:earth,mars": {
@@ -12,11 +12,11 @@
    }
   },
   "counts": {
-   "run3_ceres_earth_mars.log": 143,
-   "q2_flyby_mars.log": 164
+   "run3_ceres_earth_mars.log": 150,
+   "q2_flyby_mars.log": 169
   },
   "lowthrust_rows": 0,
-  "checked": "2026-10-31 23:02"
+  "checked": "2026-10-31 23:16"
  },
  "rows": [
   {
@@ -41,7 +41,7 @@
    "name": "Flyby search, returns from Ceres",
    "state": "running",
    "since": "2026-10-31 14:28:28",
-   "note": "143 searches finished"
+   "note": "150 searches finished"
   },
   {
    "group": "Mac Mini, queue 1",
@@ -97,7 +97,7 @@
    "name": "Flyby search, Mars to Earth, Venus, Mercury",
    "state": "running",
    "since": "2026-10-31 15:39:44",
-   "note": "164 searches finished"
+   "note": "169 searches finished"
   },
   {
    "group": "Mac Mini, queue 2",
