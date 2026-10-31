@@ -1,7 +1,7 @@
 """Catalogue screening (tier B): every object of the JPL Small-Body Database against the hubs, both directions.
 
 For each bound object of data/sbdb/catalog.npz and each hub (Earth, Mars, Ceres, with their parking-orbit end states;
-the object end is a rendezvous), the screening solves Lambert's problem (pykep, single revolution, prograde) for every
+the object end is a rendezvous), the screening solves Lambert's problem (engine/vlambert.py, single revolution, prograde; matches pykep within 4e-10) for every
 10th day from 2026-11-01 to 2100 and 20 flight times, and keeps per hub and direction the cheapest transfer overall and
 the cheapest per calendar year of departure.
 
@@ -82,8 +82,9 @@ def tof_steps(a_obj, a_hub):
     return steps[steps >= 3]
 
 def unit(args):
-    """screen one work unit: returns the path written"""
-    import pykep as pk
+    """screen one work unit: returns the path written. Workers solve with engine.vlambert (numpy): all departure dates
+    and flight times of one object, hub and direction in one call, and no pykep import (about 200 MB less per worker)."""
+    from engine.vlambert import lambert
     idx, el, spkid = args
     path = f'{OUT}/unit_{idx:04d}.npz'
     if os.path.exists(path):
@@ -92,7 +93,6 @@ def unit(args):
     jd = JD0 + STEP * np.arange(N_T)
     best = np.full((n, len(HUBS), 2, 5), np.nan)                  # cost, departure step, flight steps, vinf_dep, vinf_arr
     ymin = np.full((n, len(HUBS), 2, YEARS), np.inf, np.float32)
-    lam = pk.lambert_problem
     for o in range(n):
         r_o, v_o = two_body_states({k: el[k][o:o + 1] for k in el}, jd)   # one object at a time keeps memory small
         ro, vo = r_o[0], v_o[0]
@@ -101,19 +101,12 @@ def unit(args):
         for h, hub in enumerate(HUBS):
             Hr, Hv = _HUB[h, :, :3], _HUB[h, :, 3:]
             steps = tof_steps(el['a'][o], HUB_A[hub])
+            K = np.repeat(np.arange(N_DEP), len(steps)); A = K + np.tile(steps, N_DEP)   # departure and arrival steps
             for d in (0, 1):                                      # 0: hub -> object, 1: object -> hub
                 R1, V1, R2, V2 = (Hr, Hv, ro, vo) if d == 0 else (ro, vo, Hr, Hv)
-                vd = np.full((N_DEP, len(steps)), np.nan); va = np.full((N_DEP, len(steps)), np.nan)
-                for k in range(N_DEP):
-                    r1, v1 = R1[k], V1[k]
-                    for j, s in enumerate(steps):
-                        try:
-                            l = lam(r0=r1, r1=R2[k + s], tof=s * STEP * DAY_S, mu=MU_SUN)
-                        except Exception:
-                            continue
-                        a0, a1 = l.v0[0], l.v1[0]
-                        vd[k, j] = math.dist(a0, v1); va[k, j] = math.dist(a1, V2[k + s])
-                vd /= 1000; va /= 1000
+                w1, w2, ok = lambert(R1[K], R2[A], (A - K) * STEP * DAY_S, MU_SUN)
+                vd = np.where(ok, np.linalg.norm(w1 - V1[K], axis=1), np.nan).reshape(N_DEP, len(steps)) / 1000
+                va = np.where(ok, np.linalg.norm(w2 - V2[A], axis=1), np.nan).reshape(N_DEP, len(steps)) / 1000
                 if d == 0:
                     cost = planet_side_arr(hub, vd)[0] + va
                 else:
@@ -152,6 +145,7 @@ def main(workers=4, first=0, last=None):
     keys = ('a', 'e', 'i', 'om', 'w', 'ma', 'epoch')
     jobs = [(u, {k: cat[k][units[u]] for k in keys}, cat['spkid'][units[u]]) for u in range(first, last + 1)
             if not os.path.exists(f'{OUT}/unit_{u:04d}.npz')]
+    del cat, units                                        # the workers get their units through the queue
     with Pool(workers, initializer=_init, initargs=(hub,)) as p:
         for path in p.imap_unordered(unit, jobs):
             print(time.strftime('%Y-%m-%d %H:%M'), os.path.basename(path), f'{time.time() - t:.0f} s', flush=True)
