@@ -7,3 +7,5 @@
 {"seq": "vesta-earth", "year": 2051, "arrival": "aero", "starts": [4.728, 4.728, 4.728, 4.822, 4.728, 4.994], "best3": 4.728, "best6": 4.728, "gap": 0.0, "spread3": 0.0, "seconds": 35}
 {"seq": "psyche-earth-mars", "year": 2061, "arrival": "capture", "starts": [8.175, 8.174, 8.173, 8.174, 8.173, 8.173], "best3": 8.173, "best6": 8.173, "gap": 0.0, "spread3": 0.002, "seconds": 145}
 {"seq": "earth-earth-jupiter", "year": 2067, "arrival": "capture", "starts": [11.471, 9.656, 10.397, 12.319, 12.63, 9.915], "best3": 9.656, "best6": 9.656, "gap": 0.0, "spread3": 1.815, "seconds": 131}
+{"seq": "mars-jupiter-saturn", "year": 2071, "arrival": "capture", "starts": [7.598, 8.079, 6.823, 7.497, 7.345, 7.853], "best3": 6.823, "best6": 6.823, "gap": 0.0, "spread3": 1.256, "seconds": 166}
+max gap of 3 starts against 6: 0.674 km/s; problems with gap > 0.1: 1
