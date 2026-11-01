@@ -28,8 +28,8 @@
   </table></div>
 
   <h2>Direct transfers</h2>
-  <p>A direct route is one transfer arc from one site to another. For every departure date, every ten days from November 2026 to the end of 2100, solmaps solves Lambert's problem (the arc that connects two positions in a given flight time) for 100 flight times between 0.3 and 2.5 times the Hohmann time (at most 100 years) and keeps the cheapest after a final refinement. The maps on this site show 132 routes between 12 sites over 2,709 departure dates. The engine computes the same for every day and for 30 bodies: 870 routes, about 2.6 billion Lambert solutions. The <a href="status.html">computation status</a> page lists what is computed.</p>
-  <p>The cost includes the burn that leaves a parking orbit and the burn that captures into the destination's parking orbit, using the Oberth relation <code>Δv = √(v∞² + 2μ/r) − √(μ/r)</code>. Parking orbits: 300 km above Earth, Mars and Venus, 200 km above Mercury, 50 km above Ceres, and circular orbits at the distance of Callisto (Jupiter) and Titan (Saturn). At small asteroids a ship only matches their velocity. All burns are impulsive; low-thrust electric propulsion is not modelled.</p>
+  <p>A direct route is one transfer arc from one site to another. For every departure date, every ten days from November 2026 to the end of 2100, solmaps solves Lambert's problem (the arc that connects two positions in a given flight time) for 100 flight times between 0.3 and 2.5 times the Hohmann time (at most 100 years) and keeps the cheapest after a final refinement. The maps on this site show 132 routes between 12 sites over 2,709 departure dates. The engine computes the same for every day and for 30 bodies: 870 routes, about 2.6 billion Lambert solutions. The <a href="status.html">computation status</a> page lists what solmaps has computed so far.</p>
+  <p>The cost includes the burn that leaves a parking orbit and the burn that captures into the destination's parking orbit, using the Oberth relation <code>Δv = √(v∞² + 2μ/r) − √(μ/r)</code>. Parking orbits: 300 km above Earth, Mars and Venus, 200 km above Mercury, 50 km above Ceres, and circular orbits at the distance of Callisto (Jupiter) and Titan (Saturn). At small asteroids a ship only matches their velocity. The maps use impulsive burns. The routing engine also computes low-thrust transfers for electric ships (see the <a href="https://github.com/bhanneke/solmaps/blob/main/docs/ENGINE.md">engine documentation</a>); the maps do not use them yet.</p>
 
   <h2>Flyby routes</h2>
   <p>Flyby routes use planets as slingshots. solmaps searches sequences with up to two flybys of Venus, Earth, Mars or Jupiter, from low Earth orbit and from low Mars orbit, to Jupiter, Saturn, Mercury, Ceres, Vesta and Psyche. Each leg may include one deep-space manoeuvre (pykep's MGA-1DSM model). A global optimiser (pygmo's self-adaptive differential evolution, eight islands, two independent starts per problem) finds the cheapest route in each two-year launch window. The search caps the flight time of each leg at 1.9 times the Hohmann time.</p>
@@ -39,15 +39,17 @@
   <div class="tablewrap"><table>
     <thead><tr><th>Check</th><th>Reference</th><th>solmaps</th></tr></thead>
     <tbody>
-      <tr><td>Leaving a 300 km Earth orbit for Mars (Hohmann)</td><td>3.59 km/s, derived from the Oberth formula</td><td>3.61 km/s</td></tr>
-      <tr><td>Leaving a 300 km Earth orbit for Jupiter (Hohmann)</td><td>6.30 km/s, derived the same way</td><td>6.44 km/s</td></tr>
+      <tr><td>Planet positions from DE440 through pykep</td><td>JPL Horizons state vectors</td><td>Within 10 m</td></tr>
+      <tr><td>Round trips to near-Earth asteroids (NASA NHATS, seven published trajectories)</td><td>NHATS speeds at departure, at the asteroid and at Earth entry</td><td>Within 0.001 km/s at the asteroid; within 0.012 km/s at Earth departure, because NHATS starts at Earth's centre and solmaps at the Earth–Moon barycentre</td></tr>
+      <tr><td>Leaving a 300 km Earth orbit for Mars</td><td>3.59 km/s for the ideal Hohmann transfer between circular orbits in one plane</td><td>3.61 km/s in the best window to 2100</td></tr>
+      <tr><td>Leaving a 300 km Earth orbit for Jupiter</td><td>6.30 km/s for the ideal Hohmann transfer, computed the same way</td><td>6.44 km/s in the best window to 2100</td></tr>
       <tr><td>Earth to Mars transfer, 30 Oct 2026, 308 days</td><td>pykep's Lambert solver: v∞ 3.03 and 2.58 km/s</td><td>Same values</td></tr>
       <tr><td>Two independent network implementations, 2026–2048</td><td>JavaScript on JPL Table 1 against Python on DE440</td><td>Median difference 0.000 km/s, 95th percentile 0.02 km/s</td></tr>
       <tr><td>Cassini (Earth–Venus–Venus–Earth–Jupiter–Saturn)</td><td>Flown launch and flyby dates, 1997–1999</td><td>Launch and inner flybys within 9 to 34 days</td></tr>
       <tr><td>Juno, Galileo, Dawn</td><td>Flown sequences and dates</td><td>Same sequences; inner encounters within one to three months</td></tr>
     </tbody>
   </table></div>
-  <p>The optimiser only minimises Δv. Real missions also had to respect launch energy, arrival dates and, for Dawn, ion propulsion, so solmaps often picks a slower, cheaper arrival (Cassini at Saturn, Galileo at Jupiter).</p>
+  <p>The ideal transfer assumes circular orbits in one plane. The real orbits are elliptical and inclined, so the best real window costs 0.6 percent more for Mars and 2.2 percent more for Jupiter. The optimiser only minimises Δv. Real missions also had to respect launch energy, arrival dates and, for Dawn, ion propulsion, so solmaps often picks a slower, cheaper arrival (Cassini at Saturn, Galileo at Jupiter).</p>
 
   <h2>Strategy measures</h2>
   <h3>Propellant leverage</h3>
@@ -55,30 +57,29 @@
   <h3>Depot orbits</h3>
   <p>solmaps scored 771 candidate solar orbits by two costs: the average cheapest transfer to eight destinations over 20 years, and the cost of supplying the depot from low Earth orbit. No orbit is best on both costs; the growth map lists the best orbit at each supply cost.</p>
   <h3>Cyclers</h3>
-  <p>A cycler metric for Earth–Mars cyclers (maintenance burns at the flybys and the speeds a taxi must match) is in development.</p>
+  <p>A cycler metric for Earth–Mars cyclers (maintenance burns at the flybys and the speeds a taxi must match) is in development; the Mac Mini computes the cycler set for 2027–2097 (see the <a href="status.html">computation status</a>).</p>
 
   <h2>The 3D atlas</h2>
   <p>The 3D atlas compresses distances from the Sun logarithmically and enlarges sizes, so Mercury and the Kuiper belt fit in one view. Directions and inclinations are true. It draws asteroid populations as clouds of illustrative particles inside their published ranges. It solves route arcs again between the displayed positions, so they meet the bodies on screen; their costs come from the DE440 network.</p>
 
   <h2 id="build">Build it yourself</h2>
   <p>The computations run in a container with ESA pykep and pygmo from conda-forge, so nothing needs installing on the host apart from Docker, Python 3 and Node.</p>
-  <pre>docker build -t solmaps-env env/
-docker run --rm -v "$PWD":/work solmaps-env python flyby/network2.py       # direct network, DE440, to 2100
-docker run --rm -v "$PWD":/work solmaps-env python flyby/routes.py earth jupiter,saturn,mercury 2027 2097 8 2000 30 6
-docker run --rm -v "$PWD":/work solmaps-env python flyby/routes.py mars jupiter,saturn,ceres,vesta,psyche 2027 2097 8 2000 30 6
-node network/stations.js                                                  # depot-orbit search
-python3 site/build_site.py                                                # pages into docs/</pre>
-  <p>Validation scripts: <code>network/validate.js</code>, <code>flyby/validate_cassini.py</code>, <code>flyby/validate_missions.py</code> and <code>flyby/compare_networks.py</code>.</p>
+  <pre>make image      # build the container
+make ephemeris  # fetch the daily JPL Horizons states (about 200 MB)
+make data       # transfer network and alternatives
+make test       # test suite, including the NHATS check
+make site       # pages into docs/</pre>
+  <p>The <a href="https://github.com/bhanneke/solmaps#readme">README</a> lists every step, the flyby search and the daily data for all 30 bodies. Further validation scripts: <code>network/validate.js</code>, <code>flyby/validate_cassini.py</code>, <code>flyby/validate_missions.py</code> and <code>flyby/compare_networks.py</code>.</p>
 
   <h2>Limits and next steps</h2>
   <ul>
-    <li>Impulsive burns and patched conics; no low-thrust trajectories, no aerocapture, no lunar flybys.</li>
-    <li>Small-body orbits ignore planetary perturbations.</li>
+    <li>The maps use impulsive burns and patched conics; they show no low-thrust trajectories, no aerocapture and no lunar flybys.</li>
+    <li>The direct transfers on the maps fly at most one revolution around the Sun. The next data release adds transfers with several revolutions and flights of up to 100 years on every route.</li>
     <li>Resource entries tagged snippet-only or unverified still need checking against their primary sources.</li>
-    <li>Next: flyby routes for the full period, the cycler metric, and a learned model that estimates transfer costs fast enough for large searches.</li>
+    <li>Next: the data release with several revolutions, flyby routes for the full period, the cycler metric, and the screening of every asteroid and comet in JPL's Small-Body Database.</li>
   </ul>
 
-  <p class="foot">Deep Space Strategy is a research programme by Björn Hanneke; solmaps is its open engine. Code under the MIT licence, data and documentation under CC BY 4.0; source at <a href="https://github.com/bhanneke/solmaps">github.com/bhanneke/deep-space-strategy</a>. It builds on JPL's ephemerides and Small-Body Database, ESA's pykep, pygmo and three.js.</p>
+  <p class="foot">Deep Space Strategy is a research programme by Björn Hanneke; solmaps is its open engine. Code under the MIT licence, data and documentation under CC BY 4.0; source at <a href="https://github.com/bhanneke/solmaps">github.com/bhanneke/solmaps</a>. It builds on JPL's ephemerides and Small-Body Database, ESA's pykep, pygmo and three.js.</p>
 </main>
 
 </body></html>

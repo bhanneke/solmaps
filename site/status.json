@@ -1,5 +1,5 @@
 {
- "built": "2026-11-01 00:38",
+ "built": "2026-11-01 19:20",
  "mini": {
   "jobs": {
    "ceres:earth,mars": {
@@ -12,12 +12,13 @@
    }
   },
   "counts": {
-   "run3_ceres_earth_mars.log": 171,
-   "q2_flyby_mars.log": 198
+   "run3_ceres_earth_mars.log": 441,
+   "q2_flyby_mars.log": 400
   },
   "lowthrust_rows": 0,
-  "screen_units": 0,
-  "checked": "2026-11-01 00:38"
+  "screen_units": 12,
+  "screen_log": "2026-11-01 16:14:51 start screening, 4 workers (attempt 1)",
+  "checked": "2026-11-01 19:20"
  },
  "rows": [
   {
@@ -30,19 +31,25 @@
   },
   {
    "group": "Direct transfers",
-   "name": "Daily transfer alternatives, 30 bodies, 2026\u20132100, flights up to 100 years",
-   "done": 870,
-   "total": 870,
-   "unit": "routes",
-   "note": "2.64 of 2.64 billion Lambert solutions; 40 places with moons and Earth\u2013Moon L1",
-   "where": "data/daily (release pending)"
+   "name": "On the maps now: daily transfers for 30 bodies, 2026\u20132100, one revolution around the Sun at most, 100 flight times per day",
+   "state": "done",
+   "since": "2026-10-31",
+   "note": "870 routes, about 2.6 billion Lambert solutions; the maps show 132 routes between 12 sites, every tenth day"
+  },
+  {
+   "group": "Direct transfers",
+   "name": "For data release v0.1: every number of revolutions, flights up to 100 years on every route, 740 flight times per day",
+   "done": 15,
+   "total": 30,
+   "unit": "origins (29 routes each)",
+   "note": "paused; resumes on the MacBook overnight. Then an audit, the documentation and the release on Zenodo and Hugging Face."
   },
   {
    "group": "Mac Mini, queue 1",
    "name": "Flyby search, returns from Ceres",
    "state": "running",
    "since": "2026-10-31 14:28:28",
-   "note": "171 searches finished"
+   "note": "441 searches finished"
   },
   {
    "group": "Mac Mini, queue 1",
@@ -98,7 +105,7 @@
    "name": "Flyby search, Mars to Earth, Venus, Mercury",
    "state": "running",
    "since": "2026-10-31 15:39:44",
-   "note": "198 searches finished"
+   "note": "400 searches finished"
   },
   {
    "group": "Mac Mini, queue 2",
@@ -138,10 +145,10 @@
   {
    "group": "Mac Mini, screening",
    "name": "Every object of the JPL Small-Body Database (1,580,428 bound orbits) against Earth, Mars and Ceres, both directions, every 10 days to 2100",
-   "done": 0,
+   "done": 12,
    "total": 791,
    "unit": "work units of 2,000 objects",
-   "note": "near-Earth objects first, then by brightness; two-body orbits, for ranking"
+   "note": "running since 2026-11-01 16:14; near-Earth objects first, then by brightness; two-body orbits, for ranking"
   },
   {
    "group": "Open for contributors",
