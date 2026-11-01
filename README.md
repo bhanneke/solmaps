@@ -41,14 +41,14 @@ Needs Docker, Python 3 and Node. All orbital computation runs in the pinned cont
 ```sh
 make image      # build the container
 make ephemeris  # fetch daily JPL Horizons states (small bodies to 2205, planets 2140-2205; about 200 MB, not in git)
-make data       # transfer network and alternatives
+make data       # daily transfer alternatives, then the files the pages use
 make test       # test suite
 make serve      # ship comparison page at http://localhost:8077/
 make site       # public pages into docs/
 ```
 
-The daily data for all 30 bodies: `docker run --rm -v "$PWD":/work -w /work solmaps-env:2 python -m engine.daily 12`
-(about an hour on 12 cores, 450 MB in `data/daily/`).
+`make data` computes the daily data for all 30 bodies (about an hour on 12 cores, 450 MB in `data/daily/`) and
+derives the files the pages use from it.
 
 ## Citing
 

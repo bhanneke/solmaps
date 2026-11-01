@@ -1,7 +1,8 @@
 # Build everything from a fresh checkout. Needs Docker, Python 3 and Node on the host; all orbital computation runs in
 # the pinned container (env/Dockerfile).
 #   make image   build the container
-#   make data    direct network to 2100 (network/network.json) and transfer alternatives (data/alternatives.npz)
+#   make data    daily transfer alternatives for 30 bodies (data/daily, about an hour on 12 cores), then the 12-site, 10-day
+#                files the pages use (network/network.json, data/alternatives.npz)
 #   make test    the test suite (needs make data)
 #   make serve   the comparison page at http://localhost:8077/
 #   make site    the public pages into docs/ (needs make data; station siting needs make stations)
@@ -11,7 +12,7 @@
 IMAGE ?= solmaps-env:3
 RUN = docker run --rm -v "$(CURDIR)":/work -w /work $(IMAGE)
 
-.PHONY: all image data network alternatives test serve site stations pairs depots ephemeris
+.PHONY: all image data daily pages network-legacy alternatives test serve site stations pairs depots ephemeris
 all: image data test
 
 image:
@@ -20,9 +21,15 @@ image:
 ephemeris:
 	python3 flyby/fetch_horizons.py
 
-data: network alternatives
+data: daily pages
 
-network:
+daily:
+	$(RUN) python -m engine.daily 12
+
+pages:
+	$(RUN) python -m engine.daily pages
+
+network-legacy:    # the earlier 30-flight-time network (0.3 to 1.8 Hohmann times); the pages no longer use it
 	$(RUN) python flyby/network2.py
 
 alternatives:
