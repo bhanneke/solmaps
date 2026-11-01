@@ -1,6 +1,6 @@
 """How far the daily data's cheapest transfer lies above the true single-revolution optimum (probe, not a test).
 
-For random route-dates: scan 3,000 log-spaced flight times over the same range, refine the best by golden-section
+For random route-dates: scan 3,000 log-spaced flight times over the same range (every number of revolutions), refine the best by golden-section
 search, and compare with the cheapest stored alternative (own end states). Run in the container after engine.daily:
     python tests/grid_error.py [samples]
 """
@@ -24,10 +24,11 @@ def main(n=300):
                 return math.inf
             rb, vb = B.eph(t0 + t)
             try:
-                l = pk.lambert_problem(r0=ra, r1=rb, tof=t * 86400, mu=pk.MU_SUN)
+                l = pk.lambert_problem(r0=ra, r1=rb, tof=t * 86400, mu=pk.MU_SUN, multi_revs=daily.MAX_REVS)
             except Exception:
                 return math.inf
-            return planet_side_dv(a, math.dist(l.v0[0], va) / 1000) + planet_side_dv(b, math.dist(l.v1[0], vb) / 1000)
+            return min(planet_side_dv(a, math.dist(w0, va) / 1000) + planet_side_dv(b, math.dist(w1, vb) / 1000)
+                       for w0, w1 in zip(l.v0, l.v1))                  # every number of revolutions, as in engine/daily.py
         g = daily.tof_grid(daily.semi_major_axis(a), daily.semi_major_axis(b))
         ts = np.geomspace(g[0], g[-1], 3000); cs = [cost(t) for t in ts]; j = int(np.argmin(cs))
         lo, hi = ts[max(j - 1, 0)], ts[min(j + 1, len(ts) - 1)]

@@ -2,7 +2,7 @@
 
 For each pair of conventions.HELIO (30 bodies, 870 ordered pairs) and each day from 2026-11-01 to 2100-12-31, the module
 solves Lambert's problem (prograde, pykep, every number of revolutions around the Sun the flight time allows, the
-cheapest kept) over 200 flight times up to 100 years (tof_grid), and keeps the Pareto front of flight time against cost, thinned
+cheapest kept) over 740 flight times up to 100 years (tof_grid), and keeps the Pareto front of flight time against cost, thinned
 to at most K. Long flights circle the Sun many times while the geometry comes right (Earth to Venus: up to ~160
 revolutions in 100 years) and are often far cheaper than any short one; two-body arcs over decades are idealised
 (the planets' pull would need small correction burns). The cost
@@ -26,7 +26,7 @@ import numpy as np
 from engine.conventions import HELIO, SITES, NAMES, PARKING, planet_side_dv, end_state
 
 JD0, JD1 = 2461345.5, 2488433.5                    # 2026-11-01 to 2100-12-31, every day
-K, NTOF, NMULTI, NLONG, TOF_MAX, MAX_REVS = 10, 100, 40, 60, 100 * 365.25, 10000   # MAX_REVS: no cap; the flight time limits it
+K, NTOF, NMULTI, NLONG, TOF_MAX, MAX_REVS = 10, 100, 40, 600, 100 * 365.25, 10000   # MAX_REVS: no cap; the flight time limits it
 K2 = 2.9591220828e-4
 OUT = '/work/data/daily'
 SMALL = json.load(open('/work/engine/small_bodies.json'))['bodies']
@@ -38,9 +38,11 @@ def semi_major_axis(node):
     return {b['id']: b for b in bodies.load_atlas()['bodies']}[node]['orbit']['semi_major_axis_au']
 
 def tof_grid(a1, a2):
-    """200 flight times in three parts. Base: 100 log-spaced from 0.3 to 2.5 Hohmann times (at least 10 days), the grid of
+    """740 flight times in three parts. Base: 100 log-spaced from 0.3 to 2.5 Hohmann times (at least 10 days), the grid of
     the single-revolution data, kept exactly so the data can only get cheaper. Multi-revolution: 40 more up to three
-    orbits of the faster body, where transfers circle the Sun a few times. Long: 60 more to 100 years. A coarser single
+    orbits of the faster body, where transfers circle the Sun a few times. Long: 600 more to 100 years; the cost of a
+    long flight rises and falls with every synodic period, and 60 points missed the valleys by a median 0.10 km/s
+    (600 points: 0.007 km/s, before refinement). A coarser single
     grid up to three orbits missed narrow cost slots of inclined orbits (Pallas, 35 degrees) by up to 7 km/s on single days."""
     tH = math.pi * math.sqrt(((a1 + a2) / 2) ** 3 / K2)
     p_min = 2 * math.pi * math.sqrt(min(a1, a2) ** 3 / K2)
@@ -109,8 +111,8 @@ def route(args):
         # cheapest overall left short-flight minima unrefined once long flights joined
         # (Saturn to Apophis up to 1.07 km/s dearer on single days than the single-revolution data)
         b1 = grid[NTOF - 1]; b2 = grid[min(NTOF + NMULTI, len(grid)) - 1]   # ends of the base and multi-revolution parts
-        seg = [sorted((q for q in minima if lo_ < T[q] <= hi_), key=lambda q: cost[q])[:3]
-               for lo_, hi_ in ((0, b1), (b1, b2), (b2, math.inf))]
+        seg = [sorted((q for q in minima if lo_ < T[q] <= hi_), key=lambda q: cost[q])[:n_]
+               for lo_, hi_, n_ in ((0, b1, 3), (b1, b2, 3), (b2, math.inf, 5))]
         for q in seg[0] + seg[1] + seg[2]:
             lo, mid, hi = T[max(q - 1, 0)], T[q], T[min(q + 1, n - 1)]
             for _ in range(2):
