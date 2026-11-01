@@ -12,7 +12,7 @@ front and are priced at query time. Arrivals after the end of a body's ephemeris
 Output, one file per origin (resumable): data/daily/<origin>.npz with
   targets [n]               the other bodies
   tof     [n, date, K]      flight time, days (float32; NaN where fewer than K alternatives)
-  vinf    [n, date, K, 2]   excess speed at departure and arrival, km/s (float16: 0.004 km/s resolution at 5 km/s)
+  vinf    [n, date, K, 2]   excess speed at departure and arrival, km/s (float32; float16 rounded high speeds by up to 0.03 km/s)
   revs    [n, date, K]      full revolutions around the Sun on the way (uint16)
 The cheapest priced alternative per date is the network entry; the 10-day page files come from derive_pages().
 
@@ -68,7 +68,7 @@ def route(args):
     grid = np.array(tof_grid(semi_major_axis(a), semi_major_axis(b)))
     dates = np.arange(JD0, JD1 + 0.5, 1.0)
     tof = np.full((len(dates), K), np.nan, np.float32)
-    vinf = np.full((len(dates), K, 2), np.nan, np.float16)
+    vinf = np.full((len(dates), K, 2), np.nan, np.float32)
     revs = np.zeros((len(dates), K), np.uint16)
     for j, jd in enumerate(dates):
         t0 = jd - 2451544.5
@@ -101,7 +101,13 @@ def route(args):
         # Psyche to Mercury has one about 10 days wide at 378 days of flight.
         n = len(T)
         minima = [q for q in range(n) if (q == 0 or cost[q] <= cost[q - 1]) and (q == n - 1 or cost[q] <= cost[q + 1])]
-        for q in sorted(minima, key=lambda q: cost[q])[:3]:
+        # the three cheapest minima among the short flights (up to the end of the base grid) and the three among the long
+        # flights: refining only the three cheapest overall left short-flight minima unrefined once long flights joined
+        # (Saturn to Apophis up to 1.07 km/s dearer on single days than the single-revolution data)
+        base_end = grid[NTOF - 1]
+        short = sorted((q for q in minima if T[q] <= base_end), key=lambda q: cost[q])[:3]
+        longf = sorted((q for q in minima if T[q] > base_end), key=lambda q: cost[q])[:3]
+        for q in short + longf:
             lo, mid, hi = T[max(q - 1, 0)], T[q], T[min(q + 1, n - 1)]
             for _ in range(2):
                 for t in (math.sqrt(lo * mid), math.sqrt(mid * hi)):
