@@ -1,9 +1,11 @@
 """Daily transfer alternatives for every ordered pair of the heliocentric bodies (precompute).
 
 For each pair of conventions.HELIO (30 bodies, 870 ordered pairs) and each day from 2026-11-01 to 2100-12-31, the module
-solves Lambert's problem (prograde, pykep, up to 5 revolutions around the Sun, the cheapest kept) over 100 flight
-times, log-spaced from 0.3 Hohmann times to the longer of 2.5 Hohmann times and three orbits of the faster body, capped
-at 100 years, and keeps the Pareto front of flight time against cost, thinned to at most K. The cost
+solves Lambert's problem (prograde, pykep, every number of revolutions around the Sun the flight time allows, the
+cheapest kept) over 160 flight times up to 100 years, and keeps the Pareto front of flight time against cost, thinned
+to at most K. Long flights circle the Sun many times while the geometry comes right (Earth to Venus: up to ~160
+revolutions in 100 years) and are often far cheaper than any short one; two-body arcs over decades are idealised
+(the planets' pull would need small correction burns). The cost
 for the front uses each body's own end state (conventions.end_state); moons and Earth-Moon L1 share their planet's
 front and are priced at query time. Arrivals after the end of a body's ephemeris (Bennu: 2135-09-30) are skipped.
 
@@ -11,6 +13,7 @@ Output, one file per origin (resumable): data/daily/<origin>.npz with
   targets [n]               the other bodies
   tof     [n, date, K]      flight time, days (float32; NaN where fewer than K alternatives)
   vinf    [n, date, K, 2]   excess speed at departure and arrival, km/s (float16: 0.004 km/s resolution at 5 km/s)
+  revs    [n, date, K]      full revolutions around the Sun on the way (uint16)
 The cheapest priced alternative per date is the network entry; the 10-day page files come from derive_pages().
 
 Run: python -m engine.daily [procs]   (in the solmaps-env container, from /work)
@@ -23,7 +26,7 @@ import numpy as np
 from engine.conventions import HELIO, SITES, NAMES, PARKING, planet_side_dv, end_state
 
 JD0, JD1 = 2461345.5, 2488433.5                    # 2026-11-01 to 2100-12-31, every day
-K, NTOF, TOF_MAX, MAX_REVS = 6, 100, 100 * 365.25, 5
+K, NTOF, NLONG, TOF_MAX, MAX_REVS = 10, 100, 60, 100 * 365.25, 10000   # MAX_REVS: no cap; the flight time limits it
 K2 = 2.9591220828e-4
 OUT = '/work/data/daily'
 SMALL = json.load(open('/work/engine/small_bodies.json'))['bodies']
@@ -35,13 +38,15 @@ def semi_major_axis(node):
     return {b['id']: b for b in bodies.load_atlas()['bodies']}[node]['orbit']['semi_major_axis_au']
 
 def tof_grid(a1, a2):
-    """100 flight times, log-spaced from 0.3 Hohmann times to the longer of 2.5 Hohmann times and three orbits of the
-    faster body (at least 10 days, at most 100 years). Flights longer than an orbit can go around the Sun several times
-    on the way (multi-revolution transfers), often far cheaper; the range covers them."""
+    """160 flight times: 100 log-spaced from 0.3 Hohmann times to the longer of 2.5 Hohmann times and three orbits of the
+    faster body (at least 10 days), then 60 more log-spaced to 100 years. Flights longer than an orbit can go around the
+    Sun several times on the way (multi-revolution transfers), often far cheaper."""
     tH = math.pi * math.sqrt(((a1 + a2) / 2) ** 3 / K2)
     p_min = 2 * math.pi * math.sqrt(min(a1, a2) ** 3 / K2)
     lo, hi = max(10.0, 0.3 * tH), min(TOF_MAX, max(2.5 * tH, 3 * p_min))
-    return [lo * (hi / lo) ** (i / (NTOF - 1)) for i in range(NTOF)]
+    base = [lo * (hi / lo) ** (i / (NTOF - 1)) for i in range(NTOF)]
+    long = [hi * (TOF_MAX / hi) ** (i / NLONG) for i in range(1, NLONG + 1)] if hi < TOF_MAX * 0.99 else []
+    return base + long
 
 def pareto_thin(T, cost, vd, va):
     """indices of the Pareto front (faster and cheaper), increasing flight time, thinned to K keeping both ends"""
@@ -64,7 +69,7 @@ def route(args):
     dates = np.arange(JD0, JD1 + 0.5, 1.0)
     tof = np.full((len(dates), K), np.nan, np.float32)
     vinf = np.full((len(dates), K, 2), np.nan, np.float16)
-    revs = np.zeros((len(dates), K), np.uint8)
+    revs = np.zeros((len(dates), K), np.uint16)
     for j, jd in enumerate(dates):
         t0 = jd - 2451544.5
         ra, va = A.eph(t0)
