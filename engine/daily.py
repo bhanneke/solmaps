@@ -97,7 +97,7 @@ def route(args):
     for j, jd in enumerate(dates):
         t0 = jd - 2451544.5
         ra, va = A.eph(t0)
-        T, cost, vd, vr, NR = [], [], [], [], []
+        T, cost, vd, vr, NR, C1 = [], [], [], [], [], []
         def solve(t):
             """the cheapest of the single- and multi-revolution solutions (up to MAX_REVS) at flight time t"""
             if t0 + t > end_b or t in T:
@@ -107,23 +107,43 @@ def route(args):
                 l = pk.lambert_problem(r0=ra, r1=rb, tof=t * 86400.0, mu=pk.MU_SUN, multi_revs=MAX_REVS)
             except Exception:
                 return
-            best = None
+            best = c1 = None
             for q, (w0, w1) in enumerate(zip(l.v0, l.v1)):     # solution 0: one revolution at most; 2n-1, 2n: n full revolutions
                 d = math.dist(w0, va) / 1000; r = math.dist(w1, vb) / 1000
                 c = planet_side_dv(a, d) + planet_side_dv(b, r)
+                if q == 0:
+                    c1 = c                                      # the single-revolution cost, for the refinement below
                 if best is None or c < best[2]:
                     best = (d, r, c, (q + 1) // 2)
-            T.append(t); vd.append(best[0]); vr.append(best[1]); cost.append(best[2]); NR.append(best[3])
+            T.append(t); vd.append(best[0]); vr.append(best[1]); cost.append(best[2]); NR.append(best[3]); C1.append(c1)
         for t in grid:
             if t0 + t > end_b:
                 break
             solve(t)
         if not T:
             continue
+        ng = len(T)                       # the grid points; refinement points follow them, unsorted
         # refine the three cheapest local minima of the grid, each between its grid neighbours (two rounds of halving
         # in log time). Cost valleys next to the 180-degree transfer singularity can be narrower than the grid spacing:
         # Psyche to Mercury has one about 10 days wide at 378 days of flight.
-        n = len(T)
+        # first the single-revolution data's refinement, repeated exactly: the three cheapest local minima of the
+        # single-revolution cost over the base grid. The classic option then cannot be dearer than in the
+        # single-revolution data; refining only minima of the cheapest-over-revolutions cost left it up to 0.43 km/s
+        # dearer on single days (Earth to Mars), since the extra revolutions move the minima.
+        nb = sum(1 for t in T if t <= grid[NTOF - 1] * 1.0001)
+        m1 = [q for q in range(nb) if C1[q] is not None and (q == 0 or C1[q - 1] is None or C1[q] <= C1[q - 1])
+              and (q == nb - 1 or C1[q + 1] is None or C1[q] <= C1[q + 1])]
+        for q in sorted(m1, key=lambda q: C1[q])[:3]:
+            lo, mid, hi = T[max(q - 1, 0)], T[q], T[min(q + 1, nb - 1)]
+            for _ in range(2):
+                for t in (math.sqrt(lo * mid), math.sqrt(mid * hi)):
+                    solve(t)
+                near = sorted(t for t in T if lo <= t <= hi and C1[T.index(t)] is not None)
+                if not near:
+                    break
+                mid = min(near, key=lambda t: C1[T.index(t)]); m = near.index(mid)
+                lo, hi = near[max(m - 1, 0)], near[min(m + 1, len(near) - 1)]
+        n = ng                            # minima and their neighbours among the grid points only
         minima = [q for q in range(n) if (q == 0 or cost[q] <= cost[q - 1]) and (q == n - 1 or cost[q] <= cost[q + 1])]
         # the three cheapest minima in each part of the grid (base, multi-revolution, long): refining only the three
         # cheapest overall left short-flight minima unrefined once long flights joined
