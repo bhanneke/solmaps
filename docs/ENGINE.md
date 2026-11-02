@@ -52,15 +52,27 @@ compares them with the JavaScript engine's values (`network/nodes.js`).
 The engine knows 40 places: 30 bodies with their own heliocentric legs (`conventions.HELIO`: the planets and Pluto, Ceres,
 Vesta, Psyche, Pallas, Hygiea, Themis, Juno, six near-Earth asteroids, five Jupiter Trojans), nine moons and Earth–Moon L1.
 `engine/daily.py` computes transfer alternatives for all 870 ordered pairs of the 30 bodies for every day from
-2026-11-01 to 2100-12-31: 100 flight times from 0.3 to 2.5 Hohmann times, at most 100 years, and a refinement of the
-three cheapest local minima each day (about 2.6 billion Lambert solutions in all; 65 minutes on 12 cores). Cost valleys
-next to the 180° transfer singularity can be narrower than a coarser grid: with 40 flight times the daily data missed
-a valley on Psyche to Mercury by 8.5 km/s. Against a scan of 3,000 flight times with golden-section refinement on 300
-random route-dates, the stored cheapest transfer lies a median 0.0015 km/s above the optimum, within 0.08 km/s on 95%
-and within 0.27 km/s on 99% of them; the largest gap was 1.35 km/s. Compared with the earlier 10-day network on the
-same dates, 73% of route-dates are cheaper (median −0.18 km/s, mostly from the longer flight times) and 0.8% dearer,
-mostly Saturn and Jupiter to Mercury, where the earlier grid happened to sample a narrow valley. Slow autonomous cargo makes long flights
-worth listing; for inner routes they add little, since waiting for the next window is free in the journey graph.
+2026-11-01 to 2100-12-31. It solves Lambert's problem for 740 flight times in three log-spaced parts: 100 from 0.3 to 2.5
+Hohmann times (at least 10 days), 40 more up to three orbits of the faster body, and 600 more up to 100 years. For each
+flight time it solves every number of revolutions around the Sun the flight time allows and keeps the cheapest; Earth to
+Venus reaches about 160 revolutions in 100 years. It then refines the cheapest local minima of each part (three, three
+and five) by two rounds of halving and keeps a Pareto set of at most ten options per day, from the fastest to the
+cheapest. Each route and day needs up to 784 Lambert problems, at most 18.5 billion in all (16.4 hours with 12
+processes on an Apple M4 Pro). Slow autonomous cargo makes the long flights worth listing: the cost of a long flight
+rises and falls with every synodic period, and its valleys often lie well below any short transfer.
+
+The grid density follows from measurements. With 40 flight times the daily data missed a narrow valley next to the 180°
+transfer singularity on Psyche to Mercury by 8.5 km/s; with 60 long-flight points the stored cheapest
+option lay a median 0.10 km/s above the valleys of long flights; 600 points brought that below 0.01 km/s. The release audit (`tests/audit_daily.py`,
+`tests/grid_error.py`, `tests/audit_cheap_routes.py`) found no impossible value in 235 million option records. Against
+a scan of 3,000 flight times with golden-section refinement on 300 random route-days, the stored cheapest option lies a
+median 0.002 km/s above the optimum, within 0.05 km/s on 90% and within 0.20 km/s on 99% of them; the largest gap was
+0.34 km/s. The 100 base flight times are those of the earlier single-revolution data, so a day can only get cheaper;
+825 of 23.6 million route-days came out dearer by more than 0.02 km/s, 818 of them on Mercury to Pluto, where the
+earlier data's 16-bit speeds had rounded down. On 48 routes between bodies on nearly the same orbit (Jupiter Trojans,
+Hygiea and Themis, 2008 EV5 and Mars) the cheapest transfer lies far below the earlier data's best launch window,
+because long flights with many revolutions wait for the phasing; an independent integration of 336 of these records
+reaches the target within a median 0.1 km. `docs/DATASHEET.md` documents the released dataset.
 
 **Positions.** Planets and Pluto come from DE440 through pykep until 2149 and from JPL Horizons barycentre states (DE441)
 afterwards. Small bodies come from daily JPL Horizons states to 2205, interpolated with cubic Hermite polynomials.
@@ -247,13 +259,14 @@ The tests cover:
 
 ## Limits
 
-- Impulsive legs are single-revolution Lambert arcs on a 10-day grid; the refinement cache refines one transfer at an
-  exact date on request.
+- Impulsive legs are two-body Lambert arcs from the daily data (the pages use every tenth day); the refinement cache
+  refines one transfer at an exact date on request. Over decades the planets' pull bends a long arc, so a real ship on a
+  flight longer than about ten years would need small correction burns.
 - The journey search treats each heliocentric leg independently of the next. Slingshot routes are not yet edges of the
   journey graph, and planetary flybys appear only in the flyby search.
 - Continuous-thrust transfers cover one leg between two sites. These ships are not part of the multi-leg journey
   search. The spiral uses Edelbaum's formula, without eclipses or the third-body effect of the Moon.
-- Perigee passes are counted at full mass, with equal steps in perigee speed and one orbit between burns; the last
+- The spiral model counts perigee passes at full mass, with equal steps in perigee speed and one orbit between burns; the last
   pass carries the whole excess speed. A spiralling ship has no short route between low Earth orbit and L1.
 - From 1 mm/s² on, continuous-thrust results equal the 0.25 mm/s² reference solution: correct, possibly costlier than
   the true optimum for the stronger ship.

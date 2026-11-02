@@ -54,16 +54,34 @@ def tof_grid(a1, a2):
     long = [top * (TOF_MAX / top) ** (i / NLONG) for i in range(1, NLONG + 1)] if top < TOF_MAX * 0.99 else []
     return base + multi + long
 
-def pareto_thin(T, cost, vd, va):
-    """indices of the Pareto front (faster and cheaper), increasing flight time, thinned to K keeping both ends"""
+# flight-time limits whose cheapest transfer every day keeps: classic flights (the end of the base grid, 2.5 Hohmann
+# times), 10 and 30 years; the cheapest overall (up to 100 years) and the fastest are kept anyway
+LIMITS_Y = (10, 30)
+
+def pareto_thin(T, cost, vd, va, classic=None):
+    """indices of the Pareto front (faster and cheaper), increasing flight time, thinned to K. Kept always: the fastest
+    and the cheapest option, and the cheapest at or below each flight-time limit (classic, 10 and 30 years); the other
+    slots spread evenly in log flight time. An even spread along the front alone dropped the classic optimum on most
+    days once long flights joined, since most front points are long flights."""
     order = np.lexsort((cost, T)); out, best = [], math.inf
     for i in order:
         if cost[i] < best - 1e-9:
             out.append(i); best = cost[i]
-    if len(out) > K:
-        idx = sorted(set([0, len(out) - 1] + [round(j * (len(out) - 1) / (K - 1)) for j in range(K)]))
-        out = [out[j] for j in idx][:K]
-    return out
+    if len(out) <= K:
+        return out
+    t = np.array([T[i] for i in out])
+    keep = {0, len(out) - 1}
+    for lim in ([classic] if classic else []) + [y * 365.25 for y in LIMITS_Y]:
+        under = np.flatnonzero(t <= lim * 1.0001)
+        if len(under):
+            keep.add(int(under[-1]))                       # the slowest under the limit is the cheapest under it
+    lt = np.log(t)
+    for target in np.linspace(lt[0], lt[-1], K):          # fill the free slots evenly in log flight time
+        if len(keep) >= K:
+            break
+        free = [j for j in range(len(out)) if j not in keep]
+        keep.add(min(free, key=lambda j: abs(lt[j] - target)))
+    return [out[j] for j in sorted(keep)][:K]
 
 def route(args):
     import pykep as pk, bodies
@@ -121,7 +139,7 @@ def route(args):
                 near = sorted(t for t in T if lo <= t <= hi)
                 mid = min(near, key=lambda t: cost[T.index(t)]); m = near.index(mid)
                 lo, hi = near[max(m - 1, 0)], near[min(m + 1, len(near) - 1)]
-        idx = pareto_thin(np.array(T), np.array(cost), vd, vr)
+        idx = pareto_thin(np.array(T), np.array(cost), vd, vr, classic=grid[NTOF - 1])
         for i, p in enumerate(idx):
             tof[j, i] = T[p]; vinf[j, i, 0] = vd[p]; vinf[j, i, 1] = vr[p]; revs[j, i] = NR[p]
     return a, b, tof, vinf, revs
@@ -145,12 +163,19 @@ def main(procs=8):
                 print(f'{a} done, {time.time() - t:.0f} s', flush=True)
     print('all origins done', round(time.time() - t), 's')
 
+# flight-time limits for the page files: the pages open with classic flights (up to 2.5 Hohmann times, the base grid)
+# and load the others on request; the full alternatives stay in data/daily
+CAPS = [('classic', None, 'classic flights, up to 2.5 Hohmann times'), ('10y', 10 * 365.25, 'flights up to 10 years'),
+        ('30y', 30 * 365.25, 'flights up to 30 years'), ('100y', 100 * 365.25, 'flights up to 100 years')]
+
 def derive_pages(step=10):
-    """the 12-site, 10-day files the pages and the 10-day engine data use, from the daily data:
-    network/network.json (cheapest priced transfer per route and date) and data/alternatives.npz (the alternatives)"""
+    """the 12-site, 10-day files the pages and the 10-day engine data use, from the daily data: network/network.json
+    (cheapest priced transfer per route and date among classic flights, the pages' default), network/network_<cap>.json
+    for the longer flight-time limits in CAPS, and data/alternatives.npz (all alternatives). Within a limit the cheapest
+    stored alternative is the slowest one under it, since the alternatives form a Pareto set of flight time against cost."""
     import bodies
     atlas = bodies.load_atlas(); names = {x['id']: x['name'] for x in atlas['bodies']}
-    routes, alt, pairs = [], [], []
+    routes = {c: [] for c, _, _ in CAPS}; alt, pairs = [], []
     for a in SITES:
         d = np.load(f'{OUT}/{a}.npz'); tg = list(d['targets'])
         for b in SITES:
@@ -160,24 +185,30 @@ def derive_pages(step=10):
             T = d['tof'][i, ::step].astype(np.float64); V = d['vinf'][i, ::step].astype(np.float64)
             dep = np.vectorize(lambda v: planet_side_dv(a, v) if v == v else np.nan)(V[..., 0])
             arr = np.vectorize(lambda v: planet_side_dv(b, v) if v == v else np.nan)(V[..., 1])
-            tot = np.where(np.isnan(T), np.inf, dep + arr); k = tot.argmin(axis=1); ok = np.isfinite(tot.min(axis=1))
-            n = np.arange(len(k))
-            routes.append({'from': a, 'to': b,
-                           'dep': [round(float(x), 2) if o else None for x, o in zip(dep[n, k], ok)],
-                           'arr': [round(float(x), 2) if o else None for x, o in zip(arr[n, k], ok)],
-                           'tof': [round(float(x)) if o else None for x, o in zip(T[n, k], ok)]})
+            g = tof_grid(semi_major_axis(a), semi_major_axis(b))
+            for cap, limit, _ in CAPS:
+                lim = g[NTOF - 1] * 1.0001 if limit is None else limit          # classic: the end of the base grid
+                tot = np.where(np.isnan(T) | (T > lim), np.inf, dep + arr); k = tot.argmin(axis=1); ok = np.isfinite(tot.min(axis=1))
+                n = np.arange(len(k))
+                routes[cap].append({'from': a, 'to': b,
+                                    'dep': [round(float(x), 2) if o else None for x, o in zip(dep[n, k], ok)],
+                                    'arr': [round(float(x), 2) if o else None for x, o in zip(arr[n, k], ok)],
+                                    'tof': [round(float(x)) if o else None for x, o in zip(T[n, k], ok)]})
             alt.append(np.concatenate([T[..., None], V], axis=-1).astype(np.float32)); pairs.append(f'{a}>{b}')
-    n = len(routes[0]['dep'])
-    out = {'meta': {'built': time.strftime('%Y-%m-%d'), 'jd0': JD0, 'step_days': step, 'n': n, 'tof_steps': NTOF,
-                    'ephemeris': 'JPL DE440 for planets (Horizons DE441 barycentres after 2149); daily JPL Horizons states for small bodies',
-                    'method': 'Cheapest of the daily transfer alternatives (engine/daily.py): single-revolution Lambert transfers (pykep), '
-                              '100 flight times from 0.3 to 2.5 Hohmann times (at most 100 years). Departure and arrival burns from the '
-                              'stated parking orbits via the Oberth relation sqrt(vinf^2 + 2mu/r) - sqrt(mu/r); small bodies use '
-                              'rendezvous vinf. Impulsive burns, no gravity assists, no low-thrust.'},
-           'nodes': [{'id': k, 'name': names[k], 'park': end_state(k)['label']} for k in SITES], 'routes': routes}
-    json.dump(out, open('/work/network/network.json', 'w'), separators=(',', ':'))
+    n = len(routes['classic'][0]['dep'])
+    for cap, limit, label in CAPS:
+        out = {'meta': {'built': time.strftime('%Y-%m-%d'), 'jd0': JD0, 'step_days': step, 'n': n, 'tof_steps': NTOF + NMULTI + NLONG,
+                        'cap': cap, 'cap_label': label, 'caps': [[c, l] for c, _, l in CAPS],
+                        'ephemeris': 'JPL DE440 for planets (Horizons DE441 barycentres after 2149); daily JPL Horizons states for small bodies',
+                        'method': f'Cheapest of the daily transfer alternatives (engine/daily.py) among {label}: Lambert transfers (pykep) '
+                                  'with every number of revolutions around the Sun the flight time allows. Departure and arrival burns from '
+                                  'the stated parking orbits via the Oberth relation sqrt(vinf^2 + 2mu/r) - sqrt(mu/r); small bodies use '
+                                  'rendezvous vinf. Impulsive burns, no gravity assists, no low-thrust.'},
+               'nodes': [{'id': k, 'name': names[k], 'park': end_state(k)['label']} for k in SITES], 'routes': routes[cap]}
+        name = 'network.json' if cap == 'classic' else f'network_{cap}.json'
+        json.dump(out, open(f'/work/network/{name}', 'w'), separators=(',', ':'))
     np.savez_compressed('/work/data/alternatives.npz', alt=np.stack(alt), pairs=np.array(pairs), jd0=JD0, step=step, k=K)
-    print('pages: routes', len(routes), 'dates', n)
+    print('pages: routes', len(routes['classic']), 'dates', n, 'flight-time limits', [c for c, _, _ in CAPS])
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'pages':

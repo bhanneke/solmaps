@@ -27,6 +27,8 @@ pages = {
 for name, src in pages.items():
     (docs / name).write_text(wrap(src.read_text()))
 shutil.copy(root / 'site' / 'page.css', docs / 'page.css')
+for p in sorted((root / 'network').glob('network_*.json')):     # longer flight-time limits, loaded by the pages on request
+    shutil.copy(p, docs / p.name)
 (docs / '.nojekyll').write_text('')          # serve the files as they are
 for p in sorted(docs.iterdir()):
     print(f'{p.name:24s} {p.stat().st_size:>10,d} bytes')

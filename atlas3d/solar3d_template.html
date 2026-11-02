@@ -121,7 +121,7 @@ a{color:var(--c-water)}
   <details class="menu" id="mLayers"><summary>Layers</summary><div class="pop">
     <div><span class="lbl">Resources</span><div id="chips" class="grp"></div><select id="evMin" aria-label="Minimum evidence"><option value="0">all evidence</option><option value="1">inferred and better</option><option value="2">strong and better</option><option value="3">confirmed only</option></select></div>
     <div><span class="lbl">Routes</span><div class="grp"><select id="routeMode" aria-label="Route direction"><option value="from">Routes from</option><option value="to">Routes to</option></select><select id="routeFrom" aria-label="Site for routes"><option value="">none</option></select>
-    <select id="horizon" aria-label="Waiting horizon"><option value="18">wait up to 6 months</option><option value="37" selected>wait up to 1 year</option><option value="79">wait up to 26 months</option></select><label class="sl"><input type="checkbox" id="sling" checked> slingshots</label></div></div>
+    <select id="horizon" aria-label="Waiting horizon"><option value="18">wait up to 6 months</option><option value="37" selected>wait up to 1 year</option><option value="79">wait up to 26 months</option></select><label class="sl"><input type="checkbox" id="sling" checked> slingshots</label><select id="flightCap" aria-label="Longest flight"></select><span id="capMsg" class="lbl"></span></div></div>
   </div></details>
   <button type="button" id="btnJourney" aria-pressed="false">Journeys</button>
   <details class="menu" id="mCamera"><summary>Camera</summary><div class="pop"><div class="grp"><button type="button" id="btnTop">Top view</button><button type="button" id="btnReset">Whole system</button><button type="button" id="btnLabels" aria-pressed="true">Labels</button></div></div></details>
@@ -651,6 +651,22 @@ function bindRoutes() {
   P.querySelectorAll('[data-sling]').forEach(b => b.addEventListener('click', () => { const r = routeList.find(x => x.key === b.dataset.sling); if (r) launchSling(r); }));
   P.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { const r = routeList.find(x => x.key === b.dataset.go); if (r) setJD(r.jdDep); }));
 }
+// longest flight: the page embeds classic flights (up to 2.5 Hohmann times); longer limits load on request from
+// network_<cap>.json next to the page, where cargo can take decades and circle the Sun many times
+const NET0 = NET.routes, CAPS = NET.meta.caps || [['classic', 'classic flights']], NETCACHE = { classic: { routes: NET0, meta: NET.meta } };
+$('flightCap').innerHTML = CAPS.map(([c, l]) => `<option value="${c}">longest flight: ${c === 'classic' ? 'classic (crewed)' : c.replace('y', ' years')}</option>`).join('');
+async function setCap(cap) {
+  $('capMsg').textContent = cap === 'classic' ? '' : 'loading…';
+  try {
+    if (!NETCACHE[cap]) { const r = await fetch(`network_${cap}.json`); if (!r.ok) throw new Error(r.status); NETCACHE[cap] = await r.json(); }
+  } catch (e) { $('capMsg').textContent = 'not available here'; $('flightCap').value = state.cap || 'classic'; return; }
+  state.cap = cap; NET.routes = NETCACHE[cap].routes; NET.meta.method = NETCACHE[cap].meta.method;
+  for (const k of Object.keys(ROUTES)) delete ROUTES[k]; for (const r of NET.routes) ROUTES[r.from + '>' + r.to] = r;
+  ARCS = null; state.jResult = null; state.cResult = null; N3.data = null; N3.coords = null; N3.curve = null; N3.curveKey = null;
+  routeKey = ''; updateRoutes(); renderPanel(); if (state.net3d) drawNet3d(); if (state.netView) drawNetView();
+  $('capMsg').textContent = '';
+}
+$('flightCap').addEventListener('change', e => setCap(e.target.value));
 $('routeFrom').innerHTML = '<option value="">none</option>' + NET.nodes.map(n => `<option value="${n.id}">${esc(n.name)}</option>`).join('');
 $('routeFrom').addEventListener('change', e => { state.routeFrom = e.target.value; state.hl = null; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
 $('horizon').addEventListener('change', e => { state.H = +e.target.value; routeKey = ''; updateRoutes(); });
