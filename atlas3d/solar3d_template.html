@@ -52,7 +52,7 @@ a{color:var(--c-water)}
 #dateSlider{width:min(260px,50vw)}
 .chip{display:inline-flex;gap:5px;align-items:center;padding:3px 8px;font-size:12.5px}
 .panel{z-index:2;position:fixed;right:max(12px,env(safe-area-inset-right,0px));top:96px;bottom:max(12px,env(safe-area-inset-bottom,0px));width:380px;background:var(--deck);border:1px solid var(--rule);border-radius:8px;
-  padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;backdrop-filter:blur(4px);box-sizing:border-box}
+  padding:10px 14px 14px;display:flex;flex-direction:column;gap:6px;backdrop-filter:blur(4px);box-sizing:border-box}
 .panel h2{font-family:var(--f-display);font-weight:600;font-size:26px;letter-spacing:.03em;margin:0}
 .panel h3{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin:0}
 .panel p{margin:0;line-height:1.5}
@@ -79,8 +79,31 @@ a{color:var(--c-water)}
 .legend div{display:flex;gap:8px;align-items:center}
 .list{display:flex;flex-wrap:wrap;gap:6px}
 .hint{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));font-size:12px;color:var(--dim);pointer-events:none;max-width:60vw}
+
+.seg{gap:0}.seg button{border-radius:0;margin-left:-1px}.seg button:first-child{border-radius:4px 0 0 4px;margin-left:0}.seg button:last-child{border-radius:0 4px 4px 0}
+.menu{position:relative}
+.menu summary{list-style:none;cursor:pointer;background:rgba(18,26,41,.9);border:1px solid var(--rule);border-radius:4px;padding:5px 10px}
+.menu summary::-webkit-details-marker{display:none}
+.menu summary::after{content:" ▾";color:var(--dim)}
+.menu[open] summary{border-color:var(--sun);color:var(--sun)}
+.pop{position:absolute;top:calc(100% + 6px);left:0;z-index:5;background:var(--deck-solid);border:1px solid var(--rule);border-radius:8px;padding:12px;
+  display:flex;flex-direction:column;gap:12px;width:max-content;max-width:min(560px,calc(100vw - 32px))}
+.pop > div{display:flex;flex-direction:column;gap:6px}
+.pclose{align-self:flex-end;font-size:12px;padding:3px 9px}
+.pbody{display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;min-height:0}
+.popen{z-index:2;position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px))}
+.hint{transition:opacity .8s}.hint.gone{opacity:0}
 @media (max-width:820px){
-  .panel{left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));width:auto;top:auto;height:42vh}
+  .panel{left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));width:auto;top:auto;height:46vh}
+  .pop{position:fixed;left:12px;right:12px;top:auto;width:auto;max-width:none}
+  .top{gap:6px 8px;padding-top:8px}
+  .exp{display:none}
+  .brand > span{display:none !important}
+  .datebar{position:fixed;z-index:3;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));flex-wrap:nowrap;background:var(--deck);border:1px solid var(--rule);border-radius:8px;padding:6px 8px}
+  .datebar .lbl{display:none}#dateSlider{flex:1;width:auto;min-width:0}#speed{max-width:96px}
+  .panel{bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 52px)}
+  .popen{bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 56px)}
+  .n3card{bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 52px)}
   .hint{display:none}
   .brand{font-size:18px}
 }
@@ -94,17 +117,22 @@ a{color:var(--c-water)}
 
 <header class="top">
   <div class="brand"><span style="color:var(--sun);font-size:.62em;letter-spacing:.12em;display:block;line-height:1">DEEP SPACE STRATEGY · GEOGRAPHY AND TOPOLOGY</span>3D Atlas</div>
-  <a class="exp" href="https://bhanneke.github.io/solmaps/how-it-works.html" target="_blank" rel="noopener" title="Orbits are approximations and the display scale is compressed. Click for how it is built.">Experimental · how it is built</a>
-  <div class="grp"><span class="lbl">Date</span><input type="range" id="dateSlider" min="0" max="1" step="1" aria-label="Date"><span class="date" id="dateOut"></span>
+  <div class="grp seg" role="group" aria-label="View"><button type="button" id="btnAtlas" aria-pressed="true">3D atlas</button><button type="button" id="btnNet" aria-pressed="false">Network</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button></div>
+  <details class="menu" id="mLayers"><summary>Layers</summary><div class="pop">
+    <div><span class="lbl">Resources</span><div id="chips" class="grp"></div><select id="evMin" aria-label="Minimum evidence"><option value="0">all evidence</option><option value="1">inferred and better</option><option value="2">strong and better</option><option value="3">confirmed only</option></select></div>
+    <div><span class="lbl">Routes</span><div class="grp"><select id="routeMode" aria-label="Route direction"><option value="from">Routes from</option><option value="to">Routes to</option></select><select id="routeFrom" aria-label="Site for routes"><option value="">none</option></select>
+    <select id="horizon" aria-label="Waiting horizon"><option value="18">wait up to 6 months</option><option value="37" selected>wait up to 1 year</option><option value="79">wait up to 26 months</option></select><label class="sl"><input type="checkbox" id="sling" checked> slingshots</label></div></div>
+  </div></details>
+  <button type="button" id="btnJourney" aria-pressed="false">Journeys</button>
+  <details class="menu" id="mCamera"><summary>Camera</summary><div class="pop"><div class="grp"><button type="button" id="btnTop">Top view</button><button type="button" id="btnReset">Whole system</button><button type="button" id="btnLabels" aria-pressed="true">Labels</button></div></div></details>
+  <div class="grp" id="viewOpts"><span id="n3ctl" class="grp" hidden><select id="n3Color" aria-label="Line colour in the whole-network view"><option value="imbalance">colour = go-return imbalance</option><option value="time">colour = travel time</option><option value="cost">colour = km/s</option></select></span><select id="n3Scale" aria-label="Distance scale in the network views" hidden><option value="log">log scale</option><option value="sqrt">square-root scale</option><option value="linear">linear scale</option></select><select id="nvMetric" aria-label="Distance in the network view" hidden><option value="time">distance = travel time</option><option value="fuel">distance = fuel</option></select></div>
+  <div class="grp datebar"><span class="lbl">Date</span><input type="range" id="dateSlider" min="0" max="1" step="1" aria-label="Date"><span class="date" id="dateOut"></span>
     <select id="speed" aria-label="Playback speed"><option value="0">paused</option><option value="0.00011574">10 seconds per frame</option><option value="0.00069444">1 minute per frame</option><option value="0.006944">10 minutes per frame</option><option value="0.041667" selected>1 hour per frame</option><option value="0.25">6 hours per frame</option><option value="1">1 day per frame</option><option value="5">5 days per frame</option><option value="20">20 days per frame</option></select></div>
-  <div class="grp"><span class="lbl">Resources</span><span id="chips" class="grp"></span>
-    <select id="evMin" aria-label="Minimum evidence"><option value="0">all evidence</option><option value="1">inferred and better</option><option value="2">strong and better</option><option value="3">confirmed only</option></select></div>
-  <div class="grp"><select id="routeMode" aria-label="Route direction"><option value="from">Routes from</option><option value="to">Routes to</option></select><select id="routeFrom" aria-label="Site for routes"><option value="">none</option></select>
-    <select id="horizon" aria-label="Waiting horizon"><option value="18">wait up to 6 months</option><option value="37" selected>wait up to 1 year</option><option value="79">wait up to 26 months</option></select><label class="sl"><input type="checkbox" id="sling" checked> slingshots</label></div>
-  <div class="grp"><button type="button" id="btnJourney" aria-pressed="false">Journeys</button><button type="button" id="btnNet" aria-pressed="false">Network view</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button><span id="n3ctl" class="grp" hidden><select id="n3Color" aria-label="Line colour in the whole-network view"><option value="imbalance">colour = go-return imbalance</option><option value="time">colour = travel time</option><option value="cost">colour = km/s</option></select></span><select id="n3Scale" aria-label="Distance scale in the network views" hidden><option value="log">log scale</option><option value="sqrt">square-root scale</option><option value="linear">linear scale</option></select><select id="nvMetric" aria-label="Distance in the network view" hidden><option value="time">distance = travel time</option><option value="fuel">distance = fuel</option></select><button type="button" id="btnTop">Top view</button><button type="button" id="btnReset">Whole system</button><button type="button" id="btnLabels" aria-pressed="true">Labels</button></div>
+  <a class="exp" href="https://bhanneke.github.io/solmaps/how-it-works.html" target="_blank" rel="noopener" title="Orbits are approximations and the display scale is compressed. Click for how it is built.">Experimental · how it is built</a>
 </header>
 
-<aside class="panel" id="panel" aria-live="polite"></aside>
+<aside class="panel" id="panelBox" hidden><button type="button" class="pclose" id="panelClose" aria-label="Hide details">Hide ✕</button><div id="panel" class="pbody" aria-live="polite"></div></aside>
+<button type="button" id="panelOpen" class="popen">Details</button>
 <div class="hint">Drag to rotate, right-drag or two fingers to pan, scroll or pinch to zoom. Click any body or label for its dossier. Distances from the Sun are compressed and sizes enlarged so everything fits in one view; angles and inclinations are true.</div>
 
 <script id="atlas-data" type="application/json">/*ATLAS_DATA*/</script>
@@ -134,7 +162,7 @@ CATS.forEach(c => c.hex = css(c.color));
 const EV = { 'confirmed': 3, 'strong': 2, 'inferred': 1, 'speculative/disputed': 0 };
 const EV_NAME = ['speculative', 'inferred', 'strong', 'confirmed'];
 const catOf = r => CATS.find(c => c.match(r)) || null;
-const state = { cats: new Set(CATS.map(c => c.id)), evMin: 0, sel: null, labels: true, jd: 0 };
+const state = { cats: new Set(), evMin: 0, sel: null, labels: true, jd: 0 };
 function glyph(cat, s = 11) {
   const h = s / 2, c = cat.hex;
   const g = { circle: `<circle cx="${h}" cy="${h}" r="${h - 1}" fill="${c}"/>`, square: `<rect x="1" y="1" width="${s - 2}" height="${s - 2}" fill="${c}"/>`,
@@ -384,6 +412,7 @@ function renderPanel() {
   for (const [id, l] of Object.entries(labels)) l.classList.toggle('sel', id === state.sel);
 }
 function select(id) {
+  if (id) openPanel(true);
   state.sel = id; state.follow = id && pos3[id] ? id : null;
   if (state.follow) {
     const r = (objs[id] && objs[id].r) || 0.3, d = BY[id].type === 'population' ? 18 : Math.max(4, r * 9);
@@ -634,7 +663,7 @@ const jdOf = ms => ms / 864e5 + 2440587.5, msOf = jd => (jd - 2440587.5) * 864e5
 function setJD(jd) { state.jd = jd; $('dateOut').textContent = new Date(msOf(jd)).toISOString().slice(0, 10) + (msOf(jd) > Date.UTC(2050, 11, 31) ? ' ~' : ''); $('dateSlider').value = Math.round((msOf(jd) - DAY0) / 864e5); place(jd); if (typeof updateRoutes === 'function' && NET) updateRoutes(); if (STN_READY) { updateStationMarkers(); if (state.netView && kOf(jd) !== state.nvK) { state.nvK = kOf(jd); drawNetView(); } if (state.net3d && kOf(jd) !== state.n3K) { state.n3K = kOf(jd); drawNet3d(); } } }
 $('dateSlider').max = Math.round((DAY1 - DAY0) / 864e5);
 $('dateSlider').addEventListener('input', e => setJD(jdOf(DAY0 + (+e.target.value) * 864e5)));
-$('chips').innerHTML = CATS.map(c => `<button type="button" class="chip" data-cat="${c.id}" aria-pressed="true">${glyph(c)}${c.label}</button>`).join('');
+$('chips').innerHTML = CATS.map(c => `<button type="button" class="chip" data-cat="${c.id}" aria-pressed="${state.cats.has(c.id)}">${glyph(c)}${c.label}</button>`).join('');
 $('chips').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (!b) return; const id = b.dataset.cat; state.cats.has(id) ? state.cats.delete(id) : state.cats.add(id); b.setAttribute('aria-pressed', String(state.cats.has(id))); refreshGlyphs(); });
 $('evMin').addEventListener('change', e => { state.evMin = +e.target.value; refreshGlyphs(); renderPanel(); });
 $('btnTop').onclick = () => { const t = controls.target; camera.position.set(t.x, t.y + Math.max(30, camera.position.distanceTo(t)), t.z + 0.01); };
@@ -1197,7 +1226,7 @@ function drawNet3d() {
   n3resize(); n3compute(); n3draw(); n3curve();
 }
 function n3resize() {                                    // centre the picture between the info card and the panel
-  const w = innerWidth, h = innerHeight, wide = w > 760, pw = wide ? ($('panel').offsetWidth || 0) + 12 : 0, cw = wide ? $('n3card').offsetWidth + 16 : 0;
+  const w = innerWidth, h = innerHeight, wide = w > 760, pw = wide ? ($('panelBox').offsetWidth || 0) + 12 : 0, cw = wide ? $('n3card').offsetWidth + 16 : 0;
   n3renderer.setSize(w, h, false); N3.canvas.style.width = w + 'px'; N3.canvas.style.height = h + 'px';
   n3camera.aspect = w / h; n3camera.setViewOffset(w, h, (pw - cw) / 2, 0, w, h); n3camera.updateProjectionMatrix();
 }
@@ -1243,7 +1272,18 @@ $('n3Scale').addEventListener('change', e => { state.n3Scale = e.target.value; N
 addEventListener('resize', () => { if (state.net3d) n3resize(); });
 requestAnimationFrame(n3frame);
 
-// open with the travel network visible: routes from Earth
-state.routeFrom = 'earth'; $('routeFrom').value = 'earth';
+// open quietly: the orrery alone; resources, routes and the details panel come on when asked for
+function openPanel(on = true) { $('panelBox').hidden = !on; $('panelOpen').hidden = on; }
+$('panelClose').addEventListener('click', () => openPanel(false));
+$('panelOpen').addEventListener('click', () => openPanel(true));
+$('routeFrom').addEventListener('change', e => { if (e.target.value) openPanel(true); });
+$('btnJourney').addEventListener('click', () => { if (state.journey) openPanel(true); });
+$('btnNet3').addEventListener('click', () => { if (state.journey) openPanel(true); syncView(); });  // the whole-network handler already closes the 2D network view
+$('btnNet').addEventListener('click', () => { if (state.netView && state.net3d) $('btnNet3').click(); if (state.journey) openPanel(true); syncView(); });
+function syncView() { $('btnAtlas').setAttribute('aria-pressed', !state.netView && !state.net3d); }
+$('btnAtlas').addEventListener('click', () => { if (state.net3d) $('btnNet3').click(); if (state.netView) $('btnNet').click(); syncView(); });
+for (const m of document.querySelectorAll('details.menu')) m.addEventListener('toggle', () => { if (m.open) for (const o of document.querySelectorAll('details.menu')) if (o !== m) o.open = false; });
+document.addEventListener('pointerdown', e => { for (const m of document.querySelectorAll('details.menu[open]')) if (!m.contains(e.target)) m.open = false; });
+setTimeout(() => document.querySelector('.hint')?.classList.add('gone'), 12000);
 resize(); refreshGlyphs(); setJD(jdOf(TODAY)); renderPanel(); requestAnimationFrame(frame);
 </script>
