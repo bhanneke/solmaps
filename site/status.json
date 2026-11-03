@@ -1,10 +1,18 @@
 {
- "built": "2026-11-01 19:20",
+ "built": "2026-11-03 12:50",
  "mini": {
   "jobs": {
    "ceres:earth,mars": {
     "queue": 1,
-    "started": "2026-10-31 14:28:28"
+    "started": "2026-10-31 14:28:28",
+    "ended": "2026-11-02 06:28:32",
+    "exit": 0
+   },
+   "vesta:earth,mars": {
+    "queue": 1,
+    "started": "2026-11-02 12:38:32",
+    "ended": "2026-11-02 12:38:32",
+    "exit": 137
    },
    "flyby_mars": {
     "queue": 2,
@@ -12,13 +20,16 @@
    }
   },
   "counts": {
-   "run3_ceres_earth_mars.log": 441,
-   "q2_flyby_mars.log": 400
+   "run3_ceres_earth_mars.log": 648,
+   "run3_vesta_earth_mars.log": 305,
+   "q2_flyby_mars.log": 676
   },
   "lowthrust_rows": 0,
-  "screen_units": 12,
-  "screen_log": "2026-11-01 16:14:51 start screening, 4 workers (attempt 1)",
-  "checked": "2026-11-01 19:20"
+  "screen_units": 80,
+  "screen_log": "2026-11-02 14:04:54 end exit 137",
+  "daily_done": 4,
+  "daily_running": true,
+  "checked": "2026-11-03 12:50"
  },
  "rows": [
   {
@@ -39,116 +50,116 @@
   {
    "group": "Direct transfers",
    "name": "For data release v0.1: every number of revolutions, flights up to 100 years on every route, 740 flight times per day",
-   "done": 15,
+   "done": 4,
    "total": 30,
    "unit": "origins (29 routes each)",
-   "note": "paused; resumes on the MacBook overnight. Then an audit, the documentation and the release on Zenodo and Hugging Face."
+   "note": "running, about 3.6 hours per origin. Then an audit, the documentation and the release on Zenodo and Hugging Face."
   },
   {
-   "group": "Mac Mini, queue 1",
+   "group": "Flyby routes",
    "name": "Flyby search, returns from Ceres",
-   "state": "running",
+   "state": "done",
    "since": "2026-10-31 14:28:28",
-   "note": "441 searches finished"
+   "note": "648 searches finished"
   },
   {
-   "group": "Mac Mini, queue 1",
+   "group": "Flyby routes",
    "name": "Flyby search, returns from Vesta",
-   "state": "queued",
-   "since": "",
-   "note": ""
+   "state": "running",
+   "since": "2026-11-02 12:38:32",
+   "note": "305 searches finished"
   },
   {
-   "group": "Mac Mini, queue 1",
+   "group": "Flyby routes",
    "name": "Flyby search, returns from Psyche",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 1",
+   "group": "Flyby routes",
    "name": "Flyby search, returns from Jupiter",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 1",
+   "group": "Flyby routes",
    "name": "Flyby search rerun, Earth to Jupiter, Saturn, Mercury",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 1",
+   "group": "Flyby routes",
    "name": "Flyby search rerun, Earth to Ceres, Vesta, Psyche",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 1",
+   "group": "Flyby routes",
    "name": "Flyby search rerun, Mars to Jupiter, Saturn",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 1",
+   "group": "Flyby routes",
    "name": "Flyby search rerun, Mars to the belt",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 2",
+   "group": "Flyby routes",
    "name": "Flyby search, Mars to Earth, Venus, Mercury",
    "state": "running",
    "since": "2026-10-31 15:39:44",
-   "note": "400 searches finished"
+   "note": "676 searches finished"
   },
   {
-   "group": "Mac Mini, queue 2",
+   "group": "Flyby routes",
    "name": "Flyby search, Earth to Mars, Venus, Eros, Bennu, Ryugu",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 2",
+   "group": "Flyby routes",
    "name": "Flyby search, Saturn to Earth, Mars",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 2",
+   "group": "Cyclers",
    "name": "Earth\u2013Mars cyclers, 2027\u20132097",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 2",
+   "group": "Low thrust",
    "name": "Low-thrust atlas: electric ship, 132 routes, every two-year window",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, queue 2",
+   "group": "Flyby routes",
    "name": "Sampled trajectories for every flyby result",
    "state": "queued",
    "since": "",
    "note": ""
   },
   {
-   "group": "Mac Mini, screening",
+   "group": "Catalogue screening",
    "name": "Every object of the JPL Small-Body Database (1,580,428 bound orbits) against Earth, Mars and Ceres, both directions, every 10 days to 2100",
-   "done": 12,
+   "done": 80,
    "total": 791,
    "unit": "work units of 2,000 objects",
-   "note": "running since 2026-11-01 16:14; near-Earth objects first, then by brightness; two-body orbits, for ranking"
+   "note": "paused until the transfer data run finishes; near-Earth objects first, then by brightness; two-body orbits, for ranking"
   },
   {
    "group": "Open for contributors",

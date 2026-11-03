@@ -24,7 +24,7 @@ assumptions and limits.
 | Folder | What it holds |
 | --- | --- |
 | `engine/` | Routing engine: end-state conventions, daily precompute (`daily.py`), transfer alternatives, ships, journeys, low thrust, refinement cache, comparison service (`docs/ENGINE.md`) |
-| `flyby/` | Bodies (DE440, JPL Horizons), ephemeris and catalogue fetchers, flyby search, cyclers, trajectories, Mac Mini queues |
+| `flyby/` | Bodies (DE440, JPL Horizons), ephemeris and catalogue fetchers, flyby search, cyclers, trajectories, compute queues |
 | `atlas/` | Resource atlas: verified dataset (`atlas_dataset.json`, every entry with evidence level and source) and its map |
 | `atlas3d/` | The 3D atlas: routes, slingshots, journeys, round trips, network views |
 | `network/` | Growth map and the JavaScript transfer engine used by the pages |

@@ -17,7 +17,9 @@ def mini():
            'echo "== counts"; for f in flyby/run3_*.log flyby/q2_*.log; do echo "$(basename $f) $(grep -c "^{" $f)"; done; '
            'echo "== lt"; python3 -c "import json;print(len(json.load(open(\'data/lowthrust_atlas.json\'))))" 2>/dev/null || echo 0; '
            'echo "== screen"; ls ~/solmaps-screen/data/screen 2>/dev/null | grep -c "^unit_[0-9]*.npz$"; '
-           'echo "== screenlog"; tail -1 ~/solmaps-screen/screen.log 2>/dev/null')
+           'echo "== screenlog"; tail -1 ~/solmaps-screen/screen.log 2>/dev/null; '
+           'echo "== daily"; ls ~/solmaps-daily/data/daily 2>/dev/null | grep -c "^[a-z0-9]*.npz$"; '
+           'echo "== dailyrun"; pgrep -f run_daily_mini.sh > /dev/null && echo running || echo stopped')
     try:
         out = subprocess.run(['ssh', '-o', 'ConnectTimeout=8', '-o', 'BatchMode=yes', 'bjoernmacmini', cmd],
                              capture_output=True, text=True, timeout=60).stdout
@@ -44,6 +46,7 @@ def mini():
     counts = dict(l.rsplit(' ', 1) for l in sec.get('counts', []) if ' ' in l)
     return {'jobs': jobs, 'counts': {k: int(v) for k, v in counts.items()}, 'lowthrust_rows': int((sec.get('lt') or ['0'])[0] or 0),
             'screen_units': int((sec.get('screen') or ['0'])[0] or 0), 'screen_log': (sec.get('screenlog') or [''])[0],
+            'daily_done': int((sec.get('daily') or ['0'])[0] or 0), 'daily_running': (sec.get('dailyrun') or [''])[0] == 'running',
             'checked': time.strftime('%Y-%m-%d %H:%M')}
 
 # the Mini queues as planned (flyby/run_queue_mini.sh, run_queue_mini2.sh); problems per job from the measured run times
@@ -61,11 +64,7 @@ QUEUE = [
 def build():
     prev = json.load(open(ROOT / 'site' / 'status.json')) if (ROOT / 'site' / 'status.json').exists() else {}
     m = mini() or prev.get('mini')
-    daily_done = [p.stem for p in (DATA / 'daily').glob('*.npz') if not p.stem.endswith('.tmp')]
-    try:
-        running = 'solmaps-daily' in subprocess.run(['docker', 'ps', '--format', '{{.Names}}'], capture_output=True, text=True, timeout=20).stdout
-    except Exception:
-        running = False
+    mm = m or {}
     eph = [p.stem for p in (ROOT / 'flyby' / 'horizons').glob('*.json')]
     rows = [
         {'group': 'Positions', 'name': 'Daily JPL Horizons states: 21 small bodies to 2205, planets 2140–2205',
@@ -74,21 +73,24 @@ def build():
          '100 flight times per day', 'state': 'done', 'since': '2026-10-31',
          'note': '870 routes, about 2.6 billion Lambert solutions; the maps show 132 routes between 12 sites, every tenth day'},
         {'group': 'Direct transfers', 'name': 'For data release v0.1: every number of revolutions, flights up to 100 years on every route, '
-         '740 flight times per day', 'done': len(daily_done), 'total': len(HELIO), 'unit': 'origins (29 routes each)',
-         'note': ('running on the MacBook' if running else 'paused; resumes on the MacBook overnight') +
+         '740 flight times per day', 'done': mm.get('daily_done', 0), 'total': len(HELIO), 'unit': 'origins (29 routes each)',
+         'note': ('running, about 3.6 hours per origin' if mm.get('daily_running') else 'not running') +
                  '. Then an audit, the documentation and the release on Zenodo and Hugging Face.'},
     ]
     jobs = (m or {}).get('jobs', {})
     for key, label, q in QUEUE:
         j = jobs.get(key) or jobs.get(key.replace(',', '_').replace(':', '_'), {})
-        state = 'done' if j.get('exit') == 0 and j.get('ended') else 'failed, retrying' if j.get('ended') else 'running' if j.get('started') else 'queued'
+        restarted = j.get('started', '') >= j.get('ended', '')                # a newer start after a failed end
+        state = 'done' if j.get('exit') == 0 and j.get('ended') and not restarted else 'running' if j.get('started') and (restarted or not j.get('ended')) else 'failed, retrying' if j.get('ended') else 'queued'
         log = ('run3_' + key.replace(':', '_').replace(',', '_') if q == 1 else 'q2_' + key) + '.log'
         n = (m or {}).get('counts', {}).get(log)
-        rows.append({'group': 'Mac Mini, queue ' + str(q), 'name': label, 'state': state, 'since': j.get('started', ''),
+        group = 'Cyclers' if 'cycler' in label else 'Low thrust' if 'Low-thrust' in label else 'Flyby routes'
+        rows.append({'group': group, 'name': label, 'state': state, 'since': j.get('started', ''),
                      'note': f'{n:,} searches finished' if n and state != 'queued' else ''})
     sl = (m or {}).get('screen_log', '')
-    sstate = ('running since ' + sl[:16]) if ' start ' in sl else 'finished' if 'finished' in sl else ('stopped ' + sl[:16]) if sl else ''
-    rows.append({'group': 'Mac Mini, screening', 'name': 'Every object of the JPL Small-Body Database (1,580,428 bound orbits) against Earth, Mars '
+    sstate = ('running since ' + sl[:16]) if ' start ' in sl else 'finished' if 'finished' in sl \
+        else 'paused until the transfer data run finishes' if mm.get('daily_running') else ('stopped ' + sl[:16]) if sl else ''
+    rows.append({'group': 'Catalogue screening', 'name': 'Every object of the JPL Small-Body Database (1,580,428 bound orbits) against Earth, Mars '
                  'and Ceres, both directions, every 10 days to 2100', 'done': (m or {}).get('screen_units', 0), 'total': 791,
                  'unit': 'work units of 2,000 objects', 'note': (sstate + '; ' if sstate else '') +
                  'near-Earth objects first, then by brightness; two-body orbits, for ranking'})
@@ -111,9 +113,9 @@ def page(st):
             prog = f'<span class="state {r["state"].split(",")[0]}">{e(r["state"])}</span>' + (f' <span class="num">since {e(r["since"])}</span>' if r.get('since') else '')
         extra = ''.join(f'<div class="note">{e(r[k])}</div>' for k in ('note', 'where') if r.get(k))
         trs.append(f'<tr><td>{e(r["group"])}</td><td>{e(r["name"])}{extra}</td><td>{prog}</td></tr>')
-    mini_line = (f'Mac Mini last checked {e(st["mini"]["checked"])}.' if st.get('mini') else 'The Mac Mini was not reachable.')
+    mini_line = (f'Running jobs last checked {e(st["mini"]["checked"])}.' if st.get('mini') else 'The running jobs could not be checked.')
     return f'''<title>Computation status</title>
-<meta name="description" content="What solmaps has computed, what runs on the Mac Mini and what waits for contributors.">
+<meta name="description" content="What solmaps has computed, what runs now and what waits for contributors.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
