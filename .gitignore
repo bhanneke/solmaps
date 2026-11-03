@@ -38,3 +38,4 @@ network/network_*.json
 contrib/out*/
 contrib/inputs/
 *.before-verify
+network/options/

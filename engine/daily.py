@@ -231,9 +231,33 @@ def derive_pages(step=10):
     np.savez_compressed('/work/data/alternatives.npz', alt=np.stack(alt), pairs=np.array(pairs), jd0=JD0, step=step, k=K)
     print('pages: routes', len(routes['classic']), 'dates', n, 'flight-time limits', [c for c, _, _ in CAPS])
 
+def derive_options(step=10, src=None):
+    """every stored option of every route between the 12 sites, every tenth day, priced at each end's own end state:
+    network/options/<from>_<to>.json with tof [date][option] (days) and dv [date][option] (km/s), for the trade-off
+    view of the 3D atlas (wait, flight time, arrival and cost of every option). src: another daily folder (default OUT)"""
+    src = src or OUT
+    os.makedirs('/work/network/options', exist_ok=True)
+    for a in SITES:
+        d = np.load(f'{src}/{a}.npz'); tg = list(d['targets'])
+        for b in SITES:
+            if a == b:
+                continue
+            i = tg.index(b)
+            T = d['tof'][i, ::step].astype(np.float64); V = d['vinf'][i, ::step].astype(np.float64)
+            dep = np.vectorize(lambda v: planet_side_dv(a, v) if v == v else np.nan)(V[..., 0])
+            arr = np.vectorize(lambda v: planet_side_dv(b, v) if v == v else np.nan)(V[..., 1])
+            c = dep + arr
+            tof = [[int(round(t)) for t in row if t == t] for row in T]
+            dv = [[round(float(x), 2) for x, t in zip(row, trow) if t == t] for row, trow in zip(c, T)]
+            json.dump({'from': a, 'to': b, 'jd0': JD0, 'step': step, 'tof': tof, 'dv': dv},
+                      open(f'/work/network/options/{a}_{b}.json', 'w'), separators=(',', ':'))
+    print('options: routes', len(SITES) * (len(SITES) - 1), 'from', src)
+
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'pages':
         derive_pages()
+    elif len(sys.argv) > 1 and sys.argv[1] == 'options':         # python -m engine.daily options [daily folder]
+        derive_options(src=sys.argv[2] if len(sys.argv) > 2 else None)
     elif len(sys.argv) > 2 and sys.argv[1] == 'origin':          # python -m engine.daily origin <body> [procs]
         main(int(sys.argv[3]) if len(sys.argv) > 3 else 8, [sys.argv[2]])
     else:
