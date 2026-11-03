@@ -90,6 +90,7 @@ tr[data-route]:hover td{background:var(--deck-2)}
   <div class="grp"><span class="lbl">Engine</span><select id="ve" aria-label="Engine">
     <option value="370">methane/oxygen, Isp 370 s</option><option value="450" selected>hydrogen/oxygen, Isp 450 s</option><option value="900">nuclear thermal, Isp 900 s</option><option value="">your own engine</option></select>
     <label class="lbl" for="isp">Isp, s</label><input id="isp" type="number" min="200" max="20000" step="10" value="450" aria-label="Specific impulse in seconds" style="width:7em"></div>
+  <div class="grp"><span class="lbl">Longest flight</span><select id="flightCap" aria-label="Longest flight"></select><span id="capMsg" class="lbl"></span></div>
   <div class="grp"><label class="lbl" for="useFly"><input type="checkbox" id="useFly" checked> include flyby routes</label></div>
   <div class="grp"><span class="lbl">Show routes under</span><select id="maxdv" aria-label="Maximum delta-v shown">
     <option value="4">4 km/s</option><option value="6">6 km/s</option><option value="8" selected>8 km/s</option><option value="12">12 km/s</option><option value="99">all</option></select></div>
@@ -513,10 +514,24 @@ $('fbOrigin').addEventListener('change', () => { fillTargets(); renderFlyby(); }
 $('fbTarget').addEventListener('change', renderFlyby);
 fillTargets(); renderFlyby();
 $('useFly').addEventListener('change', e => { state.fly = e.target.checked; hubSeriesCache = null; draw(); renderPanel(); renderHubs(); });
+// longest flight: classic flights (up to 2.5 Hohmann times) are embedded; longer limits load from network_<cap>.json
+const CAPS = NET.meta.caps || [['classic', 'classic flights']], NETCACHE = { classic: { routes: NET.routes, meta: { ...NET.meta } } };
+$('flightCap').innerHTML = CAPS.map(([c]) => `<option value="${c}">${c === 'classic' ? 'classic (crewed)' : c.replace('y', ' years')}</option>`).join('');
+if (CAPS.length < 2) $('flightCap').parentElement.hidden = true;      // data without the longer flight-time files
+$('flightCap').addEventListener('change', async e => {
+  const cap = e.target.value; $('capMsg').textContent = cap === 'classic' ? '' : 'loading…';
+  try {
+    if (!NETCACHE[cap]) { const r = await fetch(`network_${cap}.json`); if (!r.ok) throw new Error(r.status); NETCACHE[cap] = await r.json(); }
+  } catch (err) { $('capMsg').textContent = 'not available here'; e.target.value = state.cap || 'classic'; return; }
+  state.cap = cap; NET.routes = NETCACHE[cap].routes; NET.meta.method = NETCACHE[cap].meta.method;
+  for (const k of Object.keys(ROUTE)) delete ROUTE[k]; for (const r of NET.routes) ROUTE[r.from + '>' + r.to] = r;
+  hubSeriesCache = null; const m = $('methodTxt'); if (m) m.textContent = NET.meta.method;
+  draw(); renderPanel(); renderHubs(); renderTS(); $('capMsg').textContent = '';
+});
 
 $('assume').innerHTML = [
-  `Positions for all route costs: ${esc(NET.meta.ephemeris || 'JPL Table 1 planets; JPL SBDB small bodies')}. Small-body orbits ignore planetary perturbations, so their positions lose accuracy over decades. The map drawing uses JPL Table 1 elements and serves only as an illustration after 2050.`,
-  `Transfers: ${esc(NET.meta.method)}`,
+  `Positions for all route costs: ${esc(NET.meta.ephemeris || 'JPL Table 1 planets; JPL SBDB small bodies')}. Small bodies follow daily JPL Horizons states, which include the planets' perturbations. The map drawing uses JPL Table 1 elements and serves only as an illustration after 2050.`,
+  `Transfers: <span id="methodTxt">${esc(NET.meta.method)}</span>`,
   `Parking orbits: ${NODES.map(n => `${esc(n.name)}: ${esc(n.park)}`).join('; ')}. GM values from NASA NSSDC fact sheets.`,
   `Gas giants: arrival means capture into a circular orbit at Callisto (Jupiter) or Titan (Saturn) distance, a modelling choice. With "include flyby routes" on, routes from Earth and from Mars to Jupiter, Saturn, Mercury, Ceres, Vesta and Psyche also use the best flyby route launched inside the waiting horizon. Each flyby result is the best launch of one sequence in one two-year window, so a horizon shorter than two years can miss it. Aerocapture is not modelled, so arrival costs are upper bounds.`,
   `Flyby routes: ESA pykep 3.0.0 MGA-1DSM (one deep-space manoeuvre per leg), up to two flybys, optimised with pygmo self-adaptive differential evolution (8 islands, two independent starts per problem). Same departure burn and capture orbits as the direct network. Leg flight times are capped at 1.9 times the Hohmann time, so some direct costs (Ceres, Saturn) sit on that cap and are slightly overstated. Validation: the same tools reproduce the real Cassini launch and Venus–Venus–Earth flyby dates within 9 to 34 days; Juno, Galileo and Dawn replay with their flown sequences, inner encounters within one to three months. Dawn flew with ion propulsion, which this impulsive model does not represent.`,
