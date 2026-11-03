@@ -2,17 +2,18 @@
 
 For each bound object of data/sbdb/catalog.npz and each hub (Earth, Mars, Ceres, with their parking-orbit end states;
 the object end is a rendezvous), the screening solves Lambert's problem (engine/vlambert.py, single revolution, prograde; matches pykep within 4e-10) for every
-10th day from 2026-11-01 to 2100 and 20 flight times, and keeps per hub and direction the cheapest transfer overall and
+day from 2026-11-01 to 2100 and 20 flight times, and keeps per hub and direction the cheapest transfer overall and
 the cheapest per calendar year of departure.
 
 Positions: hubs from DE440 and JPL Horizons (flyby/bodies.py); objects by two-body propagation of their SBDB elements
 (osculating at the catalogue epoch, 2026). Two-body motion ignores the planets' pull and drifts over decades, so the
 screening ranks objects; the full sites (engine/daily.py, daily Horizons states) give numbers for planning.
-Flight times: 20 values from 0.3 to 2.5 Hohmann times (at least 30 days, at most 30 years), rounded to multiples of
-10 days so that arrivals fall on the date grid and every position is computed once.
+Flight times: 20 values from 0.3 to 2.5 Hohmann times (at least 30 days, at most 30 years), rounded to whole days so
+that arrivals fall on the date grid and every position is computed once. Objects far out, whose shortest flight time
+exceeds 30 years, have no transfer to that hub.
 
 Work units of UNIT objects (near-Earth objects first, then by absolute magnitude, brightest first), one file each in
-data/screen/, resumable. Run: python -m engine.screen [workers] [first_unit] [last_unit]   (in the container, from /work)
+data/screen_daily/, resumable. Run: python -m engine.screen [workers] [first_unit] [last_unit]   (in the container, from /work)
 """
 import json, math, os, sys, time
 from multiprocessing import Pool
@@ -21,14 +22,14 @@ import numpy as np
 
 from engine.conventions import planet_side_arr
 
-JD0, STEP, N_DEP = 2461345.5, 10.0, 2709                # departures 2026-11-01 to 2100-12-31, every 10 days
+JD0, STEP, N_DEP = 2461345.5, 1.0, 27089                # departures 2026-11-01 to 2100-12-31, every day
 TOF_MAX_STEPS = int(30 * 365.25 // STEP)                # flights up to 30 years
 N_T = N_DEP + TOF_MAX_STEPS + 1
 HUBS = ['earth', 'mars', 'ceres']
-NTOF, UNIT = 20, 2000
+NTOF, UNIT, BLOCK = 20, 2000, 2000                      # BLOCK: departures per Lambert call (memory)
 K_GAUSS = 0.01720209895                                 # AU^1.5/day
 AU_M, DAY_S, MU_SUN = 149597870700.0, 86400.0, 1.32712440018e20
-OUT = '/work/data/screen'
+OUT = os.environ.get('SCREEN_OUT', '/work/data/screen_daily')
 YEAR0 = 2026
 YEARS = 2100 - YEAR0 + 1
 
@@ -77,9 +78,9 @@ def _init(hub):
 
 def tof_steps(a_obj, a_hub):
     tH = math.pi * math.sqrt(((a_obj + a_hub) / 2) ** 3 / 2.9591220828e-4)
-    lo, hi = max(30.0, 0.3 * tH), min(30 * 365.25, 2.5 * tH)
+    hi = min(30 * 365.25, 2.5 * tH); lo = min(max(30.0, 0.3 * tH), hi)        # distant objects: Hohmann time beyond 30 years
     steps = np.unique(np.round(np.geomspace(lo, hi, NTOF) / STEP).astype(int))
-    return steps[steps >= 3]
+    return steps[(steps >= 3) & (steps <= TOF_MAX_STEPS)]
 
 def unit(args):
     """screen one work unit: returns the path written. Workers solve with engine.vlambert (numpy): all departure dates
@@ -100,23 +101,26 @@ def unit(args):
             continue
         for h, hub in enumerate(HUBS):
             Hr, Hv = _HUB[h, :, :3], _HUB[h, :, 3:]
-            steps = tof_steps(el['a'][o], HUB_A[hub])
-            K = np.repeat(np.arange(N_DEP), len(steps)); A = K + np.tile(steps, N_DEP)   # departure and arrival steps
+            steps = tof_steps(el['a'][o], HUB_A[hub]); ns = len(steps)
+            if ns == 0:
+                continue
             for d in (0, 1):                                      # 0: hub -> object, 1: object -> hub
                 R1, V1, R2, V2 = (Hr, Hv, ro, vo) if d == 0 else (ro, vo, Hr, Hv)
-                w1, w2, ok = lambert(R1[K], R2[A], (A - K) * STEP * DAY_S, MU_SUN)
-                vd = np.where(ok, np.linalg.norm(w1 - V1[K], axis=1), np.nan).reshape(N_DEP, len(steps)) / 1000
-                va = np.where(ok, np.linalg.norm(w2 - V2[A], axis=1), np.nan).reshape(N_DEP, len(steps)) / 1000
-                if d == 0:
-                    cost = planet_side_arr(hub, vd)[0] + va
-                else:
-                    cost = vd + planet_side_arr(hub, va)[0]
-                cost = np.where(np.isnan(cost), np.inf, cost)
-                jbest = cost.argmin(axis=1); cbest = cost[np.arange(N_DEP), jbest]
+                jbest = np.zeros(N_DEP, int); cbest = np.full(N_DEP, np.inf); vdb = np.full(N_DEP, np.nan); vab = np.full(N_DEP, np.nan)
+                for b0 in range(0, N_DEP, BLOCK):                 # departures in blocks: memory stays near 30 MB per worker
+                    b1 = min(N_DEP, b0 + BLOCK); nb = b1 - b0
+                    K = np.repeat(np.arange(b0, b1), ns); A = K + np.tile(steps, nb)   # departure and arrival steps
+                    w1, w2, ok = lambert(R1[K], R2[A], (A - K) * STEP * DAY_S, MU_SUN)
+                    vd = np.where(ok, np.linalg.norm(w1 - V1[K], axis=1), np.nan).reshape(nb, ns) / 1000
+                    va = np.where(ok, np.linalg.norm(w2 - V2[A], axis=1), np.nan).reshape(nb, ns) / 1000
+                    cost = planet_side_arr(hub, vd)[0] + va if d == 0 else vd + planet_side_arr(hub, va)[0]
+                    cost = np.where(np.isnan(cost), np.inf, cost)
+                    jb = cost.argmin(axis=1); r = np.arange(nb)
+                    jbest[b0:b1] = jb; cbest[b0:b1] = cost[r, jb]; vdb[b0:b1] = vd[r, jb]; vab[b0:b1] = va[r, jb]
                 np.minimum.at(ymin[o, h, d], years, cbest.astype(np.float32))
                 k = int(cbest.argmin())
                 if np.isfinite(cbest[k]):
-                    best[o, h, d] = (cbest[k], k, steps[jbest[k]], vd[k, jbest[k]], va[k, jbest[k]])
+                    best[o, h, d] = (cbest[k], k, steps[jbest[k]], vdb[k], vab[k])
     ymin[~np.isfinite(ymin)] = np.nan
     np.savez_compressed(path + '.tmp.npz', spkid=spkid, best=best.astype(np.float32), year_min=ymin.astype(np.float16),
                         hubs=np.array(HUBS), jd0=JD0, step=STEP, year0=YEAR0)
@@ -136,10 +140,13 @@ def main(workers=4, first=0, last=None):
     os.makedirs(OUT, exist_ok=True)
     cat = dict(np.load('/work/data/sbdb/catalog.npz'))
     units = plan_units(cat)
+    cap = int(os.environ.get('SCREEN_MAX_OBJECTS', 0))          # tests only: a few objects per unit
+    if cap:
+        units = [u[:cap] for u in units]
     last = len(units) - 1 if last is None else last
     json.dump({'units': len(units), 'unit_size': UNIT, 'objects': int(sum(len(u) for u in units)), 'hubs': HUBS,
-               'jd0': JD0, 'step_days': STEP, 'departures': N_DEP, 'tof_count': NTOF, 'tof_max_years': 30,
-               'started': time.strftime('%Y-%m-%d %H:%M')}, open(f'{OUT}/meta.json', 'w'), indent=1)
+               'jd0': JD0, 'step_days': STEP, 'departures': N_DEP, 'tof_count': NTOF, 'tof_max_years': 30},
+              open(f'{OUT}/meta.json', 'w'), indent=1)
     t = time.time(); hub = hub_states()
     print(f'{len(units)} units of up to {UNIT} objects; hub states in {time.time() - t:.0f} s', flush=True)
     keys = ('a', 'e', 'i', 'om', 'w', 'ma', 'epoch')

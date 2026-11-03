@@ -164,9 +164,10 @@ def route(args):
             tof[j, i] = T[p]; vinf[j, i, 0] = vd[p]; vinf[j, i, 1] = vr[p]; revs[j, i] = NR[p]
     return a, b, tof, vinf, revs
 
-def main(procs=8):
+def main(procs=8, origins=None):
+    """all origins not yet on disk, or only the given ones (contributors compute one origin: python -m contrib)"""
     os.makedirs(OUT, exist_ok=True)
-    todo = [a for a in HELIO if not os.path.exists(f'{OUT}/{a}.npz')]
+    todo = [a for a in (origins or HELIO) if not os.path.exists(f'{OUT}/{a}.npz')]
     pairs = [(a, b) for a in todo for b in HELIO if a != b]
     print('origins to do', len(todo), 'pairs', len(pairs), flush=True)
     t = time.time(); got = {}
@@ -233,5 +234,7 @@ def derive_pages(step=10):
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'pages':
         derive_pages()
+    elif len(sys.argv) > 2 and sys.argv[1] == 'origin':          # python -m engine.daily origin <body> [procs]
+        main(int(sys.argv[3]) if len(sys.argv) > 3 else 8, [sys.argv[2]])
     else:
         main(int(sys.argv[1]) if len(sys.argv) > 1 else 8)
