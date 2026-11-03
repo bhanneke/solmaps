@@ -412,6 +412,7 @@ $('useFly').addEventListener('change', e => { state.fly = e.target.checked; hubS
 // longest flight: classic flights (up to 2.5 Hohmann times) are embedded; longer limits load from network_<cap>.json
 const CAPS = NET.meta.caps || [['classic', 'classic flights']], NETCACHE = { classic: { routes: NET.routes, meta: { ...NET.meta } } };
 $('flightCap').innerHTML = CAPS.map(([c]) => `<option value="${c}">${c === 'classic' ? 'classic (crewed)' : c.replace('y', ' years')}</option>`).join('');
+if (CAPS.length < 2) $('flightCap').parentElement.hidden = true;      // data without the longer flight-time files
 $('flightCap').addEventListener('change', async e => {
   const cap = e.target.value; $('capMsg').textContent = cap === 'classic' ? '' : 'loading…';
   try {
