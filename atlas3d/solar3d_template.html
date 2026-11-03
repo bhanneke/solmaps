@@ -103,6 +103,13 @@ a{color:var(--c-water)}
 .ttab th{position:sticky;top:0;background:var(--deck-solid);text-align:left;font-weight:500;color:var(--dim);padding:6px 8px;border-bottom:1px solid var(--rule);cursor:pointer;white-space:nowrap}
 .ttab th[aria-sort]{color:var(--sun)}.ttab td{padding:5px 8px;border-bottom:1px solid var(--rule);white-space:nowrap}.ttab td.num{font-family:var(--f-mono)}
 .ttab tr:hover td{background:rgba(242,184,75,.06)}.ttab td button{font-size:12px;padding:2px 8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:8px 0 12px}
+.kpi{border:1px solid var(--rule);border-radius:8px;padding:8px 12px;background:var(--deck)}.kpi .k{font-size:11.5px;color:var(--dim);letter-spacing:.04em;text-transform:uppercase}
+.kpi .v{font-family:var(--f-display);font-size:24px;font-weight:600;color:var(--ink)}.kpi .d{font-size:12.5px;color:var(--dim);line-height:1.4}.kpi button{margin-top:4px;font-size:12px;padding:2px 8px}
+.xcharts{display:grid;grid-template-columns:1fr 1fr;gap:14px}.xcharts figure,.xsurf{margin:0}.xcharts canvas{width:100%;display:block;background:var(--deck-solid);border:1px solid var(--rule);border-radius:6px}
+figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14px}#xC{height:420px;background:var(--deck-solid);border:1px solid var(--rule);border-radius:6px;position:relative}
+.xl{display:flex;gap:8px;align-items:center}.xl b{font-family:var(--f-mono);font-weight:400;color:var(--ink);min-width:3.5em}
+.xlegend{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--dim);margin-top:8px}.xramp{width:180px;height:8px;border-radius:4px;background:linear-gradient(90deg,hsl(47,90%,62%),hsl(24,90%,53%),hsl(0,90%,44%))}
 .popen{z-index:2;position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px))}
 .hint{transition:opacity .8s}.hint.gone{opacity:0}
 @media (max-width:820px){
@@ -117,6 +124,7 @@ a{color:var(--c-water)}
   .popen{bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 56px)}
   .n3card{bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 52px)}
   .tview{top:96px;bottom:60px}
+  .xcharts{grid-template-columns:1fr}#xC{height:320px}
   .hud{top:auto;bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 56px);width:calc(100vw - 24px);max-width:none}
   .hint{display:none}
   .brand{font-size:18px}
@@ -131,7 +139,7 @@ a{color:var(--c-water)}
 
 <header class="top">
   <div class="brand"><span style="color:var(--sun);font-size:.62em;letter-spacing:.12em;display:block;line-height:1">DEEP SPACE STRATEGY · GEOGRAPHY AND TOPOLOGY</span>3D Atlas</div>
-  <div class="grp seg" role="group" aria-label="View"><button type="button" id="btnAtlas" aria-pressed="true">3D atlas</button><button type="button" id="btnNet" aria-pressed="false">Network</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button><button type="button" id="btnTable" aria-pressed="false">Table</button></div>
+  <div class="grp seg" role="group" aria-label="View"><button type="button" id="btnAtlas" aria-pressed="true">3D atlas</button><button type="button" id="btnNet" aria-pressed="false">Network</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button><button type="button" id="btnTable" aria-pressed="false">Table</button><button type="button" id="btnTrade" aria-pressed="false">Trade-offs</button></div>
   <details class="menu" id="mLayers"><summary>Resources</summary><div class="pop">
     <div><span class="lbl">Resources</span><div id="chips" class="grp"></div><select id="evMin" aria-label="Minimum evidence"><option value="0">all evidence</option><option value="1">inferred and better</option><option value="2">strong and better</option><option value="3">confirmed only</option></select></div>
   </div></details>
@@ -143,6 +151,23 @@ a{color:var(--c-water)}
   <a class="exp" href="https://bhanneke.github.io/solmaps/how-it-works.html" target="_blank" rel="noopener" title="Orbits are approximations and the display scale is compressed. Click for how it is built.">Experimental · how it is built</a>
 </header>
 
+<section id="tradeView" class="tview" hidden aria-label="Trade-offs of one route">
+  <div class="tfilters">
+    <label>From <select id="xFrom"></select></label><label>To <select id="xTo"></select></label>
+    <label>Start <input id="xStart" type="date" min="2026-11-01" max="2099-12-31"></label>
+    <label>Price of time, km/s per year <span class="xl"><input id="xLam" type="range" min="0" max="100" value="40"><b id="xLamOut"></b></span></label>
+    <label>Budget, km/s <input id="xBud" type="number" min="1" step="0.5" value="8"></label>
+  </div>
+  <p class="caveat" id="xMsg"></p>
+  <div class="kpis" id="xKpi"></div>
+  <div class="xcharts">
+    <figure><figcaption>Every option: departure date and flight time, coloured by cost</figcaption><canvas id="xA" height="300"></canvas></figure>
+    <figure><figcaption>From the start date: arrival and cost; the line is the cheapest way to arrive by each date</figcaption><canvas id="xB" height="300"></canvas></figure>
+  </div>
+  <figure class="xsurf"><figcaption>Cost surface: wait before leaving (left to right), flight time (front to back, log scale), cost (height and colour); the ring marks the best option for the price of time. Drag to turn.</figcaption><div id="xC"></div></figure>
+  <div class="xlegend"><span>cheapest</span><span class="xramp"></span><span id="xRampHi"></span></div>
+  <div id="xTip" class="n3tip" hidden></div>
+</section>
 <section id="tableView" class="tview" hidden aria-label="Trip options as a table">
   <div class="tfilters">
     <label>From <select id="tFrom"></select></label><label>To <select id="tTo"></select></label>
@@ -1515,7 +1540,169 @@ $('tBody').addEventListener('click', e => { const b = e.target.closest('button')
   if (b.dataset.tride != null) rideRow(r); else { if (state.tableView) $('btnTable').click(); setJD(r.leave); } });
 $('btnTable').addEventListener('click', () => {
   state.tableView = !state.tableView; $('btnTable').setAttribute('aria-pressed', state.tableView); $('tableView').hidden = !state.tableView;
-  if (state.tableView) { if (state.net3d) $('btnNet3').click(); if (state.netView) $('btnNet').click(); drawTable(); }
+  if (state.tableView) { if (state.net3d) $('btnNet3').click(); if (state.netView) $('btnNet').click(); if (state.tradeView) $('btnTrade').click(); drawTable(); }
+  syncView();
+});
+
+/* ---------- trade-offs: wait, flight time, arrival and cost of every option of one route ---------- */
+Object.assign(state, { tradeView: false, xSel: null });
+const XCACHE = {};
+let XO = null, XS = null;                               // loaded options; derived series for the current start
+const lamOf = v => v <= 0 ? 0 : +(0.02 * Math.pow(500, v / 100)).toFixed(2);     // slider 0..100 -> 0, 0.02..10 km/s per year
+function xRamp(dv, lo) { const t = Math.min(1, Math.max(0, (dv - lo) / 8)); return `hsl(${Math.round(47 - 47 * t)},90%,${Math.round(62 - 18 * t)}%)`; }   // whole numbers: three.js parses no decimals here
+const fmtT = d => d >= 730 ? (d / 365.25).toFixed(1) + ' y' : Math.round(d) + ' d';
+function classicLimit(a, b) {
+  const sa = x => (BY[x] && BY[x].orbit && +BY[x].orbit.semi_major_axis_au) || 1;
+  return 2.5 * Math.PI * Math.sqrt(Math.pow((sa(a) + sa(b)) / 2, 3) / K2);
+}
+async function xLoad() {
+  const a = $('xFrom').value, b = $('xTo').value; if (!a || !b || a === b) { $('xMsg').textContent = 'Pick two different places.'; return; }
+  const key = a + '_' + b;
+  $('xMsg').textContent = 'loading…';
+  try {
+    if (!XCACHE[key]) { const r = await fetch(`options/${key}.json`); if (!r.ok) throw new Error(r.status); XCACHE[key] = await r.json(); }
+  } catch (e) { $('xMsg').textContent = 'The options of this route are not available here (the page needs the files in options/ next to it).'; XO = null; xDraw(); return; }
+  XO = XCACHE[key]; xCompute(); xDraw();
+}
+function xCompute() {
+  const O = XO, start = jdOf(Date.parse($('xStart').value || isoOf(state.jd))), k0 = Math.max(0, Math.ceil((start - O.jd0) / O.step));
+  const pts = [];
+  for (let k = k0; k < O.tof.length; k++) {
+    const w = O.jd0 + k * O.step - start;
+    for (let i = 0; i < O.tof[k].length; i++) pts.push({ k, w, T: O.tof[k][i], A: w + O.tof[k][i], dv: O.dv[k][i] });
+  }
+  const lo = Math.min(...pts.map(p => p.dv));
+  const byA = [...pts].sort((x, y) => x.A - y.A), front = []; let m = Infinity;
+  for (const p of byA) if (p.dv < m - 1e-9) { m = p.dv; front.push(p); }
+  const lam = lamOf(+$('xLam').value), best = pts.reduce((x, y) => (y.dv + lam * y.A / 365.25 < x.dv + lam * x.A / 365.25 ? y : x), pts[0]);
+  XS = { start, k0, pts, lo, front, lam, best, classic: classicLimit(O.from, O.to) };
+}
+function xKpis() {
+  const S = XS, now = S.pts.filter(p => p.k === S.k0), cheapNow = now.reduce((x, y) => y.dv < x.dv ? y : x, now[0]), fastNow = now[0];
+  const sameArr = now.filter(p => p.A <= S.best.A + 0.5).reduce((x, y) => (!x || y.dv < x.dv ? y : x), null);
+  const bud = parseFloat($('xBud').value), within = S.pts.filter(p => p.dv <= bud).reduce((x, y) => (!x || y.A < x.A ? y : x), null);
+  const card = (k, v, d, sel) => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div>${sel ? `<button type="button" data-xsel="${sel}">Show</button>` : ''}</div>`;
+  const desc = p => `leave ${isoOf(S.start + p.w)} · fly ${fmtT(p.T)} · arrive ${isoOf(S.start + p.A)}`;
+  XS.cards = { best: S.best, cheapNow, within };
+  $('xKpi').innerHTML = [
+    card('Best for your price of time', `${S.best.dv.toFixed(2)} km/s`, `${desc(S.best)}; price ${S.lam} km/s per year of arrival time`, 'best'),
+    card('Leave on the start date', `${cheapNow.dv.toFixed(2)} km/s`, `cheapest option, flight ${fmtT(cheapNow.T)}; the fastest costs ${fastNow.dv.toFixed(2)} km/s for ${fmtT(fastNow.T)}`, 'cheapNow'),
+    card('Cost of leaving now', sameArr ? `${(sameArr.dv - S.best.dv >= 0 ? '+' : '') + (sameArr.dv - S.best.dv).toFixed(2)} km/s` : '–',
+         sameArr ? `to arrive by ${isoOf(S.start + S.best.A)} when leaving on the start date instead of waiting` : `no option leaving on the start date arrives by ${isoOf(S.start + S.best.A)}`),
+    card(`Earliest arrival within ${bud} km/s`, within ? isoOf(S.start + within.A) : 'none', within ? `${desc(within)} · ${within.dv.toFixed(2)} km/s` : 'raise the budget', within ? 'within' : ''),
+  ].join('');
+}
+// ---- 2D charts on canvas: thin marks, one axis each, recessive grid, hover tooltip ----
+function xAxes(ctx, W, H, M, xs, ys, xlab, ylab, fmtX, fmtY) {
+  ctx.strokeStyle = 'rgba(141,153,176,.25)'; ctx.fillStyle = '#8d99b0'; ctx.font = '11px IBM Plex Sans, sans-serif'; ctx.lineWidth = 1;
+  for (const [v, x] of xs) { ctx.beginPath(); ctx.moveTo(x, M.t); ctx.lineTo(x, H - M.b); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(fmtX(v), x, H - M.b + 14); }
+  for (const [v, y] of ys) { ctx.beginPath(); ctx.moveTo(M.l, y); ctx.lineTo(W - M.r, y); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(fmtY(v), M.l - 6, y + 4); }
+  ctx.textAlign = 'center'; ctx.fillText(xlab, (M.l + W - M.r) / 2, H - 4);
+  ctx.save(); ctx.translate(12, (M.t + H - M.b) / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(ylab, 0, 0); ctx.restore();
+}
+function xCanvas(id) {
+  const c = $(id), r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1, W = Math.max(280, r.width), H = 300;
+  c.width = W * dpr; c.height = H * dpr; c.style.height = H + 'px'; const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  return { c, ctx, W, H, M: { l: 52, r: 12, t: 10, b: 34 } };
+}
+const logTicks = (lo, hi) => [10, 30, 100, 365.25, 1095.75, 3652.5, 10957.5, 36525].filter(v => v >= lo * 0.9 && v <= hi * 1.1);
+const fmtTick = d => d < 365 ? Math.round(d) + ' d' : Math.round(d / 365.25) + ' y';
+function xDrawA() {
+  const { ctx, W, H, M } = xCanvas('xA'), S = XS; if (!S) return;
+  const t0 = S.start, t1 = XO.jd0 + XO.tof.length * XO.step, Tl = Math.min(...S.pts.map(p => p.T)), Th = Math.max(...S.pts.map(p => p.T));
+  const X = jd => M.l + (jd - t0) / (t1 - t0) * (W - M.l - M.r), Y = T => H - M.b - Math.log(T / Tl) / Math.log(Th / Tl || 2) * (H - M.t - M.b);
+  const yrs = []; for (let y = new Date(msOf(t0)).getUTCFullYear() + 1; y <= 2100; y++) { const jd = jdOf(Date.UTC(y, 0, 1)); if (jd < t1 && (y % (t1 - t0 > 9000 ? 10 : 5) === 0)) yrs.push([y, X(jd)]); }
+  xAxes(ctx, W, H, M, yrs, logTicks(Tl, Th).map(v => [v, Y(v)]), 'departure date', 'flight time (log)', v => v, fmtTick);
+  for (const p of S.pts) { ctx.fillStyle = xRamp(p.dv, S.lo); ctx.fillRect(X(t0 + p.w) - 1, Y(p.T) - 1, 2.2, 2.2); }
+  const b = S.best; ctx.strokeStyle = '#e2e7f0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(X(t0 + b.w), Y(b.T), 6, 0, 2 * Math.PI); ctx.stroke();
+  S.mapA = p => [X(t0 + p.w), Y(p.T)];
+}
+function xDrawB() {
+  const { ctx, W, H, M } = xCanvas('xB'), S = XS; if (!S) return;
+  const Al = Math.max(1, Math.min(...S.pts.map(p => p.A))), Ah = Math.max(...S.pts.map(p => p.A)), lo = S.lo, hi = Math.min(Math.max(...S.pts.map(p => p.dv)), lo + 14);
+  const X = A => M.l + Math.log(A / Al) / Math.log(Ah / Al) * (W - M.l - M.r), Y = dv => H - M.b - (Math.min(dv, hi) - lo) / (hi - lo || 1) * (H - M.t - M.b);
+  const dvt = []; for (let v = Math.ceil(lo); v <= hi; v += hi - lo > 8 ? 2 : 1) dvt.push([v, Y(v)]);
+  xAxes(ctx, W, H, M, logTicks(Al, Ah).map(v => [v, X(v)]), dvt, 'time from the start date to arrival (log)', 'km/s', fmtTick, v => v);
+  for (const p of S.pts) { ctx.fillStyle = 'rgba(141,153,176,.35)'; ctx.fillRect(X(p.A) - 1, Y(p.dv) - 1, 2, 2); }
+  ctx.strokeStyle = '#f2b84b'; ctx.lineWidth = 2; ctx.beginPath();
+  S.front.forEach((p, i) => { const x = X(p.A), y = Y(p.dv); if (i) { ctx.lineTo(x, Y(S.front[i - 1].dv)); } i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+  ctx.lineTo(W - M.r, Y(S.front[S.front.length - 1].dv)); ctx.stroke();
+  if (S.lam > 0) {                                        // the price of time: lines of equal dv + lam * A touch the frontier at the best option
+    const c = S.best.dv + S.lam * S.best.A / 365.25; ctx.setLineDash([4, 4]); ctx.strokeStyle = 'rgba(226,231,240,.5)'; ctx.lineWidth = 1; ctx.beginPath();
+    for (let i = 0; i <= 60; i++) { const A = Al * Math.pow(Ah / Al, i / 60), dv = c - S.lam * A / 365.25; i ? ctx.lineTo(X(A), Y(dv)) : ctx.moveTo(X(A), Y(dv)); }
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+  const b = S.best; ctx.strokeStyle = '#e2e7f0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(X(b.A), Y(b.dv), 6, 0, 2 * Math.PI); ctx.stroke();
+  S.mapB = p => [X(p.A), Y(p.dv)];
+}
+// ---- 3D surface: z(wait, flight time) = cheapest option of that departure with at most that flight time ----
+const XC = { r: null, scene: null, cam: null, ctl: null, mesh: null };
+function xDrawC() {
+  const el = $('xC'), S = XS; if (!S) return;
+  if (!XC.r) {
+    XC.r = new THREE.WebGLRenderer({ antialias: true, alpha: true }); el.appendChild(XC.r.domElement);
+    XC.scene = new THREE.Scene(); XC.scene.add(new THREE.AmbientLight(0xffffff, 0.55)); const dl = new THREE.DirectionalLight(0xffffff, 0.45); dl.position.set(3, 6, 4); XC.scene.add(dl);
+    XC.cam = new THREE.PerspectiveCamera(40, 1, 0.1, 100); XC.cam.position.set(4.5, 9.5, 12.5);
+    XC.ctl = new THREE.OrbitControls(XC.cam, XC.r.domElement); XC.ctl.target.set(4, 1.0, 2.4); XC.ctl.update();
+    (function loop() { if (state.tradeView) XC.r.render(XC.scene, XC.cam); requestAnimationFrame(loop); })();
+  }
+  const w = el.clientWidth, h = el.clientHeight; XC.r.setSize(w, h); XC.cam.aspect = w / h; XC.cam.updateProjectionMatrix();
+  for (const o of [...XC.scene.children]) if (!o.isLight) { XC.scene.remove(o); o.geometry && o.geometry.dispose(); }
+  const days = Math.min(XO.tof.length - S.k0, Math.round(8 * 365.25 / XO.step));          // eight years of departures
+  const Tl = Math.max(10, Math.min(...S.pts.map(p => p.T))), Th = Math.max(...S.pts.map(p => p.T)), NT = 48, span = 10;
+  const Tg = Array.from({ length: NT }, (_, i) => Tl * Math.pow(Th / Tl, i / (NT - 1)));
+  const WX = 8, DZ = 5, HY = 3, geo = new THREE.PlaneGeometry(WX, DZ, days - 1, NT - 1), pos = geo.attributes.position, col = [];
+  for (let iy = 0; iy < NT; iy++) for (let ix = 0; ix < days; ix++) {
+    const k = S.k0 + ix, T = Tg[iy]; let m = Infinity;
+    for (let i = 0; i < XO.tof[k].length; i++) if (XO.tof[k][i] <= T * 1.0001) m = Math.min(m, XO.dv[k][i]);
+    const v = iy * days + ix, z = isFinite(m) ? Math.min(1, (m - S.lo) / span) : 1;
+    pos.setXYZ(v, ix / (days - 1) * WX, (isFinite(m) ? z : 1.05) * HY, iy / (NT - 1) * DZ);
+    const c = new THREE.Color(isFinite(m) ? xRamp(m, S.lo) : '#2a3448'); col.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); geo.computeVertexNormals();
+  XC.scene.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })));
+  XC.scene.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.PlaneGeometry(WX, DZ, 16, 8).rotateX(-Math.PI / 2).translate(WX / 2, 0, DZ / 2)), new THREE.LineBasicMaterial({ color: 0x243049 })));
+  const b = S.best, bx = b.w / ((days - 1) * XO.step) * WX, bz = Math.log(Math.max(b.T, Tl) / Tl) / Math.log(Th / Tl) * DZ, by = Math.min(1, (b.dv - S.lo) / span) * HY;
+  if (b.w <= (days - 1) * XO.step) { const ring = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.035, 8, 24), new THREE.MeshBasicMaterial({ color: 0xffffff })); ring.position.set(bx, by + 0.05, bz); ring.rotation.x = Math.PI / 2; XC.scene.add(ring); }
+  const label = (txt, x, y, z) => { const c = document.createElement('canvas'); c.width = 512; c.height = 64; const g = c.getContext('2d'); g.font = '30px IBM Plex Sans, sans-serif'; g.fillStyle = '#c9d1de'; g.fillText(txt, 4, 40);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false })); sp.scale.set(4, 0.5, 1); sp.position.set(x, y, z); XC.scene.add(sp); };
+  label(`wait: 0 to ${Math.round(days * XO.step / 365.25)} years →`, WX / 2, -0.25, DZ + 0.5);
+  label(`flight time: ${fmtT(Tl)} to ${fmtT(Th)} →`, -1.6, -0.25, DZ / 2);
+  label(`cost: ${S.lo.toFixed(1)} to ${(S.lo + span).toFixed(1)}+ km/s ↑`, 0.6, HY + 0.5, -0.2);
+}
+function xDraw() {
+  if (!XO) { $('xKpi').innerHTML = ''; return; }
+  const S = XS, n = S.pts.length, tooLong = S.best.T > S.classic * 1.001;
+  $('xMsg').textContent = `${nodeName(XO.from)} to ${nodeName(XO.to)}: ${n.toLocaleString('en')} options from ${isoOf(S.start)} to 2100 (up to ten per departure date, every ${XO.step} days). `
+    + `The price of time weighs every year until arrival against km/s: at 0 the cheapest option wins however long it takes; at 10 km/s per year almost only speed counts.`
+    + (tooLong ? ' The best option here is a long phasing flight; the ride shows classic flights only.' : '');
+  $('xRampHi').textContent = `${(S.lo + 8).toFixed(1)}+ km/s`; $('xLamOut').textContent = S.lam;
+  xKpis(); xDrawA(); xDrawB(); xDrawC();
+}
+function xTip(ev, which) {
+  const S = XS; if (!S) return; const map = which === 'A' ? S.mapA : S.mapB, r = $(which === 'A' ? 'xA' : 'xB').getBoundingClientRect();
+  const mx = ev.clientX - r.left, my = ev.clientY - r.top; let best = null, bd = 9;
+  for (const p of S.pts) { const [x, y] = map(p), d = Math.hypot(x - mx, y - my); if (d < bd) { bd = d; best = p; } }
+  const t = $('xTip'); if (!best) { t.hidden = true; return null; }
+  t.innerHTML = `leave ${isoOf(S.start + best.w)}<br>fly ${fmtT(best.T)} · arrive ${isoOf(S.start + best.A)}<br><b>${best.dv.toFixed(2)} km/s</b>`;
+  t.hidden = false; t.style.left = Math.min(ev.clientX + 14, innerWidth - 240) + 'px'; t.style.top = (ev.clientY + 14) + 'px'; return best;
+}
+for (const w of ['A', 'B']) {
+  $('x' + w).addEventListener('mousemove', ev => xTip(ev, w)); $('x' + w).addEventListener('mouseleave', () => { $('xTip').hidden = true; });
+  $('x' + w).addEventListener('click', ev => { const p = xTip(ev, w); if (p) { XS.best = p; xDraw(); } });
+}
+$('xKpi').addEventListener('click', e => { const b = e.target.closest('[data-xsel]'); if (!b || !XS.cards) return; const p = XS.cards[b.dataset.xsel]; if (!p) return;
+  if (p.T <= XS.classic * 1.001) { $('btnTrade').click(); rideRow({ type: 'direct', from: XO.from, to: XO.to, leave: XS.start + p.w, days: p.T, dv: p.dv }); }
+  else { XS.best = p; xDraw(); $('xMsg').textContent += ' This option is a long phasing flight with many revolutions; the atlas cannot draw it yet.'; } });
+const xOpts = sel => '<option value="">–</option>' + NET.nodes.map(n => `<option value="${n.id}" ${n.id === sel ? 'selected' : ''}>${esc(n.name)}</option>`).join('');
+$('xFrom').innerHTML = xOpts('earth'); $('xTo').innerHTML = xOpts('mars');
+for (const id of ['xFrom', 'xTo']) $(id).addEventListener('change', xLoad);
+for (const id of ['xStart', 'xLam', 'xBud']) $(id).addEventListener('input', () => { if (XO) { xCompute(); xDraw(); } });
+addEventListener('resize', () => { if (state.tradeView && XO) xDraw(); });
+$('btnTrade').addEventListener('click', () => {
+  state.tradeView = !state.tradeView; $('btnTrade').setAttribute('aria-pressed', state.tradeView); $('tradeView').hidden = !state.tradeView;
+  if (state.tradeView) { for (const [b, on] of [['btnTable', state.tableView], ['btnNet3', state.net3d], ['btnNet', state.netView]]) if (on) $(b).click();
+    if (!$('xStart').value) $('xStart').value = isoOf(state.jd); if (!XO) xLoad(); else xDraw(); }
   syncView();
 });
 
@@ -1525,10 +1712,10 @@ $('panelClose').addEventListener('click', () => openPanel(false));
 $('panelOpen').addEventListener('click', () => openPanel(true));
 $('routeFrom').addEventListener('change', e => { if (e.target.value) openPanel(true); });
 $('btnJourney').addEventListener('click', () => { if (state.journey) openPanel(true); });
-$('btnNet3').addEventListener('click', () => { if (state.tableView && state.net3d) $('btnTable').click(); if (state.journey) openPanel(true); syncView(); });  // the whole-network handler already closes the 2D network view
-$('btnNet').addEventListener('click', () => { if (state.tableView && state.netView) $('btnTable').click(); if (state.netView && state.net3d) $('btnNet3').click(); if (state.journey) openPanel(true); syncView(); });
-function syncView() { $('btnAtlas').setAttribute('aria-pressed', !state.netView && !state.net3d && !state.tableView); }
-$('btnAtlas').addEventListener('click', () => { if (state.net3d) $('btnNet3').click(); if (state.netView) $('btnNet').click(); if (state.tableView) $('btnTable').click(); syncView(); });
+$('btnNet3').addEventListener('click', () => { if (state.tradeView && state.net3d) $('btnTrade').click(); if (state.tableView && state.net3d) $('btnTable').click(); if (state.journey) openPanel(true); syncView(); });  // the whole-network handler already closes the 2D network view
+$('btnNet').addEventListener('click', () => { if (state.tradeView && state.netView) $('btnTrade').click(); if (state.tableView && state.netView) $('btnTable').click(); if (state.netView && state.net3d) $('btnNet3').click(); if (state.journey) openPanel(true); syncView(); });
+function syncView() { $('btnAtlas').setAttribute('aria-pressed', !state.netView && !state.net3d && !state.tableView && !state.tradeView); }
+$('btnAtlas').addEventListener('click', () => { if (state.net3d) $('btnNet3').click(); if (state.netView) $('btnNet').click(); if (state.tableView) $('btnTable').click(); if (state.tradeView) $('btnTrade').click(); syncView(); });
 for (const m of document.querySelectorAll('details.menu')) m.addEventListener('toggle', () => { if (m.open) for (const o of document.querySelectorAll('details.menu')) if (o !== m) o.open = false; });
 document.addEventListener('pointerdown', e => { for (const m of document.querySelectorAll('details.menu[open]')) if (!m.contains(e.target)) m.open = false; });
 setTimeout(() => document.querySelector('.hint')?.classList.add('gone'), 12000);

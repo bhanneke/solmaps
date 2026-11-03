@@ -32,3 +32,6 @@ secrets/
 token
 *.token
 *_token
+
+# every option per route (engine.daily options); the site build copies them to docs/options
+network/options/

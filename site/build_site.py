@@ -28,6 +28,10 @@ pages = {
 for name, src in pages.items():
     (docs / name).write_text(wrap(src.read_text()))
 shutil.copy(root / 'site' / 'page.css', docs / 'page.css')
+if (root / 'network' / 'options').is_dir():                     # every option per route, for the trade-off view
+    shutil.copytree(root / 'network' / 'options', docs / 'options', dirs_exist_ok=True)
+for p in sorted((root / 'network').glob('network_*.json')):     # longer flight-time limits, loaded by the pages on request
+    shutil.copy(p, docs / p.name)
 if (root / 'site' / 'progress.json').exists():
     shutil.copy(root / 'site' / 'progress.json', docs / 'progress.json')     # read by python -m contrib
 (docs / '.nojekyll').write_text('')          # serve the files as they are
