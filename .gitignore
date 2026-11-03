@@ -8,8 +8,6 @@ network/stations.log
 .claude/
 flyby/*.log
 __pycache__/
-flyby/*.log
-network/network.json
 surrogate/*.npz
 surrogate/*.pt
 atlas3d/solar-system-3d.html
@@ -38,4 +36,6 @@ network/network_*.json
 contrib/out*/
 contrib/inputs/
 *.before-verify
+
+# every option per route (engine.daily options); the site build copies them to docs/options
 network/options/
