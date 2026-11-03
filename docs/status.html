@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"></head><body>
 <title>Computation status</title>
-<meta name="description" content="What solmaps has computed, what runs now and what waits for contributors.">
+<meta name="description" content="What solmaps has computed, what runs now, what is verified, and how to contribute a work unit.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
@@ -8,37 +8,28 @@
 <style>
 .bar{height:8px;border-radius:4px;background:var(--rule,#2a3448);overflow:hidden;margin:4px 0}.bar span{display:block;height:100%;background:#f2b84b;border-radius:4px}
 .num{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dim,#8d99b0)}.note{font-size:12.5px;color:var(--dim,#8d99b0);margin-top:2px}
-.state{font-size:12.5px;padding:1px 7px;border-radius:9px;border:1px solid currentColor}.state.done{color:#5cc28a}.state.running{color:#f2b84b}.state.queued{color:#8d99b0}.state.failed{color:#e0645a}
+.state{font-size:12px;padding:1px 7px;border-radius:9px;border:1px solid currentColor;white-space:nowrap}.state.done{color:#5cc28a}.state.running{color:#f2b84b}.state.queued{color:#8d99b0}
+.call{border:1px solid #f2b84b;border-radius:8px;padding:10px 14px}
 </style>
 <main>
   <p><a href="https://bhanneke.github.io/deep-space-strategy/">Deep Space Strategy</a> · <a href="index.html">solmaps</a> · <a href="how-it-works.html">How solmaps works</a> · <a href="technical.html">Technical documentation</a></p>
   <h1>Computation status</h1>
-  <p class="lede">What solmaps has computed, what runs now and what waits. Updated 2026-11-03 12:50. Running jobs last checked 2026-11-03 12:50.</p>
-  <p>This page is a snapshot: it changes when the site is rebuilt, usually once or twice a day while computations run.</p>
+  <p class="lede call">Anyone with Docker can help: from data release v0.1 on, pick a job below, compute one of its work units with a single command, or recompute a finished unit to verify it (<a href="contribute.html">how to contribute</a>).</p>
+  <p>Updated 2026-11-03 13:19; running jobs checked 2026-11-03 13:19. The page is a snapshot of the latest site build. A unit counts as verified once two independent runs agree.</p>
   <div class="tablewrap"><table>
-    <thead><tr><th>Area</th><th>Dataset</th><th>Progress</th></tr></thead>
+    <thead><tr><th>Job</th><th>Progress</th><th>Verified units</th><th></th></tr></thead>
     <tbody>
-      <tr><td>Positions</td><td>Daily JPL Horizons states: 21 small bodies to 2205, planets 2140–2205<div class="note">make ephemeris; archived with each data release</div></td><td><div class="bar" role="img" aria-label="100% done"><span style="width:100.0%"></span></div><span class="num">30 of 30 bodies</span></td></tr>
-<tr><td>Direct transfers</td><td>On the maps now: daily transfers for 30 bodies, 2026–2100, one revolution around the Sun at most, 100 flight times per day<div class="note">870 routes, about 2.6 billion Lambert solutions; the maps show 132 routes between 12 sites, every tenth day</div></td><td><span class="state done">done</span> <span class="num">since 2026-10-31</span></td></tr>
-<tr><td>Direct transfers</td><td>For data release v0.1: every number of revolutions, flights up to 100 years on every route, 740 flight times per day<div class="note">running, about 3.6 hours per origin. Then an audit, the documentation and the release on Zenodo and Hugging Face.</div></td><td><div class="bar" role="img" aria-label="13% done"><span style="width:13.3%"></span></div><span class="num">4 of 30 origins (29 routes each)</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search, returns from Ceres<div class="note">648 searches finished</div></td><td><span class="state done">done</span> <span class="num">since 2026-10-31 14:28:28</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search, returns from Vesta<div class="note">305 searches finished</div></td><td><span class="state running">running</span> <span class="num">since 2026-11-02 12:38:32</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search, returns from Psyche</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search, returns from Jupiter</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search rerun, Earth to Jupiter, Saturn, Mercury</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search rerun, Earth to Ceres, Vesta, Psyche</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search rerun, Mars to Jupiter, Saturn</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search rerun, Mars to the belt</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search, Mars to Earth, Venus, Mercury<div class="note">676 searches finished</div></td><td><span class="state running">running</span> <span class="num">since 2026-10-31 15:39:44</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search, Earth to Mars, Venus, Eros, Bennu, Ryugu</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Flyby routes</td><td>Flyby search, Saturn to Earth, Mars</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Cyclers</td><td>Earth–Mars cyclers, 2027–2097</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Low thrust</td><td>Low-thrust atlas: electric ship, 132 routes, every two-year window</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Flyby routes</td><td>Sampled trajectories for every flyby result</td><td><span class="state queued">queued</span></td></tr>
-<tr><td>Catalogue screening</td><td>Every object of the JPL Small-Body Database (1,580,428 bound orbits) against Earth, Mars and Ceres, both directions, every 10 days to 2100<div class="note">paused until the transfer data run finishes; near-Earth objects first, then by brightness; two-body orbits, for ranking</div></td><td><div class="bar" role="img" aria-label="10% done"><span style="width:10.1%"></span></div><span class="num">80 of 791 work units of 2,000 objects</span></td></tr>
-<tr><td>Open for contributors</td><td>Flyby search for the remaining body pairs (36 two-year windows each)<div class="note">work units and verification in preparation</div></td><td><div class="bar" role="img" aria-label="0% done"><span style="width:0.0%"></span></div><span class="num">0 of 818 pairs</span></td></tr>
+      <tr id="transfers"><td>Daily transfer options between 30 bodies, 2026–2100, every number of revolutions, flights up to 100 years<div class="note">one unit = every route from one body: 29 routes, 27,089 days each</div></td><td><div class="bar" role="img" aria-label="13% done"><span style="width:13.3%"></span></div><span class="num">4 of 30 units</span> <span class="state running">running</span></td><td class="num">0</td><td><a href="contribute.html#transfers">Run or verify</a></td></tr>
+<tr id="screening"><td>Every asteroid and comet of the JPL Small-Body Database against Earth, Mars and Ceres, both directions, every day to 2100<div class="note">one unit = 2,000 objects; two-body orbits, for ranking</div></td><td><div class="bar" role="img" aria-label="0% done"><span style="width:0.0%"></span></div><span class="num">0 of 791 units</span> <span class="state queued">paused until the transfer data run finishes</span></td><td class="num">0</td><td><a href="contribute.html#screening">Run or verify</a></td></tr>
+<tr id="flyby-returns"><td>Flyby search: returns to Earth and Mars from Ceres, Vesta, Psyche and Jupiter<div class="note"></div></td><td><div class="bar" role="img" aria-label="34% done"><span style="width:33.7%"></span></div><span class="num">97 of 288 units</span> <span class="state running">running</span></td><td class="num">0</td><td><a href="contribute.html#flyby-returns">Run or verify</a></td></tr>
+<tr id="flyby-earth"><td>Flyby search: from Earth to the planets, the belt and the near-Earth asteroids<div class="note"></div></td><td><div class="bar" role="img" aria-label="0% done"><span style="width:0.0%"></span></div><span class="num">0 of 396 units</span> <span class="state queued">queued</span></td><td class="num">0</td><td><a href="contribute.html#flyby-earth">Run or verify</a></td></tr>
+<tr id="flyby-mars"><td>Flyby search: from Mars to the planets and the belt<div class="note"></div></td><td><div class="bar" role="img" aria-label="34% done"><span style="width:34.0%"></span></div><span class="num">98 of 288 units</span> <span class="state running">running</span></td><td class="num">0</td><td><a href="contribute.html#flyby-mars">Run or verify</a></td></tr>
+<tr id="flyby-saturn"><td>Flyby search: from Saturn to Earth and Mars<div class="note"></div></td><td><div class="bar" role="img" aria-label="0% done"><span style="width:0.0%"></span></div><span class="num">0 of 72 units</span> <span class="state queued">queued</span></td><td class="num">0</td><td><a href="contribute.html#flyby-saturn">Run or verify</a></td></tr>
+<tr id="flyby-other"><td>Flyby search: every other pair of the 30 bodies (841 pairs)<div class="note">one unit = one pair and one two-year window</div></td><td><div class="bar" role="img" aria-label="0% done"><span style="width:0.0%"></span></div><span class="num">0 of 30,276 units</span> <span class="state queued">open for contributors</span></td><td class="num">0</td><td><a href="contribute.html#flyby-other">Run or verify</a></td></tr>
+<tr id="cyclers"><td>Earth–Mars cyclers, 2027–2097<div class="note">one unit: the whole scan</div></td><td><div class="bar" role="img" aria-label="0% done"><span style="width:0.0%"></span></div><span class="num">0 of 1 unit</span> <span class="state queued">queued</span></td><td class="num">0</td><td><a href="contribute.html#cyclers">Run or verify</a></td></tr>
+<tr id="lowthrust"><td>Low-thrust atlas: an electric ship on every site pair and two-year window<div class="note">one unit: the whole atlas</div></td><td><div class="bar" role="img" aria-label="0% done"><span style="width:0.0%"></span></div><span class="num">0 of 1 unit</span> <span class="state queued">queued</span></td><td class="num">0</td><td><a href="contribute.html#lowthrust">Run or verify</a></td></tr>
     </tbody>
   </table></div>
-  <p>Finished datasets go to Zenodo and Hugging Face with every release, with checksums and the exact ephemeris files used.</p>
+  <p>Inputs: daily JPL Horizons states for 21 small bodies to 2205 and the planets from 2140 to 2205, and the JPL Small-Body Database catalogue; every data release archives the exact files. Finished datasets go to Zenodo and Hugging Face with every release, with checksums.</p>
 </main>
 </body></html>

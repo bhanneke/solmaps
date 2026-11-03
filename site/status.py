@@ -1,31 +1,38 @@
-# Computation status: what solmaps has computed, what runs and what waits. Writes site/status.json and site/status.html.
-# Reads the local data files and, over SSH, the Mac Mini's queue logs and result counts (if the Mini is reachable;
-# otherwise the last known Mini state from site/status.json). Run on the host: python3 site/status.py
-import glob, html, json, os, pathlib, re, subprocess, sys, time
+# Computation status: every solmaps job (contrib/jobs.py) with its work units, what is done, what runs and what is
+# verified. Writes site/status.json, site/progress.json (read by python -m contrib to pick open units) and site/status.html.
+# Reads the maintainers' compute queues over SSH (if reachable; otherwise the last known state from site/status.json)
+# and the receipts in the contributions dataset on Hugging Face. Run on the host: python3 site/status.py
+import html, json, os, pathlib, subprocess, sys, time, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DATA = pathlib.Path(os.environ.get('SOLMAPS_DATA', ROOT / 'data'))   # where data/daily lives
 sys.path.insert(0, str(ROOT))
-from engine.conventions import HELIO, SITES, PLACES
+from contrib.jobs import JOBS, WINDOWS, QUEUED
 
-DAYS = 27089                                       # 2026-11-01 to 2100-12-31
-LAMBERT_PER_DAY = 112                              # 100 flight times plus up to 12 refinement solutions
+CONTRIB = os.environ.get('SOLMAPS_CONTRIB_REPO', 'Deep-Space-Strategy/solmaps-contrib')
+HOST = os.environ.get('SOLMAPS_QUEUE_HOST', 'bjoernmacmini')        # the maintainers' compute host (never shown on the page)
+# the maintainers' queue jobs (flyby/run_queue_mini*.sh) and the registry job each belongs to
+QUEUE = {'ceres:earth,mars': 'flyby-returns', 'vesta:earth,mars': 'flyby-returns', 'psyche:earth,mars': 'flyby-returns',
+         'jupiter:earth,mars': 'flyby-returns', 'earth:jupiter,saturn,mercury': 'flyby-earth', 'earth:ceres,vesta,psyche': 'flyby-earth',
+         'mars:jupiter,saturn': 'flyby-mars', 'mars:ceres,vesta,psyche': 'flyby-mars', 'flyby_mars': 'flyby-mars',
+         'flyby_earth': 'flyby-earth', 'flyby_saturn': 'flyby-saturn', 'cyclers': 'cyclers', 'lowthrust': 'lowthrust'}
 
-def mini():
-    """queue logs and result counts from the Mac Mini, or None"""
+def queues():
+    """job states, finished units and running jobs on the compute host, or None"""
+    py = ("import json,glob\n"
+          "for f in glob.glob('flyby/routes3_*.json'):\n"
+          "  try:\n    rs=json.load(open(f))\n  except Exception:\n    continue\n"
+          "  for r in rs: print('FLY',r.get('origin'),r.get('target'),r.get('bin'))\n")
     cmd = ('cd ~/solmaps && for q in queue.log queue2.log; do echo "== $q"; cat $q 2>/dev/null; done; '
-           'echo "== counts"; for f in flyby/run3_*.log flyby/q2_*.log; do echo "$(basename $f) $(grep -c "^{" $f)"; done; '
-           'echo "== lt"; python3 -c "import json;print(len(json.load(open(\'data/lowthrust_atlas.json\'))))" 2>/dev/null || echo 0; '
-           'echo "== screen"; ls ~/solmaps-screen/data/screen 2>/dev/null | grep -c "^unit_[0-9]*.npz$"; '
+           f'echo "== fly"; python3 -c "{py}" 2>/dev/null | sort -u; '
+           'echo "== screen"; ls ~/solmaps-screen/data/screen_daily 2>/dev/null | grep "^unit_[0-9]*.npz$"; '
            'echo "== screenlog"; tail -1 ~/solmaps-screen/screen.log 2>/dev/null; '
-           'echo "== daily"; ls ~/solmaps-daily/data/daily 2>/dev/null | grep -c "^[a-z0-9]*.npz$"; '
+           'echo "== daily"; ls ~/solmaps-daily/data/daily 2>/dev/null | grep "^[a-z0-9]*.npz$"; '
            'echo "== dailyrun"; pgrep -f run_daily_mini.sh > /dev/null && echo running || echo stopped')
     try:
-        out = subprocess.run(['ssh', '-o', 'ConnectTimeout=8', '-o', 'BatchMode=yes', 'bjoernmacmini', cmd],
-                             capture_output=True, text=True, timeout=60).stdout
+        out = subprocess.run(['ssh', '-o', 'ConnectTimeout=8', '-o', 'BatchMode=yes', HOST, cmd], capture_output=True, text=True, timeout=120).stdout
     except Exception:
         return None
-    if '== counts' not in out:
+    if '== fly' not in out:
         return None
     sec, cur = {}, None
     for line in out.splitlines():
@@ -33,89 +40,85 @@ def mini():
             cur = line[3:]; sec[cur] = []
         elif cur:
             sec[cur].append(line)
-    jobs = {}
+    states = {}
     for q in ('queue.log', 'queue2.log'):
         for line in sec.get(q, []):
-            m = re.match(r'(\S+ \S+) (start|end) (\S+)(?: \(attempt \d+\)| exit (\d+))?', line)
-            if m:
-                j = jobs.setdefault(m.group(3), {'queue': 1 if q == 'queue.log' else 2})
-                if m.group(2) == 'start':
-                    j['started'] = m.group(1)
-                else:
-                    j['ended'], j['exit'] = m.group(1), int(m.group(4) or 1)
-    counts = dict(l.rsplit(' ', 1) for l in sec.get('counts', []) if ' ' in l)
-    return {'jobs': jobs, 'counts': {k: int(v) for k, v in counts.items()}, 'lowthrust_rows': int((sec.get('lt') or ['0'])[0] or 0),
-            'screen_units': int((sec.get('screen') or ['0'])[0] or 0), 'screen_log': (sec.get('screenlog') or [''])[0],
-            'daily_done': int((sec.get('daily') or ['0'])[0] or 0), 'daily_running': (sec.get('dailyrun') or [''])[0] == 'running',
-            'checked': time.strftime('%Y-%m-%d %H:%M')}
+            p = line.split()
+            if len(p) >= 4 and p[2] in ('start', 'end'):
+                j = states.setdefault(p[3], {})
+                j['started' if p[2] == 'start' else 'ended'] = p[0] + ' ' + p[1]
+                if p[2] == 'end':
+                    j['exit'] = int(p[-1]) if p[-1].lstrip('-').isdigit() else 1
+    for j in states.values():
+        restarted = j.get('started', '') >= j.get('ended', '')
+        j['state'] = 'done' if j.get('exit') == 0 and j.get('ended') and not restarted else 'running' if j.get('started') else 'queued'
+    fly = [l.split()[1:] for l in sec.get('fly', []) if l.startswith('FLY')]
+    done = {'transfers': [l[:-4] for l in sec.get('daily', [])], 'screening': [l[5:9] for l in sec.get('screen', [])],
+            'flyby': sorted({f'{o}-{t}-{b[:4]}' for o, t, b in fly if b})}
+    return {'states': states, 'done': done, 'screen_log': (sec.get('screenlog') or [''])[0],
+            'daily_running': (sec.get('dailyrun') or [''])[0] == 'running', 'checked': time.strftime('%Y-%m-%d %H:%M')}
 
-# the Mini queues as planned (flyby/run_queue_mini.sh, run_queue_mini2.sh); problems per job from the measured run times
-QUEUE = [
-    ('ceres:earth,mars', 'Flyby search, returns from Ceres', 1), ('vesta:earth,mars', 'Flyby search, returns from Vesta', 1),
-    ('psyche:earth,mars', 'Flyby search, returns from Psyche', 1), ('jupiter:earth,mars', 'Flyby search, returns from Jupiter', 1),
-    ('earth:jupiter,saturn,mercury', 'Flyby search rerun, Earth to Jupiter, Saturn, Mercury', 1),
-    ('earth:ceres,vesta,psyche', 'Flyby search rerun, Earth to Ceres, Vesta, Psyche', 1),
-    ('mars:jupiter,saturn', 'Flyby search rerun, Mars to Jupiter, Saturn', 1), ('mars:ceres,vesta,psyche', 'Flyby search rerun, Mars to the belt', 1),
-    ('flyby_mars', 'Flyby search, Mars to Earth, Venus, Mercury', 2), ('flyby_earth', 'Flyby search, Earth to Mars, Venus, Eros, Bennu, Ryugu', 2),
-    ('flyby_saturn', 'Flyby search, Saturn to Earth, Mars', 2), ('cyclers', 'Earth–Mars cyclers, 2027–2097', 2),
-    ('lowthrust', 'Low-thrust atlas: electric ship, 132 routes, every two-year window', 2), ('trajectories', 'Sampled trajectories for every flyby result', 2),
-]
+def receipts():
+    """agreeing receipts per job and unit in the contributions dataset ({} while it does not exist)"""
+    try:
+        tree = json.load(urllib.request.urlopen(f'https://huggingface.co/api/datasets/{CONTRIB}/tree/main/receipts?recursive=true', timeout=30))
+    except Exception:
+        return {}
+    out = {}
+    for f in tree:
+        p = f.get('path', '').split('/')
+        if f.get('type') == 'file' and len(p) == 4:
+            out.setdefault(p[1], {}).setdefault(p[2], 0); out[p[1]][p[2]] += 1
+    return out
 
 def build():
     prev = json.load(open(ROOT / 'site' / 'status.json')) if (ROOT / 'site' / 'status.json').exists() else {}
-    m = mini() or prev.get('mini')
-    mm = m or {}
-    eph = [p.stem for p in (ROOT / 'flyby' / 'horizons').glob('*.json')]
-    rows = [
-        {'group': 'Positions', 'name': 'Daily JPL Horizons states: 21 small bodies to 2205, planets 2140–2205',
-         'done': len(eph), 'total': 30, 'unit': 'bodies', 'where': 'make ephemeris; archived with each data release'},
-        {'group': 'Direct transfers', 'name': 'On the maps now: daily transfers for 30 bodies, 2026–2100, one revolution around the Sun at most, '
-         '100 flight times per day', 'state': 'done', 'since': '2026-10-31',
-         'note': '870 routes, about 2.6 billion Lambert solutions; the maps show 132 routes between 12 sites, every tenth day'},
-        {'group': 'Direct transfers', 'name': 'For data release v0.1: every number of revolutions, flights up to 100 years on every route, '
-         '740 flight times per day', 'done': mm.get('daily_done', 0), 'total': len(HELIO), 'unit': 'origins (29 routes each)',
-         'note': ('running, about 3.6 hours per origin' if mm.get('daily_running') else 'not running') +
-                 '. Then an audit, the documentation and the release on Zenodo and Hugging Face.'},
-    ]
-    jobs = (m or {}).get('jobs', {})
-    for key, label, q in QUEUE:
-        j = jobs.get(key) or jobs.get(key.replace(',', '_').replace(':', '_'), {})
-        restarted = j.get('started', '') >= j.get('ended', '')                # a newer start after a failed end
-        state = 'done' if j.get('exit') == 0 and j.get('ended') and not restarted else 'running' if j.get('started') and (restarted or not j.get('ended')) else 'failed, retrying' if j.get('ended') else 'queued'
-        log = ('run3_' + key.replace(':', '_').replace(',', '_') if q == 1 else 'q2_' + key) + '.log'
-        n = (m or {}).get('counts', {}).get(log)
-        group = 'Cyclers' if 'cycler' in label else 'Low thrust' if 'Low-thrust' in label else 'Flyby routes'
-        rows.append({'group': group, 'name': label, 'state': state, 'since': j.get('started', ''),
-                     'note': f'{n:,} searches finished' if n and state != 'queued' else ''})
-    sl = (m or {}).get('screen_log', '')
-    sstate = ('running since ' + sl[:16]) if ' start ' in sl else 'finished' if 'finished' in sl \
-        else 'paused until the transfer data run finishes' if mm.get('daily_running') else ('stopped ' + sl[:16]) if sl else ''
-    rows.append({'group': 'Catalogue screening', 'name': 'Every object of the JPL Small-Body Database (1,580,428 bound orbits) against Earth, Mars '
-                 'and Ceres, both directions, every 10 days to 2100', 'done': (m or {}).get('screen_units', 0), 'total': 791,
-                 'unit': 'work units of 2,000 objects', 'note': (sstate + '; ' if sstate else '') +
-                 'near-Earth objects first, then by brightness; two-body orbits, for ranking'})
-    open_pairs = len(HELIO) * (len(HELIO) - 1) - 52
-    rows.append({'group': 'Open for contributors', 'name': 'Flyby search for the remaining body pairs (36 two-year windows each)',
-                 'done': 0, 'total': open_pairs, 'unit': 'pairs', 'note': 'work units and verification in preparation'})
-    st = {'built': time.strftime('%Y-%m-%d %H:%M'), 'mini': m, 'rows': rows}
+    q = queues() or prev.get('queues') or {}
+    rc = receipts()
+    rows, progress = [], {}
+    for job in JOBS:
+        units = set(job.units)
+        if job.id.startswith('flyby'):
+            mine = [u for u in q.get('done', {}).get('flyby', []) if u in units]
+        elif job.id in ('cyclers', 'lowthrust'):
+            mine = ['all'] if q.get('states', {}).get(job.id, {}).get('state') == 'done' else []
+        else:
+            mine = [u for u in q.get('done', {}).get(job.id, []) if u in units]
+        theirs = rc.get(job.id, {})
+        done = sorted(set(mine) | set(theirs))
+        count = {u: (1 if u in mine else 0) + theirs.get(u, 0) for u in done}
+        verified = sum(1 for n in count.values() if n >= 2)
+        runs = [q.get('states', {}).get(k, {}).get('state', 'queued') for k, j in QUEUE.items() if j == job.id]   # planned jobs count as queued
+        if job.id == 'transfers':
+            state = 'running' if q.get('daily_running') else 'queued'
+        elif job.id == 'screening':
+            sl = q.get('screen_log', '')
+            state = 'running' if ' start ' in sl else 'paused until the transfer data run finishes' if q.get('daily_running') else 'queued'
+        elif runs:
+            state = 'running' if 'running' in runs else 'done' if all(s == 'done' for s in runs) and len(done) >= len(units) else 'queued'
+        else:
+            state = 'open for contributors'
+        rows.append({'id': job.id, 'name': job.title, 'note': job.note, 'state': state, 'done': len(done), 'total': len(units), 'verified': verified})
+        progress[job.id] = {'done': done, 'receipts': count}
+    st = {'built': time.strftime('%Y-%m-%d %H:%M'), 'queues': q, 'rows': rows}
     json.dump(st, open(ROOT / 'site' / 'status.json', 'w'), indent=1)
+    json.dump(progress, open(ROOT / 'site' / 'progress.json', 'w'), separators=(',', ':'))
     return st
 
 def page(st):
     e = html.escape
     trs = []
     for r in st['rows']:
-        if 'total' in r:
-            pct = 100 * r['done'] / r['total'] if r['total'] else 0
-            prog = (f'<div class="bar" role="img" aria-label="{pct:.0f}% done"><span style="width:{pct:.1f}%"></span></div>'
-                    f'<span class="num">{r["done"]:,} of {r["total"]:,} {e(r["unit"])}</span>')
-        else:
-            prog = f'<span class="state {r["state"].split(",")[0]}">{e(r["state"])}</span>' + (f' <span class="num">since {e(r["since"])}</span>' if r.get('since') else '')
-        extra = ''.join(f'<div class="note">{e(r[k])}</div>' for k in ('note', 'where') if r.get(k))
-        trs.append(f'<tr><td>{e(r["group"])}</td><td>{e(r["name"])}{extra}</td><td>{prog}</td></tr>')
-    mini_line = (f'Running jobs last checked {e(st["mini"]["checked"])}.' if st.get('mini') else 'The running jobs could not be checked.')
+        pct = 100 * r['done'] / r['total'] if r['total'] else 0
+        cls = 'done' if r['state'] == 'done' else 'running' if r['state'] == 'running' else 'queued'
+        prog = (f'<div class="bar" role="img" aria-label="{pct:.0f}% done"><span style="width:{pct:.1f}%"></span></div>'
+                f'<span class="num">{r["done"]:,} of {r["total"]:,} unit{"" if r["total"] == 1 else "s"}</span> <span class="state {cls}">{e(r["state"])}</span>')
+        trs.append(f'<tr id="{r["id"]}"><td>{e(r["name"])}<div class="note">{e(r["note"])}</div></td><td>{prog}</td>'
+                   f'<td class="num">{r["verified"]:,}</td><td><a href="contribute.html#{r["id"]}">Run or verify</a></td></tr>')
+    checked = st.get('queues', {}).get('checked')
+    when = f'Updated {e(st["built"])}' + (f'; running jobs checked {e(checked)}.' if checked else '.')
     return f'''<title>Computation status</title>
-<meta name="description" content="What solmaps has computed, what runs now and what waits for contributors.">
+<meta name="description" content="What solmaps has computed, what runs now, what is verified, and how to contribute a work unit.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
@@ -123,24 +126,25 @@ def page(st):
 <style>
 .bar{{height:8px;border-radius:4px;background:var(--rule,#2a3448);overflow:hidden;margin:4px 0}}.bar span{{display:block;height:100%;background:#f2b84b;border-radius:4px}}
 .num{{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dim,#8d99b0)}}.note{{font-size:12.5px;color:var(--dim,#8d99b0);margin-top:2px}}
-.state{{font-size:12.5px;padding:1px 7px;border-radius:9px;border:1px solid currentColor}}.state.done{{color:#5cc28a}}.state.running{{color:#f2b84b}}.state.queued{{color:#8d99b0}}.state.failed{{color:#e0645a}}
+.state{{font-size:12px;padding:1px 7px;border-radius:9px;border:1px solid currentColor;white-space:nowrap}}.state.done{{color:#5cc28a}}.state.running{{color:#f2b84b}}.state.queued{{color:#8d99b0}}
+.call{{border:1px solid #f2b84b;border-radius:8px;padding:10px 14px}}
 </style>
 <main>
   <p><a href="https://bhanneke.github.io/deep-space-strategy/">Deep Space Strategy</a> · <a href="index.html">solmaps</a> · <a href="how-it-works.html">How solmaps works</a> · <a href="technical.html">Technical documentation</a></p>
   <h1>Computation status</h1>
-  <p class="lede">What solmaps has computed, what runs now and what waits. Updated {e(st["built"])}. {mini_line}</p>
-  <p>This page is a snapshot: it changes when the site is rebuilt, usually once or twice a day while computations run.</p>
+  <p class="lede call">Anyone with Docker can help: from data release v0.1 on, pick a job below, compute one of its work units with a single command, or recompute a finished unit to verify it (<a href="contribute.html">how to contribute</a>).</p>
+  <p>{when} The page is a snapshot of the latest site build. A unit counts as verified once two independent runs agree.</p>
   <div class="tablewrap"><table>
-    <thead><tr><th>Area</th><th>Dataset</th><th>Progress</th></tr></thead>
+    <thead><tr><th>Job</th><th>Progress</th><th>Verified units</th><th></th></tr></thead>
     <tbody>
       {chr(10).join(trs)}
     </tbody>
   </table></div>
-  <p>Finished datasets go to Zenodo and Hugging Face with every release, with checksums and the exact ephemeris files used.</p>
+  <p>Inputs: daily JPL Horizons states for 21 small bodies to 2205 and the planets from 2140 to 2205, and the JPL Small-Body Database catalogue; every data release archives the exact files. Finished datasets go to Zenodo and Hugging Face with every release, with checksums.</p>
 </main>'''
 
 if __name__ == '__main__':
     st = build()
     (ROOT / 'site' / 'status.html').write_text(page(st))
     for r in st['rows']:
-        print(f"{r['group'][:22]:22s} {r['name'][:70]:70s} {r.get('state') or str(r['done']) + '/' + str(r['total'])}")
+        print(f"{r['id']:14s} {r['done']:6d}/{r['total']:<6d} verified {r['verified']:<5d} {r['state']}")

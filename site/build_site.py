@@ -19,6 +19,7 @@ pages = {
     'how-it-works.html': root / 'site' / 'how-it-works.html',
     'technical.html': root / 'site' / 'technical.html',
     'status.html': root / 'site' / 'status.html',
+    'contribute.html': root / 'site' / 'contribute.html',
     'atlas.html': root / 'atlas' / 'solar-system-atlas.html',
     'growth-map.html': root / 'network' / 'solar-system-growth-map.html',
     'solar-system-3d.html': root / 'atlas3d' / 'solar-system-3d.html',
@@ -27,6 +28,8 @@ pages = {
 for name, src in pages.items():
     (docs / name).write_text(wrap(src.read_text()))
 shutil.copy(root / 'site' / 'page.css', docs / 'page.css')
+if (root / 'site' / 'progress.json').exists():
+    shutil.copy(root / 'site' / 'progress.json', docs / 'progress.json')     # read by python -m contrib
 (docs / '.nojekyll').write_text('')          # serve the files as they are
 for p in sorted(docs.iterdir()):
     print(f'{p.name:24s} {p.stat().st_size:>10,d} bytes')

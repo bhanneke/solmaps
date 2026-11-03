@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"></head><body>
+<title>Contribute computing</title>
+<meta name="description" content="Run a solmaps work unit with one command, verify someone else's, and submit the result.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="page.css">
+<main>
+  <p><a href="https://bhanneke.github.io/deep-space-strategy/">Deep Space Strategy</a> · <a href="index.html">solmaps</a> · <a href="status.html">Computation status</a> · <a href="how-it-works.html">How solmaps works</a></p>
+  <h1>Contribute computing</h1>
+  <p class="lede">solmaps splits every computation into work units. You can compute an open unit, or recompute a finished one so that two independent runs back each published number.</p>
+  <p class="exp"><strong>Opening with data release v0.1.</strong> The commands below and the public contributions dataset on Hugging Face go live together with the first data release. This page already describes how it will work.</p>
+
+  <h2>What you need</h2>
+  <p>Docker, Git and about 6 GB of free disk space. To submit results you also need a free <a href="https://huggingface.co/join">Hugging Face account</a> and an access token with write permission. Everything else runs in the solmaps container, so your results come from the same libraries as everyone else's.</p>
+
+  <h2>Five steps</h2>
+  <pre>git clone https://github.com/bhanneke/solmaps.git && cd solmaps
+make image                                                          # 1. build the container (once)
+docker run --rm -v "$PWD":/work -w /work solmaps-env:3 python -m contrib setup     # 2. fetch the exact inputs
+docker run --rm -v "$PWD":/work -w /work solmaps-env:3 python -m contrib run screening          # 3. compute an open unit
+docker run --rm -v "$PWD":/work -w /work solmaps-env:3 python -m contrib verify flyby-earth     # 4. or verify a finished one
+docker run --rm -v "$PWD":/work -w /work -e HF_TOKEN=hf_… solmaps-env:3 python -m contrib submit  # 5. send results and receipts</pre>
+  <p><code>python -m contrib list</code> shows every job with its units and how many of them already have one or two runs. Without a unit name, <code>run</code> picks an open unit and <code>verify</code> picks a finished unit with the fewest runs; both choose at random among the candidates, so two contributors rarely pick the same unit. To choose yourself, add the unit name, for example <code>run flyby-other pluto-ceres-2031</code>.</p>
+
+  <h2>How verification works</h2>
+  <p>Every run writes a receipt: a checksum of the result, a short summary, the code version and the versions of the numerical libraries. <code>submit</code> sends the receipts, and the results of first runs, as a pull request to the contributions dataset; the maintainers merge them after the checks below.</p>
+  <ul>
+    <li>Most jobs give the same numbers on every run. <code>verify</code> recomputes the unit and compares it with the published result. Different processors and maths libraries round differently, so the comparison allows a small tolerance (10<sup>−6</sup> km/s for the transfer data, 0.001 km/s for the screening); results outside it count as a disagreement and the maintainers look into them.</li>
+    <li>The flyby search uses an optimiser with random starts, so a second run never repeats the first exactly. It confirms a result when it finds an equally cheap or cheaper route for every sequence and window (within 0.05 km/s). A cheaper route improves the dataset.</li>
+    <li>A unit counts as verified once two independent runs agree. The status page shows the count per job.</li>
+  </ul>
+
+  <h2>The jobs</h2>
+  <h3 id="transfers">Daily transfer options</h3>
+  <p>One unit is every route from one of the 30 bodies: 29 routes, each for 27,089 departure days with flights up to 100 years. A unit takes a few hours on 8 processor cores. Unit names are the body names used by solmaps (<code>earth</code>, <code>mars</code>, <code>2</code> for Pallas, <code>617</code> for Patroclus and so on).</p>
+  <pre>python -m contrib run transfers pluto</pre>
+  <h3 id="screening">Catalogue screening</h3>
+  <p>One unit is 2,000 objects of the JPL Small-Body Database, each against Earth, Mars and Ceres in both directions for every departure day to 2100. A unit takes about five hours on one core. Units <code>0000</code> to <code>0790</code>; near-Earth objects come first.</p>
+  <pre>python -m contrib run screening</pre>
+  <h3 id="flyby-returns">Flyby search: returns to Earth and Mars</h3>
+  <p>One unit is one pair and one two-year launch window, for example <code>vesta-earth-2041</code>. A unit takes about half an hour on 6 cores.</p>
+  <h3 id="flyby-earth">Flyby search from Earth</h3>
+  <p>Units like <code>earth-saturn-2033</code>; about half an hour each.</p>
+  <h3 id="flyby-mars">Flyby search from Mars</h3>
+  <p>Units like <code>mars-ceres-2029</code>; about half an hour each.</p>
+  <h3 id="flyby-saturn">Flyby search from Saturn</h3>
+  <p>Units like <code>saturn-earth-2045</code>; about half an hour each.</p>
+  <h3 id="flyby-other">Flyby search for every other pair</h3>
+  <p>The 841 pairs of the 30 bodies that no queue covers, each in 36 windows: 30,276 units, for example <code>pluto-ceres-2031</code>. This job runs only with contributors.</p>
+  <pre>python -m contrib run flyby-other</pre>
+  <h3 id="cyclers">Earth–Mars cyclers</h3>
+  <p>One unit: the whole scan from 2027 to 2097.</p>
+  <h3 id="lowthrust">Low-thrust atlas</h3>
+  <p>One unit: an electric ship on every pair of the 12 sites and every two-year window.</p>
+
+  <p class="foot">Code under the MIT licence, data under CC BY 4.0. Questions go to the <a href="https://github.com/bhanneke/solmaps/issues">issue tracker</a>.</p>
+</main>
+
+</body></html>
