@@ -228,7 +228,7 @@ so stronger ships do not yet exploit their extra thrust. The results err on the 
 **One grid for all exhaust speeds?** At a fixed initial acceleration, the equivalent Δv of a heliocentric leg barely
 depends on the exhaust speed: 5.739, 5.731 and 5.723 km/s at Isp 2,000, 4,000 and 10,000 s and 0.25 mm/s²
 (`tests/probe_dv_vs_ve.py`). Fuel then follows from the rocket equation, and a grid over acceleration alone, from
-0.05 to 4 mm/s², would serve every continuous-thrust engine. That grid is the next precomputation for the Mac Mini.
+0.05 to 4 mm/s², would serve every continuous-thrust engine. That grid is the next precomputation.
 
 ## Earlier review findings, checked against the code (2026-10-31)
 
