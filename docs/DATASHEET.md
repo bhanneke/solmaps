@@ -47,7 +47,7 @@ have fewer than 10 options).
   more up to 100 years. For each flight time solmaps solves every number of revolutions around the Sun the flight time
   allows and keeps the cheapest. It then refines the cheapest local minima of each part (three, three and five) by two
   rounds of halving and thins the Pareto set to 10 options (`engine/daily.py`). Each route and day needs up to 784 Lambert
-  problems, at most 18.5 billion in all, and 16.4 hours with 12 processes on an Apple M4 Pro (14 cores).
+  problems, at most 18.5 billion in all.
 - **Time scale.** All dates are TDB. pykep's DE440 interface reads dates as UTC; solmaps corrects the 64.184 s offset
   (found during this work, `flyby/bodies.py`).
 - **Environment.** Pinned container (`env/Dockerfile`: pykep 3.0.0, numpy 2.5.4, Python 3.14); the data comes from commit `86966f3` of github.com/bhanneke/solmaps.

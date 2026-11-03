@@ -57,8 +57,7 @@ Hohmann times (at least 10 days), 40 more up to three orbits of the faster body,
 flight time it solves every number of revolutions around the Sun the flight time allows and keeps the cheapest; Earth to
 Venus reaches about 160 revolutions in 100 years. It then refines the cheapest local minima of each part (three, three
 and five) by two rounds of halving and keeps a Pareto set of at most ten options per day, from the fastest to the
-cheapest. Each route and day needs up to 784 Lambert problems, at most 18.5 billion in all (16.4 hours with 12
-processes on an Apple M4 Pro). Slow autonomous cargo makes the long flights worth listing: the cost of a long flight
+cheapest. Each route and day needs up to 784 Lambert problems, at most 18.5 billion in all. Slow autonomous cargo makes the long flights worth listing: the cost of a long flight
 rises and falls with every synodic period, and its valleys often lie well below any short transfer.
 
 The grid density follows from measurements. With 40 flight times the daily data missed a narrow valley next to the 180°
