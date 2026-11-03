@@ -95,6 +95,14 @@ a{color:var(--c-water)}
 .tripctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)}
 .hud{z-index:4;position:fixed;left:50%;transform:translateX(-50%);top:110px;background:var(--deck);border:1px solid var(--sun);border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;gap:6px;max-width:min(560px,calc(100vw - 32px));font-size:13px;backdrop-filter:blur(4px)}
 .hud b{color:var(--sun);font-weight:600}.hud .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.tview{position:fixed;left:0;right:0;bottom:0;top:100px;z-index:2;background:var(--void);overflow:auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box}
+.tfilters{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end}.tfilters label{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--dim)}
+.tfilters input[type=number]{width:6.5em;background:var(--deck-solid);border:1px solid var(--rule);border-radius:4px;padding:4px 6px}
+.tchk{display:flex;gap:10px}.tchk label{flex-direction:row;align-items:center;gap:4px;font-size:13px;color:var(--ink)}
+.twrap{overflow-x:auto;margin-top:6px}.ttab{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+.ttab th{position:sticky;top:0;background:var(--deck-solid);text-align:left;font-weight:500;color:var(--dim);padding:6px 8px;border-bottom:1px solid var(--rule);cursor:pointer;white-space:nowrap}
+.ttab th[aria-sort]{color:var(--sun)}.ttab td{padding:5px 8px;border-bottom:1px solid var(--rule);white-space:nowrap}.ttab td.num{font-family:var(--f-mono)}
+.ttab tr:hover td{background:rgba(242,184,75,.06)}.ttab td button{font-size:12px;padding:2px 8px}
 .popen{z-index:2;position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px))}
 .hint{transition:opacity .8s}.hint.gone{opacity:0}
 @media (max-width:820px){
@@ -108,6 +116,7 @@ a{color:var(--c-water)}
   .panel{bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 52px)}
   .popen{bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 56px)}
   .n3card{bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 52px)}
+  .tview{top:96px;bottom:60px}
   .hud{top:auto;bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 56px);width:calc(100vw - 24px);max-width:none}
   .hint{display:none}
   .brand{font-size:18px}
@@ -122,7 +131,7 @@ a{color:var(--c-water)}
 
 <header class="top">
   <div class="brand"><span style="color:var(--sun);font-size:.62em;letter-spacing:.12em;display:block;line-height:1">DEEP SPACE STRATEGY · GEOGRAPHY AND TOPOLOGY</span>3D Atlas</div>
-  <div class="grp seg" role="group" aria-label="View"><button type="button" id="btnAtlas" aria-pressed="true">3D atlas</button><button type="button" id="btnNet" aria-pressed="false">Network</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button></div>
+  <div class="grp seg" role="group" aria-label="View"><button type="button" id="btnAtlas" aria-pressed="true">3D atlas</button><button type="button" id="btnNet" aria-pressed="false">Network</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button><button type="button" id="btnTable" aria-pressed="false">Table</button></div>
   <details class="menu" id="mLayers"><summary>Resources</summary><div class="pop">
     <div><span class="lbl">Resources</span><div id="chips" class="grp"></div><select id="evMin" aria-label="Minimum evidence"><option value="0">all evidence</option><option value="1">inferred and better</option><option value="2">strong and better</option><option value="3">confirmed only</option></select></div>
   </div></details>
@@ -134,6 +143,21 @@ a{color:var(--c-water)}
   <a class="exp" href="https://bhanneke.github.io/solmaps/how-it-works.html" target="_blank" rel="noopener" title="Orbits are approximations and the display scale is compressed. Click for how it is built.">Experimental · how it is built</a>
 </header>
 
+<section id="tableView" class="tview" hidden aria-label="Trip options as a table">
+  <div class="tfilters">
+    <label>From <select id="tFrom"></select></label><label>To <select id="tTo"></select></label>
+    <label>Leave from <input id="tY0" type="number" min="2026" max="2100" value="2026" inputmode="numeric"></label>
+    <label>to <input id="tY1" type="number" min="2026" max="2100" value="2040" inputmode="numeric"></label>
+    <label>At most km/s <input id="tDv" type="number" min="0" step="0.5" placeholder="any"></label>
+    <label>At most years <input id="tYrs" type="number" min="0" step="0.5" placeholder="any"></label>
+    <span class="tchk"><label><input type="checkbox" id="tDirect" checked> direct</label><label><input type="checkbox" id="tSling" checked> slingshot</label><label><input type="checkbox" id="tStops" checked> with stops</label></span>
+    <button type="button" id="tPlan" disabled title="Pick a start and a destination first">Find journeys with stops</button>
+  </div>
+  <p class="caveat" id="tCount"></p>
+  <div class="twrap"><table class="ttab"><thead><tr>
+    <th data-k="type">Type</th><th data-k="from">From</th><th data-k="to">To</th><th data-k="leave">Leave</th><th data-k="arrive">Arrive</th><th data-k="days">Flight</th><th data-k="dv">km/s</th><th data-k="via">Via</th><th></th>
+  </tr></thead><tbody id="tBody"></tbody></table></div>
+</section>
 <aside class="panel" id="panelBox" hidden><button type="button" class="pclose" id="panelClose" aria-label="Hide details">Hide ✕</button><div id="tripTabs" class="list tabs" role="tablist" hidden><button type="button" data-tab="routes">Direct routes</button><button type="button" data-tab="journey">With stops</button><button type="button" data-tab="cargo">Cargo round trip</button></div><div id="tripCtl" class="tripctl" hidden><select id="routeMode" aria-label="Route direction"><option value="from">Routes from</option><option value="to">Routes to</option></select><select id="routeFrom" aria-label="Site for routes"><option value="">none</option></select>
     <select id="horizon" aria-label="Waiting horizon"><option value="18">wait up to 6 months</option><option value="37" selected>wait up to 1 year</option><option value="79">wait up to 26 months</option></select><label class="sl"><input type="checkbox" id="sling" checked> slingshots</label><select id="flightCap" aria-label="Longest flight"></select><span id="capMsg" class="lbl"></span></div><div id="panel" class="pbody" aria-live="polite"></div></aside>
 <div id="rideHud" class="hud" hidden aria-live="polite"><div id="rideTxt"></div><div class="list"><button type="button" id="ridePause">Pause</button><button type="button" id="rideCam">Free camera</button><button type="button" id="rideEnd">Leave ship</button></div></div>
@@ -614,21 +638,32 @@ function updateRoutes() {
     else f.line.material.opacity = t > f.tof ? 0.25 : 0.95;
   }
 }
+function dropFlight(f) {
+  flightGroup.remove(f.ship); if (f.group) flightGroup.remove(f.group); else if (f.line && f.line.isObject3D) flightGroup.remove(f.line);
+  state.flights = state.flights.filter(x => x !== f);
+}
+function dropSame(from, to, jdDep) { for (const f of state.flights.filter(x => x.from === from && x.to === to && Math.abs(x.jdDep - jdDep) < 0.5)) dropFlight(f); }
+function slingStops(f, p) {
+  const enc = f.encounters_mjd2000 ? f.encounters_mjd2000.map(t => t + 2451544.5) : p.legs ? [p.jdDep, ...p.legs.map(l => l.jd + l.tof)] : null;
+  return f.seq.slice(1).map((id, i) => ({ id, jd: enc && enc[i + 1] ? enc[i + 1] : p.jdDep + p.tof, fly: i < f.seq.length - 2 }));
+}
 function launchSling(r) {
   const p = r.flyPath; if (!p) return;
+  dropSame(r.fly.origin, r.fly.target, p.jdDep);
   const group = new THREE.Group(); drawFlyby(group, p, 0xffffff, 0.95);
   const ship = shipMesh(SLING);
   flightGroup.add(group); flightGroup.add(ship);
   state.flights.push({ from: r.fly.origin, to: r.fly.target, name: BY[r.fly.target].name + ' via ' + r.fly.seq.slice(1, -1).map(x => BY[x].name).join(' and '),
-    dv: r.fly.dv, jdDep: p.jdDep, tof: p.tof, legs: p.legs, samples: p.samples, line: { material: group.children[0].material }, ship, group });
+    dv: r.fly.dv, jdDep: p.jdDep, tof: p.tof, legs: p.legs, samples: p.samples, line: { material: group.children[0].material }, ship, group, stops: slingStops(r.fly, p) });
   updateRoutes(); renderPanel(); return state.flights[state.flights.length - 1];
 }
 function launch(r) {
   if (!r.el) return;
+  dropSame(r.from, r.to, r.jdDep);
   const line = arcLine(r.el, r.tof, 0xffffff, 0.95);
   const ship = shipMesh(0xffffff);
   flightGroup.add(line); flightGroup.add(ship);
-  state.flights.push({ from: r.from, to: r.to, name: nodeName(r.to), dv: r.dv, jdDep: r.jdDep, tof: r.tof, el: r.el, line, ship });
+  state.flights.push({ from: r.from, to: r.to, name: nodeName(r.to), dv: r.dv, jdDep: r.jdDep, tof: r.tof, el: r.el, line, ship, stops: [{ id: r.to, jd: r.jdDep + r.tof, fly: false }] });
   updateRoutes(); renderPanel(); return state.flights[state.flights.length - 1];
 }
 function routesPanel() {
@@ -648,12 +683,13 @@ function routesPanel() {
   }).join('');
   const fl = state.flights.map((f, i) => { const t = state.jd - f.jdDep; const st = t < 0 ? `departs in ${Math.ceil(-t)} days` : t <= f.tof ? `in flight, day ${Math.floor(t)} of ${f.tof}` : 'arrived'; return `<div class="meta">${esc(nodeName(f.from))} to ${esc(f.name)}: ${st}</div>`; }).join('');
   return `<div><h2>Routes ${state.routeMode === 'to' ? 'to' : 'from'} ${esc(BY[from].name)}</h2><p class="caveat">Every launch window between ${isoOf(jdOfK(k))} and ${isoOf(jdOfK(k + state.H))}, each at its cheapest departure date; ${routeList.length} windows to ${new Set(routeList.map(r => r.site)).size} sites. Windows more than 3 km/s above a destination's best are left out. Dashed cyan paths are slingshot routes from the pykep flyby search, with a ring at each flyby planet; they exist so far for routes from Earth to Jupiter, Ceres, Vesta and Psyche. Δv includes the burn out of the parking orbit and into the destination's (rendezvous at small bodies); colours run from cheap (gold) to costly (red). Flyby alternatives come from the pykep search where it has run.</p></div>
-    ${state.flights.length ? `<div><h3>Your ships</h3>${fl}<p class="caveat">Press play to watch them fly, or launch another and ride along.</p></div>` : ''}
+    ${state.flights.length ? `<div><h3>Your ships</h3>${fl}<div class="list"><button type="button" id="clearShips">Clear ships</button></div><p class="caveat">Press play to watch them fly, or launch another and ride along.</p></div>` : ''}
     <div class="res">${rows}</div>
     <p class="caveat">Costs: ${esc(NET.meta.ephemeris || '')}. ${esc(NET.meta.method)}</p>`;
 }
 function bindRoutes() {
   const P = $('panel');
+  const cs = P.querySelector('#clearShips'); if (cs) cs.addEventListener('click', () => { endRide(); for (const f of [...state.flights]) dropFlight(f); renderPanel(); });
   P.querySelectorAll('[data-hl]').forEach(b => b.addEventListener('click', () => { state.hl = state.hl === b.dataset.hl ? null : b.dataset.hl; routeKey = ''; updateRoutes(); renderPanel(); }));
   P.querySelectorAll('[data-launch]').forEach(b => b.addEventListener('click', () => { const r = routeList.find(x => x.key === b.dataset.launch); if (r) { const f = launch(r); if (f) ride([f]); } }));
   P.querySelectorAll('[data-sling]').forEach(b => b.addEventListener('click', () => { const r = routeList.find(x => x.key === b.dataset.sling); if (r) { const f = launchSling(r); if (f) ride([f]); } }));
@@ -670,7 +706,7 @@ async function setCap(cap) {
   } catch (e) { $('capMsg').textContent = 'not available here'; $('flightCap').value = state.cap || 'classic'; return; }
   state.cap = cap; NET.routes = NETCACHE[cap].routes; NET.meta.method = NETCACHE[cap].meta.method;
   for (const k of Object.keys(ROUTES)) delete ROUTES[k]; for (const r of NET.routes) ROUTES[r.from + '>' + r.to] = r;
-  ARCS = null; state.jResult = null; state.cResult = null; N3.data = null; N3.coords = null; N3.curve = null; N3.curveKey = null;
+  ARCS = null; TROWS = null; TSTOPS = []; state.jResult = null; state.cResult = null; N3.data = null; N3.coords = null; N3.curve = null; N3.curveKey = null;
   routeKey = ''; updateRoutes(); renderPanel(); if (state.net3d) drawNet3d(); if (state.netView) drawNetView();
   $('capMsg').textContent = '';
 }
@@ -710,9 +746,45 @@ function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h
 addEventListener('resize', resize);
 
 /* ---------- ride along ---------- */
-function shipMesh(color) {
-  const g = new THREE.ConeGeometry(0.05, 0.3, 10); g.rotateX(Math.PI / 2);          // points along +z, so lookAt aims it
-  return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color }));
+var GLOW_TEX = null;                                      // var: shipMesh can run before this line during setup
+function glowTexture() {
+  if (GLOW_TEX) return GLOW_TEX;
+  const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
+  const g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.25, 'rgba(255,214,140,0.9)'); g.addColorStop(0.6, 'rgba(255,120,40,0.35)'); g.addColorStop(1, 'rgba(255,80,20,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64); return (GLOW_TEX = new THREE.CanvasTexture(c));
+}
+function shipMesh(accent) {
+  // a small cargo ship, about 0.36 scene units long, nose along +z (so lookAt aims it along its path)
+  const ship = new THREE.Group(), U = 0.012;
+  const metal = new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 0.6, roughness: 0.35, emissive: 0x3a4250, emissiveIntensity: 0.6 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x3a4150, metalness: 0.6, roughness: 0.5 });
+  const trim = new THREE.MeshStandardMaterial({ color: accent, metalness: 0.3, roughness: 0.4, emissive: accent, emissiveIntensity: 0.35 });
+  const panel = new THREE.MeshStandardMaterial({ color: 0x1d3f8f, metalness: 0.4, roughness: 0.3, emissive: 0x0b1a40, emissiveIntensity: 0.6, side: THREE.DoubleSide });
+  const add = (geo, mat, z = 0, rx = Math.PI / 2) => { const m = new THREE.Mesh(geo, mat); m.rotation.x = rx; m.position.z = z; ship.add(m); return m; };
+  add(new THREE.CylinderGeometry(3 * U, 3 * U, 16 * U, 14), metal, 0);                       // hull
+  add(new THREE.ConeGeometry(3 * U, 6 * U, 14), metal, 11 * U);                              // nose
+  add(new THREE.CylinderGeometry(3.4 * U, 3.4 * U, 1.2 * U, 14), trim, 5 * U);               // trim bands
+  add(new THREE.CylinderGeometry(3.4 * U, 3.4 * U, 1.2 * U, 14), trim, -5 * U);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(7 * U, 1.1 * U, 8, 32), metal); ring.position.z = 2 * U; ship.add(ring);   // habitat ring
+  for (let i = 0; i < 4; i++) { const sp = new THREE.Mesh(new THREE.BoxGeometry(0.5 * U, 7 * U, 0.5 * U), dark); sp.position.z = 2 * U; sp.rotation.z = i * Math.PI / 4; ring.add(sp); }
+  ship.userData.ring = ring;
+  for (const side of [-1, 1]) {                                                              // solar wings on a truss
+    const truss = new THREE.Mesh(new THREE.BoxGeometry(6 * U, 0.6 * U, 0.6 * U), dark); truss.position.set(side * 6 * U, 0, -2 * U); ship.add(truss);
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(13 * U, 0.25 * U, 6 * U), panel); wing.position.set(side * 15 * U, 0, -2 * U); ship.add(wing);
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.3 * U, 6 * U, 5 * U), dark); fin.position.set(0, side * 5 * U, -6 * U); ship.add(fin);   // radiators
+  }
+  add(new THREE.CylinderGeometry(2.2 * U, 3.6 * U, 4 * U, 14, 1, true), dark, -10 * U);      // engine bell
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: 0xffffff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+  glow.position.z = -14 * U; glow.scale.setScalar(12 * U); ship.add(glow); ship.userData.glow = glow;
+  // a marker of constant screen size, so the ship stays findable when the camera backs off for a flyby
+  const mark = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: accent, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, transparent: true, sizeAttenuation: false }));
+  mark.scale.setScalar(0.035); ship.add(mark);
+  return ship;
+}
+function animateShip(ship, t) {
+  if (ship.userData.ring) ship.userData.ring.rotation.z = t * 0.0015;
+  if (ship.userData.glow) ship.userData.glow.scale.setScalar(0.12 + 0.03 * Math.sin(t * 0.03) + 0.015 * Math.random());
 }
 function flightAU(f, jd) {
   if (f.samples) return sampleAt(f.samples, jd);
@@ -720,7 +792,10 @@ function flightAU(f, jd) {
   return arcAt(f.el, Math.min(Math.max(jd - f.jdDep, 0), f.tof));
 }
 const RIDE_S = 30;
+const encWin = f => Math.min(120, Math.max(12, 0.12 * f.tof));                     // days around an encounter that get the close-up
+const encWeight = (dt, W) => { const x = Math.max(0, 1 - Math.abs(dt) / W); return x * x * (3 - 2 * x); };
 function ride(list) {
+  for (const f of state.flights.filter(x => !list.includes(x) && state.jd > x.jdDep + x.tof)) dropFlight(f);   // arrived ships go
   state.ride = { list, i: 0, cam: 'ship', paused: false, dir: new THREE.Vector3(1, 0, 0) };
   state.follow = null; $('speed').value = '0'; setJD(list[0].jdDep);
   routeGroup.visible = false;                              // only the ship's own path while riding
@@ -734,8 +809,10 @@ $('rideEnd').onclick = endRide;
 let rideTick = 0;
 function rideStep() {
   const r = state.ride, f = r.list[r.i], end = f.jdDep + f.tof;
+  const stop = (f.stops || []).find(x => x.jd >= state.jd - 0.5 * encWin(f)) || null;
+  const w = stop && pos3[stop.id] ? encWeight(stop.jd - state.jd, encWin(f)) : 0;
   if (!r.paused && !r.done) {
-    let jd = Math.max(state.jd, f.jdDep) + f.tof / (RIDE_S * 60);
+    let jd = Math.max(state.jd, f.jdDep) + f.tof / (RIDE_S * 60) * (1 - 0.8 * w);       // slow down near an encounter
     if (jd >= end) {
       if (r.i + 1 < r.list.length) { r.i++; jd = r.list[r.i].jdDep; }          // next leg: the ship waits at the stop until it leaves
       else { jd = end; r.done = true; $('ridePause').textContent = 'Replay'; }
@@ -746,10 +823,20 @@ function rideStep() {
   const ahead = S(flightAU(g, Math.min(state.jd + Math.max(0.5, g.tof / 400), g.jdDep + g.tof)));
   const d = ahead.clone().sub(P); if (d.lengthSq() > 1e-10) r.dir.lerp(d.normalize(), 0.2).normalize();
   if (g.ship.visible) g.ship.lookAt(P.clone().add(r.dir));
+  const g2 = r.list[r.i], st2 = (g2.stops || []).find(x => x.jd >= state.jd - 0.5 * encWin(g2)) || null;
+  const w2 = r.done ? 1 : st2 && pos3[st2.id] ? encWeight(st2.jd - state.jd, encWin(g2)) : 0;
+  const Q = r.done ? pos3[g2.to] : st2 && pos3[st2.id];
+  for (const [id, l] of Object.entries(labels)) l.classList.toggle('sel', !!(st2 && id === st2.id && w2 > 0) || id === state.sel);
+  animateShip(g2.ship, performance.now());
   if (r.cam === 'ship') {
-    const D = 4, up = new THREE.Vector3(0, 1, 0);
-    camera.position.lerp(P.clone().addScaledVector(r.dir, -D).addScaledVector(up, 0.8 * D), 0.12);
-    controls.target.lerp(P.clone().addScaledVector(r.dir, 0.8 * D), 0.2); camera.lookAt(controls.target);
+    const D = 2.4, up = new THREE.Vector3(0, 1, 0);
+    let cam = P.clone().addScaledVector(r.dir, -D).addScaledVector(up, 0.6 * D), tgt = P.clone().addScaledVector(r.dir, 0.8 * D);
+    if (Q && w2 > 0) {                          // encounter: step back so the ship and the planet share the frame
+      const sep = Q.clone().sub(P), dist = sep.length(), back = sep.clone().normalize().multiplyScalar(-1);
+      const camE = P.clone().addScaledVector(back, D + 0.7 * dist).addScaledVector(up, 0.5 * (D + dist)), mid = P.clone().addScaledVector(sep, 0.5);
+      cam.lerp(camE, w2); tgt.lerp(mid, w2);
+    }
+    camera.position.lerp(cam, 0.1); controls.target.lerp(tgt, 0.15); camera.lookAt(controls.target);
   } else { const moved = P.clone().sub(r.last || P); controls.target.add(moved); camera.position.add(moved); }
   r.last = P;
   if (rideTick++ % 6 === 0) {
@@ -757,9 +844,11 @@ function rideStep() {
     const tgt = BY[g.to] ? helio(BY[g.to].parent && BY[g.to].parent !== 'Sun' && BY[BY[g.to].parent] ? BY[BY[g.to].parent] : BY[g.to], state.jd) : null;
     const togo = tgt ? Math.hypot(a[0] - tgt[0], a[1] - tgt[1], a[2] - tgt[2]) : null;
     const leg = r.list.length > 1 ? ` · leg ${r.i + 1} of ${r.list.length}` : '';
+    const dt = st2 ? st2.jd - state.jd : null;
+    const enc = st2 && st2.fly && w2 > 0 ? ` · <b>slingshot past ${esc(BY[st2.id] ? BY[st2.id].name : st2.id)} ${dt > 1 ? 'in ' + Math.round(dt) + ' days' : dt < -1 ? Math.round(-dt) + ' days ago' : 'now'}</b>` : '';
     $('rideTxt').innerHTML = r.done ? `<b>Arrived at ${esc(g.name)}</b> on ${isoOf(state.jd)} after ${Math.round(g.tof)} days${leg}`
       : state.jd < g.jdDep ? `<b>Waiting at ${esc(nodeName(g.from))}</b> until ${isoOf(g.jdDep)}${leg}`
-      : `<b>On board to ${esc(g.name)}</b>${leg} · <span class="num">${isoOf(state.jd)}</span> · day <span class="num">${day}</span> of ${Math.round(g.tof)} · <span class="num">${sun.toFixed(2)}</span> AU from the Sun${togo != null ? ` · <span class="num">${togo.toFixed(2)}</span> AU to go` : ''} · ${g.dv.toFixed(2)} km/s`;
+      : `<b>On board to ${esc(g.name)}</b>${leg} · <span class="num">${isoOf(state.jd)}</span> · day <span class="num">${day}</span> of ${Math.round(g.tof)} · <span class="num">${sun.toFixed(2)}</span> AU from the Sun${togo != null ? ` · <span class="num">${togo.toFixed(2)}</span> AU to go` : ''} · ${g.dv.toFixed(2)} km/s${enc}`;
   }
 }
 
@@ -1357,16 +1446,89 @@ $('n3Scale').addEventListener('change', e => { state.n3Scale = e.target.value; N
 addEventListener('resize', () => { if (state.net3d) n3resize(); });
 requestAnimationFrame(n3frame);
 
+/* ---------- table view: every trip option as an itinerary ---------- */
+Object.assign(state, { tableView: false, tSort: 'leave', tDir: 1 });
+let TROWS = null, TSTOPS = [];
+const yearOf = jd => new Date(msOf(jd)).getUTCFullYear();
+function tableRows() {
+  if (TROWS) return TROWS;
+  const rows = [];
+  for (const r of NET.routes) for (const w of windowsDirect(r.from, r.to, 0, NET.meta.n))
+    rows.push({ type: 'direct', from: r.from, to: r.to, leave: jdOfK(w.k), days: w.tof, dv: w.dv, via: '' });
+  for (const f of FBR) {
+    if (!f.feasible || f.seq.length < 3) continue;
+    rows.push({ type: 'slingshot', from: f.origin, to: f.target, leave: f.launch_mjd2000 + 2451544.5, days: Math.round(f.tof_days), dv: f.dv,
+                via: f.seq.slice(1, -1).map(x => BY[x] ? BY[x].name.replace(/\s*\(.*\)/, '') : x).join(', '), fly: f });
+  }
+  for (const r of rows) r.arrive = r.leave + r.days;
+  return (TROWS = rows);
+}
+function planStops() {                                     // journeys with stops for the chosen pair, a fresh start every two years
+  const from = $('tFrom').value, to = $('tTo').value; if (!from || !to || from === to) return;
+  const y0 = +$('tY0').value || 2026, y1 = +$('tY1').value || 2100, seen = new Set(); TSTOPS = [];
+  for (let y = y0; y <= y1; y += 2) {
+    const k0 = Math.max(0, kOf(jdOf(Date.UTC(y, 0, 1)))); if (k0 >= NET.meta.n - 1) break;
+    const res = planJourney(from, to, k0, state.jMode, state.jB, state.jYears); if (!res) continue;
+    for (const j of [res.earliest, res.cheapest]) {
+      if (!j || !j.legs || !j.legs.length) continue;
+      const key = j.legs.map(e => e.u + '-' + e.v + '-' + e.k).join('|'); if (seen.has(key)) continue; seen.add(key);
+      const first = j.legs[0], last = j.legs[j.legs.length - 1];
+      TSTOPS.push({ type: 'with stops', from, to, leave: jdOfK(first.k), arrive: jdOfK(last.k2), days: Math.round(jdOfK(last.k2) - jdOfK(first.k)),
+                    dv: j.legs.reduce((a, e) => a + e.cost, 0), via: j.legs.slice(0, -1).map(e => nodeName(SITE_IDS[e.v])).join(', '), legs: j.legs });
+    }
+  }
+  drawTable();
+}
+function drawTable() {
+  const f = { from: $('tFrom').value, to: $('tTo').value, y0: +$('tY0').value || 2026, y1: +$('tY1').value || 2100,
+              dv: parseFloat($('tDv').value), yrs: parseFloat($('tYrs').value) };
+  const types = { direct: $('tDirect').checked, slingshot: $('tSling').checked, 'with stops': $('tStops').checked };
+  $('tPlan').disabled = !(f.from && f.to && f.from !== f.to);
+  const rows = tableRows().concat(TSTOPS).filter(r => types[r.type] && (!f.from || r.from === f.from) && (!f.to || r.to === f.to)
+    && yearOf(r.leave) >= f.y0 && yearOf(r.leave) <= f.y1 && !(r.dv > f.dv) && !(r.days > f.yrs * 365.25));
+  const k = state.tSort, d = state.tDir, val = r => k === 'from' || k === 'to' ? nodeName(r[k]) : r[k];
+  rows.sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * d);
+  const shown = rows.slice(0, 400);
+  $('tCount').textContent = `${rows.length.toLocaleString('en')} trip options${rows.length > 400 ? '; showing the first 400, narrow the filters for more' : ''}. Direct: the cheapest date of each launch window (${NET.meta.cap_label || 'classic flights'}). Slingshot: the pykep flyby search. With stops: the journey planner's earliest and cheapest journey, a fresh start every two years.`;
+  for (const th of document.querySelectorAll('.ttab th[data-k]')) th.toggleAttribute('aria-sort', th.dataset.k === k);
+  const fmtD = n => n >= 730 ? (n / 365.25).toFixed(1) + ' y' : Math.round(n) + ' d';
+  $('tBody').innerHTML = shown.map((r, i) => `<tr><td>${r.type}</td><td>${esc(nodeName(r.from))}</td><td>${esc(nodeName(r.to))}</td><td class="num">${isoOf(r.leave)}</td><td class="num">${isoOf(r.arrive)}</td>
+    <td class="num">${fmtD(r.days)}</td><td class="num">${r.dv.toFixed(2)}</td><td>${esc(r.via)}</td><td><button type="button" data-tride="${i}">Ride along</button> <button type="button" data-tgo="${i}">Date</button></td></tr>`).join('');
+  TSHOWN = shown;
+}
+let TSHOWN = [];
+function rideRow(r) {
+  if (state.tableView) $('btnTable').click();
+  setJD(r.leave);
+  let fs = [];
+  if (r.type === 'direct') { const f = launch({ key: 'table', from: r.from, to: r.to, name: nodeName(r.to), dv: r.dv, jdDep: r.leave, tof: r.days, el: solveArc(r.from, r.to, r.leave, r.days) }); if (f) fs = [f]; }
+  else if (r.type === 'slingshot') { const f = launchSling({ key: 'table', fly: r.fly, flyPath: flybyPath(r.fly) }); if (f) fs = [f]; }
+  else for (const e of r.legs) { const q = legRoute(e); const f = q.flyPath ? launchSling(q) : launch(q); if (f) fs.push(f); }
+  if (fs.length) ride(fs);
+}
+const nodeOpts = '<option value="">any</option>' + NET.nodes.map(n => `<option value="${n.id}">${esc(n.name)}</option>`).join('');
+$('tFrom').innerHTML = nodeOpts; $('tTo').innerHTML = nodeOpts;
+for (const id of ['tFrom', 'tTo', 'tY0', 'tY1', 'tDv', 'tYrs', 'tDirect', 'tSling', 'tStops']) $(id).addEventListener(id.startsWith('t') && /Y|Dv|Yrs/.test(id) ? 'input' : 'change', () => { if (id === 'tFrom' || id === 'tTo') TSTOPS = []; drawTable(); });
+$('tPlan').addEventListener('click', () => { $('tPlan').textContent = 'Planning…'; setTimeout(() => { planStops(); $('tPlan').textContent = 'Find journeys with stops'; }, 20); });
+document.querySelector('.ttab thead').addEventListener('click', e => { const th = e.target.closest('th[data-k]'); if (!th) return; state.tDir = state.tSort === th.dataset.k ? -state.tDir : 1; state.tSort = th.dataset.k; drawTable(); });
+$('tBody').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const r = TSHOWN[+(b.dataset.tride ?? b.dataset.tgo)]; if (!r) return;
+  if (b.dataset.tride != null) rideRow(r); else { if (state.tableView) $('btnTable').click(); setJD(r.leave); } });
+$('btnTable').addEventListener('click', () => {
+  state.tableView = !state.tableView; $('btnTable').setAttribute('aria-pressed', state.tableView); $('tableView').hidden = !state.tableView;
+  if (state.tableView) { if (state.net3d) $('btnNet3').click(); if (state.netView) $('btnNet').click(); drawTable(); }
+  syncView();
+});
+
 // open quietly: the orrery alone; resources, routes and the details panel come on when asked for
 function openPanel(on = true) { $('panelBox').hidden = !on; $('panelOpen').hidden = on; }
 $('panelClose').addEventListener('click', () => openPanel(false));
 $('panelOpen').addEventListener('click', () => openPanel(true));
 $('routeFrom').addEventListener('change', e => { if (e.target.value) openPanel(true); });
 $('btnJourney').addEventListener('click', () => { if (state.journey) openPanel(true); });
-$('btnNet3').addEventListener('click', () => { if (state.journey) openPanel(true); syncView(); });  // the whole-network handler already closes the 2D network view
-$('btnNet').addEventListener('click', () => { if (state.netView && state.net3d) $('btnNet3').click(); if (state.journey) openPanel(true); syncView(); });
-function syncView() { $('btnAtlas').setAttribute('aria-pressed', !state.netView && !state.net3d); }
-$('btnAtlas').addEventListener('click', () => { if (state.net3d) $('btnNet3').click(); if (state.netView) $('btnNet').click(); syncView(); });
+$('btnNet3').addEventListener('click', () => { if (state.tableView && state.net3d) $('btnTable').click(); if (state.journey) openPanel(true); syncView(); });  // the whole-network handler already closes the 2D network view
+$('btnNet').addEventListener('click', () => { if (state.tableView && state.netView) $('btnTable').click(); if (state.netView && state.net3d) $('btnNet3').click(); if (state.journey) openPanel(true); syncView(); });
+function syncView() { $('btnAtlas').setAttribute('aria-pressed', !state.netView && !state.net3d && !state.tableView); }
+$('btnAtlas').addEventListener('click', () => { if (state.net3d) $('btnNet3').click(); if (state.netView) $('btnNet').click(); if (state.tableView) $('btnTable').click(); syncView(); });
 for (const m of document.querySelectorAll('details.menu')) m.addEventListener('toggle', () => { if (m.open) for (const o of document.querySelectorAll('details.menu')) if (o !== m) o.open = false; });
 document.addEventListener('pointerdown', e => { for (const m of document.querySelectorAll('details.menu[open]')) if (!m.contains(e.target)) m.open = false; });
 setTimeout(() => document.querySelector('.hint')?.classList.add('gone'), 12000);
