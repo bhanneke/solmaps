@@ -55,9 +55,11 @@ Vesta, Psyche, Pallas, Hygiea, Themis, Juno, six near-Earth asteroids, five Jupi
 2026-11-01 to 2100-12-31. It solves Lambert's problem for 740 flight times in three log-spaced parts: 100 from 0.3 to 2.5
 Hohmann times (at least 10 days), 40 more up to three orbits of the faster body, and 600 more up to 100 years. For each
 flight time it solves every number of revolutions around the Sun the flight time allows and keeps the cheapest; Earth to
-Venus reaches about 160 revolutions in 100 years. It then refines the cheapest local minima of each part (three, three
-and five) by two rounds of halving and keeps a Pareto set of at most ten options per day, from the fastest to the
-cheapest. Each route and day needs up to 784 Lambert problems, at most 18.5 billion in all. Slow autonomous cargo makes the long flights worth listing: the cost of a long flight
+Venus reaches about 160 revolutions in 100 years. It then refines the three cheapest local minima of the single-revolution
+cost over the first part, and the cheapest local minima of the overall cost in each part (three, three and five), by two
+rounds of halving. It keeps a Pareto set of at most ten options per day: always the fastest, the cheapest and the cheapest
+at or below each flight-time limit (classic flights, 10 and 30 years), the other slots spread in log flight time. Each
+route and day needs up to 796 Lambert problems, at most 18.8 billion in all. Slow autonomous cargo makes the long flights worth listing: the cost of a long flight
 rises and falls with every synodic period, and its valleys often lie well below any short transfer.
 
 The grid density follows from measurements. With 40 flight times the daily data missed a narrow valley next to the 180°
@@ -65,10 +67,10 @@ transfer singularity on Psyche to Mercury by 8.5 km/s; with 60 long-flight point
 option lay a median 0.10 km/s above the valleys of long flights; 600 points brought that below 0.01 km/s. The release audit (`tests/audit_daily.py`,
 `tests/grid_error.py`, `tests/audit_cheap_routes.py`) found no impossible value in 235 million option records. Against
 a scan of 3,000 flight times with golden-section refinement on 300 random route-days, the stored cheapest option lies a
-median 0.002 km/s above the optimum, within 0.05 km/s on 90% and within 0.20 km/s on 99% of them; the largest gap was
-0.34 km/s. The 100 base flight times are those of the earlier single-revolution data, so a day can only get cheaper;
-825 of 23.6 million route-days came out dearer by more than 0.02 km/s, 818 of them on Mercury to Pluto, where the
-earlier data's 16-bit speeds had rounded down. On 48 routes between bodies on nearly the same orbit (Jupiter Trojans,
+median 0.002 km/s above the optimum, within 0.05 km/s on 90% and within 0.19 km/s on 99% of them; the largest gap was
+0.34 km/s. The 100 base flight times and the first refinement repeat the earlier single-revolution data, so a day can
+only get cheaper; 818 of 23.6 million route-days came out dearer by more than 0.02 km/s, 817 of them on Mercury to Pluto,
+where the earlier data's 16-bit speeds had rounded down. On 48 routes between bodies on nearly the same orbit (Jupiter Trojans,
 Hygiea and Themis, 2008 EV5 and Mars) the cheapest transfer lies far below the earlier data's best launch window,
 because long flights with many revolutions wait for the phasing; an independent integration of 336 of these records
 reaches the target within a median 0.1 km. `docs/DATASHEET.md` documents the released dataset.

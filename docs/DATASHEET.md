@@ -33,7 +33,7 @@ The files hold excess speeds; a cost follows from the end states: an Oberth burn
 √(v∞² + 2μ/r) − √(μ/r), or the excess speed itself at bodies too small to orbit (`engine/conventions.py`, documented in
 `docs/ENGINE.md`). Keeping speeds lets users price other end states without recomputing.
 
-**Size.** 30 files, 1.7 GB compressed; 235,221,623 option records (at most 870 × 27,089 × 10 = 235,674,300; some days
+**Size.** 30 files, 1.7 GB compressed; 235,314,140 option records (at most 870 × 27,089 × 10 = 235,674,300; some days
 have fewer than 10 options).
 
 ## How solmaps computed the data
@@ -45,12 +45,14 @@ have fewer than 10 options).
 - **Transfers.** For each pair and day: Lambert's problem (pykep, prograde) for 740 flight times in three log-spaced
   parts: 100 from 0.3 to 2.5 Hohmann times (at least 10 days), 40 more up to three orbits of the faster body, and 600
   more up to 100 years. For each flight time solmaps solves every number of revolutions around the Sun the flight time
-  allows and keeps the cheapest. It then refines the cheapest local minima of each part (three, three and five) by two
-  rounds of halving and thins the Pareto set to 10 options (`engine/daily.py`). Each route and day needs up to 784 Lambert
-  problems, at most 18.5 billion in all.
+  allows and keeps the cheapest. It then refines the three cheapest local minima of the single-revolution cost over the
+  first part, and the cheapest local minima of the overall cost in each part (three, three and five), by two rounds of
+  halving. It thins the Pareto set to 10 options per day and always keeps the fastest option, the cheapest option and the
+  cheapest at or below each flight-time limit: classic flights (2.5 Hohmann times), 10 years and 30 years
+  (`engine/daily.py`). Each route and day needs up to 796 Lambert problems, at most 18.8 billion in all.
 - **Time scale.** All dates are TDB. pykep's DE440 interface reads dates as UTC; solmaps corrects the 64.184 s offset
   (found during this work, `flyby/bodies.py`).
-- **Environment.** Pinned container (`env/Dockerfile`: pykep 3.0.0, numpy 2.5.4, Python 3.14); the data comes from commit `86966f3` of github.com/bhanneke/solmaps.
+- **Environment.** Pinned container (`env/Dockerfile`: pykep 3.0.0, numpy 2.5.4, Python 3.14); the data comes from commit `adfd502` of github.com/bhanneke/solmaps.
 
 ## Quality
 
@@ -59,10 +61,11 @@ have fewer than 10 options).
 | JPL Small-Body Mission-Design maps, 10 bodies, launches 2027–2035, 305,000 cells | JPL's solution is among solmaps' solutions in 97.7–99.98% of cells (arrival within 0.003 km/s, departure within 0.03 km/s); all within 0.07 km/s | `tests/external/check_mdesign.py` |
 | NASA NHATS round trips, 7 trajectories | asteroid arrival and departure speeds within 0.001 km/s; Earth departure within 0.012 km/s (Earth's centre against the Earth–Moon barycentre) | `tests/test_nhats.py` |
 | Second Lambert solver (numpy), 20,000 random transfers | same velocities within 4e-10 (relative) | `tests/test_vlambert.py` |
-| Impossible values (negative or missing speeds, unordered options, a slower option dearer than a faster one), all 235,221,623 records | none | `tests/audit_daily.py` |
-| Cheapest option per day against the earlier single-revolution data (same base grid), 23,567,430 route-days | dearer by more than 0.02 km/s on 825 route-days: 818 on Mercury to Pluto, where the earlier data's 16-bit speeds rounded down by up to 0.03 km/s, and 7 on routes into Mercury or Venus that cost more than 19 km/s | `tests/audit_daily.py` |
+| Impossible values (negative or missing speeds, unordered options, a slower option dearer than a faster one), all 235,314,140 records | none | `tests/audit_daily.py` |
+| Cheapest option per day against the earlier single-revolution data (same base grid), 23,567,430 route-days | dearer by more than 0.02 km/s on 818 route-days: 817 on Mercury to Pluto (at most 0.033 km/s) and 1 on Pallas to Mercury (0.020 km/s), where the earlier data's 16-bit speeds rounded down | `tests/audit_daily.py` |
+| Classic flights (up to 2.5 Hohmann times) against the earlier single-revolution data, 23,567,430 route-days | dearer by more than 0.035 km/s on 1 route-day (Mercury to Itokawa, 0.036 km/s at 81 km/s, the same rounding) | `tests/audit_daily.py` |
 | Routes far below the earlier data's best launch window | 48 routes undercut it by more than 0.3 km/s, all between bodies on nearly the same orbit (Jupiter Trojans with each other and with Jupiter, Hygiea and Themis, 2008 EV5 and Mars, three routes to Neptune), where long flights with many revolutions wait for the phasing; 336 of their cheapest records (flights up to 100 years, up to 191 revolutions) recomputed within 0.0002 km/s and integrated independently (scipy DOP853) to a median 0.1 km and at most 1,450 km from the target after 100 years | `tests/audit_cheap_routes.py` |
-| Grid resolution: cheapest stored option against a 3,000-point scan with golden-section refinement, 300 random route-days | median 0.002 km/s above the optimum; 90% within 0.05 km/s, 99% within 0.20 km/s, largest 0.34 km/s | `tests/grid_error.py` |
+| Grid resolution: cheapest stored option against a 3,000-point scan with golden-section refinement, 300 random route-days | median 0.002 km/s above the optimum; 90% within 0.05 km/s, 99% within 0.19 km/s, largest 0.34 km/s | `tests/grid_error.py` |
 | Reproducibility: all 29 routes from Mars recomputed from a fresh clone | bit-identical | `engine/daily.py` |
 
 ## Known limits

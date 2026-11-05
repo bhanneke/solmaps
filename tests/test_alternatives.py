@@ -43,7 +43,7 @@ def test_alternatives_trade_time_against_cost(alts):
         a, b = pair.split('>')
         for k in range(0, alts.n_dates, 101):
             opts = alts.options(a, b, k)
-            assert 1 <= len(opts) <= 6
+            assert 1 <= len(opts) <= 10
             costs = [sum(alts.priced(o, a, b)) for o in opts]
             tofs = [o['tof'] for o in opts]
             assert tofs == sorted(tofs)
