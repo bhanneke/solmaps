@@ -123,11 +123,17 @@ class Route:
             self.fast = False
             return
         lib = ctypes.CDLL(FIT_LIB); D, I, dp, ip = ctypes.c_double, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int)
-        tabs = [np.load(f'{TABLES}/{n}.npy', mmap_mode='r') for n in self.seq]; off, k = [], 0
+        lo, hi = self.no_arr.get_bounds(); t_lo, t_hi = lo[0] - 2.0, hi[0] + sum(hi[5::4]) + 2.0          # only the span this search can reach
+        tabs, ts, hs = [], [], []
+        for n in self.seq:
+            t = np.load(f'{TABLES}/{n}.npy', mmap_mode='r'); t0, h = float(t[0, 0]), float(t[0, 1])
+            i0 = max(0, int((t_lo - t0) / h)); i1 = min(len(t) - 1, int((t_hi - t0) / h) + 2)
+            tabs.append(np.array(t[1 + i0:1 + i1])); ts.append(t0 + i0 * h); hs.append(h)
+        off, k = [], 0
         for t in tabs:
-            off.append(k); k += t[1:].size
-        big = np.concatenate([np.asarray(t[1:]).ravel() for t in tabs]); off = np.array(off, np.int32); nt = np.array([len(t) - 1 for t in tabs], np.int32)
-        ts = np.array([t[0, 0] for t in tabs], float); hs = np.array([t[0, 1] for t in tabs], float); ph = [bodies.body(n, ATLAS) for n in self.seq]
+            off.append(k); k += t.size
+        big = np.concatenate([t.ravel() for t in tabs]); off = np.array(off, np.int32); nt = np.array([len(t) for t in tabs], np.int32)
+        ts = np.array(ts, float); hs = np.array(hs, float); ph = [bodies.body(n, ATLAS) for n in self.seq]
         mu = np.array([getattr(b, 'mu_self', 0.0) for b in ph], float); rad = np.array([getattr(b, 'radius', 0.0) for b in ph], float)
         def park(n):
             return PARK.get(n, (0.0, 0.0))
