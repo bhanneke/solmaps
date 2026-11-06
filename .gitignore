@@ -39,3 +39,7 @@ contrib/inputs/
 
 # every option per route (engine.daily options); the site build copies them to docs/options
 network/options/
+
+# compiled screening kernel (make fortran)
+engine/fortran/screen_unit
+engine/fortran/*.mod

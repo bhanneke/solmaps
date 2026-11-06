@@ -12,7 +12,7 @@
 IMAGE ?= solmaps-env:3
 RUN = docker run --rm -v "$(CURDIR)":/work -w /work $(IMAGE)
 
-.PHONY: all image data daily pages network-legacy alternatives test serve site stations pairs depots ephemeris
+.PHONY: fortran all image data daily pages network-legacy alternatives test serve site stations pairs depots ephemeris
 all: image data test
 
 image:
@@ -34,6 +34,9 @@ network-legacy:    # the earlier 30-flight-time network (0.3 to 1.8 Hohmann time
 
 alternatives:
 	$(RUN) python -m engine.alternatives 8
+
+fortran:      # the compiled screening kernel (static, runs in the solmaps container)
+	docker run --rm -v "$(CURDIR)":/w -w /w/engine/fortran gcc:14 gfortran -O3 -static -o screen_unit lambert_izzo.f90 screen_unit.f90
 
 test:
 	$(RUN) python -m pytest -q tests/
