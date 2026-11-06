@@ -4,7 +4,7 @@
 #  - small bodies on perturbed JPL Horizons orbits (bodies.py), planets on DE440
 #  - leg flight times up to 2.5 Hohmann times (was 1.9)
 #  - optimiser: ring-connected population search, then basin hopping on the best routes (optimizer_study*.py);
-#    three independent runs per problem, five for two-flyby sequences; the spread is stored; interrupted runs resume
+#    three independent runs per problem, twelve for two-flyby sequences; the spread is stored; interrupted runs resume
 #  - arrival excess speed stored for every route; arrivals at Earth and Mars in two variants: propulsive capture into the
 #    parking orbit, and aerocapture (assumed limits below)
 #  - the full decision vector stored, so the pages can draw the optimiser's own trajectory
@@ -232,7 +232,7 @@ def main():
                         continue
                     t = time.time()
                     # optimizer_study*.log: three independent runs, five for two-flyby sequences (the least reliable)
-                    n = starts + (2 if len(seq) > 3 else 0)
+                    n = starts + (9 if len(seq) > 3 else 0)      # two-flyby sequences: 12 starts beat 5 on five of six test routes
                     runs = [solve(seq, t0, arrival, seed=y * 100 + k, **budget) for k in range(n)]
                     r = min(runs, key=lambda s: s['dv'])
                     r.update(origin=origin, target=tgt, bin=f'{y}-{y + width - 1}', feasible=bool(r['dv'] < OUT_OF_RANGE),
