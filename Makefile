@@ -36,7 +36,8 @@ alternatives:
 	$(RUN) python -m engine.alternatives 8
 
 fortran:      # the compiled screening kernel (static, runs in the solmaps container)
-	docker run --rm -v "$(CURDIR)":/w -w /w/engine/fortran gcc:14 gfortran -O3 -static -o screen_unit lambert_izzo.f90 screen_unit.f90
+	docker run --rm -v "$(CURDIR)":/w -w /w/engine/fortran gcc:14 sh -c 'gfortran -O3 -static -J/tmp -o screen_unit lambert_izzo.f90 screen_unit.f90 && gfortran -O3 -fPIC -shared -static-libgcc -J/tmp -Wl,-rpath,/opt/conda/lib -o flyby_fit.so lambert_izzo.f90 flyby_fit.f90'
+	$(RUN) python flyby/make_tables.py
 
 test:
 	$(RUN) python -m pytest -q tests/

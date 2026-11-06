@@ -9,7 +9,7 @@
 #    parking orbit, and aerocapture (assumed limits below)
 #  - the full decision vector stored, so the pages can draw the optimiser's own trajectory
 # Usage: python routes3.py ORIGIN TARGET[,TARGET] FIRST LAST ISLANDS GENS POP EVOLVES STARTS  (study setting: 8 1000 60 6 3)
-import json, math, sys, time, itertools
+import ctypes, json, math, os, sys, time, itertools
 sys.path.insert(0, '/work/flyby')
 import numpy as np
 import pykep as pk, pygmo as pg
@@ -17,6 +17,8 @@ import bodies
 from routes import PARK, park_burn, A, SEQS as OLD_SEQS
 
 ATLAS = bodies.load_atlas()
+FIT_LIB = os.environ.get('FLYBY_FIT_LIB', '/work/engine/fortran/flyby_fit.so')        # make fortran
+TABLES = os.environ.get('FLYBY_TABLES', '/work/data/flyby_tables')                    # flyby/make_tables.py
 OUT_OF_RANGE = 999.0
 MU_SUN_KM = 1.32712440018e11
 AU_KM = 149597870.7
@@ -111,6 +113,30 @@ class Route:
                     vinf=[0.5, 12.0], add_vinf_dep=False, tof_encoding='direct')
         self.with_arr = pk.trajopt.mga_1dsm(add_vinf_arr=True, **base)          # DSMs + arrival excess speed
         self.no_arr = pk.trajopt.mga_1dsm(add_vinf_arr=False, **base)           # DSMs only
+        self.fast = None
+    def __getstate__(self):                           # the compiled kernel is set up again in each worker
+        s = dict(self.__dict__); s['fast'] = None
+        return s
+    def setup_fast(self):
+        """the compiled fitness (engine/fortran/flyby_fit.f90), about ten times faster through pygmo; False if not built"""
+        if not (os.path.exists(FIT_LIB) and all(os.path.exists(f'{TABLES}/{n}.npy') for n in self.seq)):
+            self.fast = False
+            return
+        lib = ctypes.CDLL(FIT_LIB); D, I, dp, ip = ctypes.c_double, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int)
+        tabs = [np.load(f'{TABLES}/{n}.npy', mmap_mode='r') for n in self.seq]; off, k = [], 0
+        for t in tabs:
+            off.append(k); k += t[1:].size
+        big = np.concatenate([np.asarray(t[1:]).ravel() for t in tabs]); off = np.array(off, np.int32); nt = np.array([len(t) - 1 for t in tabs], np.int32)
+        ts = np.array([t[0, 0] for t in tabs], float); hs = np.array([t[0, 1] for t in tabs], float); ph = [bodies.body(n, ATLAS) for n in self.seq]
+        mu = np.array([getattr(b, 'mu_self', 0.0) for b in ph], float); rad = np.array([getattr(b, 'radius', 0.0) for b in ph], float)
+        def park(n):
+            return PARK.get(n, (0.0, 0.0))
+        (m0, r0), (m1, r1) = park(self.origin), park(self.target); aero = self.arrival == 'aero'
+        lim, trim = (AERO[self.target]['vinf_max'], AERO[self.target]['trim']) if aero else (0.0, 0.0)
+        x = np.zeros(len(self.no_arr.get_bounds()[0])); out = np.zeros(3)
+        args = (I(len(self.seq)), I(len(x)), I(1), x.ctypes.data_as(dp), big.ctypes.data_as(dp), off.ctypes.data_as(ip), nt.ctypes.data_as(ip), ts.ctypes.data_as(dp), hs.ctypes.data_as(dp),
+                mu.ctypes.data_as(dp), rad.ctypes.data_as(dp), D(m0), D(r0), D(m1), D(r1), I(int(aero)), D(lim), D(trim), D(pk.MU_SUN), out.ctypes.data_as(dp))
+        self.fast = (lib.flyby_fitness, args, x, out, big, off, nt, ts, hs, mu, rad)      # keeps the arrays alive
     def parts(self, x):
         dsm = self.no_arr.fitness(x)[0] / 1000.0
         vinf_arr = self.with_arr.fitness(x)[0] / 1000.0 - dsm
@@ -123,6 +149,14 @@ class Route:
             return excess + AERO[t]['trim']
         return park_burn(vinf_arr, t)                # capture into the parking orbit, or rendezvous at a small body
     def fitness(self, x):
+        if self.fast is None:
+            self.setup_fast()
+        if self.fast:
+            f, args, xv, out = self.fast[:4]
+            xv[:] = x; f(*args)
+            return [float(out[0])]
+        return self.python_fitness(x)
+    def python_fitness(self, x):
         try:
             dsm, vinf_arr = self.parts(x)
             return [park_burn(x[3] / 1000.0, self.origin) + dsm + self.arrive(vinf_arr)]
@@ -162,7 +196,7 @@ def solve(seq, t0, arrival, islands, gens, pop, evolves, seed):
     for _ in range(2):
         refine.evolve(); refine.wait_check()
     best = min((isl.get_population() for isl in refine), key=lambda q: q.champion_f[0])
-    x, f = best.champion_x, best.champion_f[0]
+    x = best.champion_x; f = udp.python_fitness(x)[0]        # the stored value always comes from the Python model
     tofs = [x[5]] + [x[9 + 4 * (i - 1)] for i in range(1, len(seq) - 1)]
     enc = [float(x[0])]
     for d in tofs:

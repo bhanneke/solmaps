@@ -43,3 +43,4 @@ network/options/
 # compiled screening kernel (make fortran)
 engine/fortran/screen_unit
 engine/fortran/*.mod
+engine/fortran/flyby_fit.so
