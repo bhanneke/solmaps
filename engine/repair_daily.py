@@ -88,7 +88,7 @@ def main(out, procs=8, origins=None):
             continue
         d = np.load(f'{SRC}/{a}.npz'); targets = [str(x) for x in d['targets']]
         jobs = [(a, b, d['tof'][i], d['vinf'][i], d['revs'][i]) for i, b in enumerate(targets)]
-        with Pool(procs) as p:
+        with Pool(procs, maxtasksperchild=4) as p:              # workers restart, so memory stays low
             res = {r[1]: r for r in p.imap_unordered(repair_route, jobs)}
         np.savez_compressed(f'{out}/{a}.tmp.npz', targets=np.array(targets), jd0=daily.JD0, step=1.0, k=daily.K,
                             tof=np.stack([res[x][2] for x in targets]), vinf=np.stack([res[x][3] for x in targets]),
