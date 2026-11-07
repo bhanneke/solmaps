@@ -86,7 +86,7 @@ def repair_route(args):
 def final_route(args):
     """the last stage: every option solved again at exactly its stored 32-bit flight time, so the file reproduces itself. The
     cost can jump by kilometres per second within a thousandth of a day where a solution with one more revolution first
-    exists, so a value solved at an unrounded time need not hold at the stored one. Flights stay within 100 years, and days
+    exists, so where the rounded time comes out dearer than the stored option the neighbouring 32-bit values are solved too. Flights stay within 100 years, and days
     more than SPIKE km/s above both neighbours also get a scan of SCAN flight times and those of the days around them."""
     import pykep as pk, bodies
     from engine.conventions import planet_side_arr
@@ -97,19 +97,22 @@ def final_route(args):
     spike = np.zeros(n, bool); spike[1:-1] = (m[1:-1] > m[:-2] + SPIKE) & (m[1:-1] > m[2:] + SPIKE)
     tof, vinf, revs, sun = np.full((n, K), np.nan, np.float32), np.full((n, K, 2), np.nan, np.float32), np.zeros((n, K), np.uint16), np.full((n, K), np.nan, np.float32)
     for d in range(n):
-        cand = T0[d][~np.isnan(T0[d])]
+        keep = ~np.isnan(T0[d]); cand = T0[d][keep]
         if spike[d]:
             near = T0[max(0, d - 7):min(n, d + 8)]; cand = np.concatenate([cand, near[~np.isnan(near)], scan])
         t0 = daily.JD0 + d - 2451544.5; ra, va = A.eph(t0)
-        Ts, cost, vd, vr, NR, S = [], [], [], [], [], []
-        for x in sorted(set(float(v) for v in cand)):               # 32-bit values, exactly as stored
+        Ts, cost, vd, vr, NR, S = [], [], [], [], [], []; seen = {}
+        def solve(x):                                               # x: a 32-bit value, exactly as it will be stored
+            if x in seen:
+                return seen[x]
+            seen[x] = math.inf
             if x <= 0 or x > daily.TOF_MAX or t0 + x > end_b:
-                continue
+                return math.inf
             rb, vb = B.eph(t0 + x)
             try:
                 l = pk.lambert_problem(r0=ra, r1=rb, tof=x * 86400.0, mu=pk.MU_SUN, multi_revs=daily.MAX_REVS)
             except Exception:
-                continue
+                return math.inf
             best = None
             for q, (w0, w1) in enumerate(zip(l.v0, l.v1)):
                 dd = math.dist(w0, va) / 1000; rr = math.dist(w1, vb) / 1000; c = planet_side_dv(a, dd) + planet_side_dv(b, rr)
@@ -118,8 +121,21 @@ def final_route(args):
                 rm = closest_to_sun(ra, w0, rb, w1, pk.MU_SUN, (q + 1) // 2)
                 if rm > R_SUN:
                     best = (dd, rr, c, (q + 1) // 2, rm)
-            if best:
-                Ts.append(x); vd.append(best[0]); vr.append(best[1]); cost.append(best[2]); NR.append(best[3]); S.append(best[4])
+            if not best:
+                return math.inf
+            Ts.append(x); vd.append(best[0]); vr.append(best[1]); cost.append(best[2]); NR.append(best[3]); S.append(best[4]); seen[x] = best[2]
+            return best[2]
+        for x in sorted(set(float(v) for v in cand)):
+            solve(x)
+        if np.nanmax(cand) > daily.TOF_MAX:                         # an option beyond 100 years: the flight times right at the limit
+            for e in (0, 1, 2, 4, 8, 16, 32, 64):
+                solve(float(np.float32(daily.TOF_MAX - e)))
+        for t, c0 in zip(T0[d][keep], C[d][keep]):                  # the rounded time fell below a step in the cost: the neighbouring 32-bit values
+            if float(t) <= daily.TOF_MAX and solve(float(t)) > c0 + 1e-3:
+                u = float(np.spacing(t))
+                for k in (1, 2, 4, 8, 16, 32):
+                    if min(solve(float(np.float32(float(t) + k * u))), solve(float(np.float32(float(t) - k * u)))) <= c0 + 1e-3:
+                        break
         if Ts:
             for i, p in enumerate(daily.pareto_thin(np.array(Ts), np.array(cost), vd, vr, classic=classic)):
                 tof[d, i] = Ts[p]; vinf[d, i, 0] = vd[p]; vinf[d, i, 1] = vr[p]; revs[d, i] = NR[p]; sun[d, i] = S[p] / pk.AU
