@@ -90,14 +90,14 @@ def final_route(args):
     more than SPIKE km/s above both neighbours also get a scan of SCAN flight times and those of the days around them."""
     import pykep as pk, bodies
     from engine.conventions import planet_side_arr
-    a, b, T0, V0 = args
+    a, b, T0, V0, Torig = args
     atlas = bodies.load_atlas(); A, B = bodies.body(a, atlas), bodies.body(b, atlas); end_b = bodies.coverage_end(b)
     g = daily.tof_grid(daily.semi_major_axis(a), daily.semi_major_axis(b)); classic = g[daily.NTOF - 1]; scan = np.float32(np.geomspace(g[0], daily.TOF_MAX, SCAN))
     n, K = T0.shape; C = np.where(np.isnan(T0), np.inf, planet_side_arr(a, V0[..., 0].astype(float))[0] + planet_side_arr(b, V0[..., 1].astype(float))[0]); m = C.min(1)
     spike = np.zeros(n, bool); spike[1:-1] = (m[1:-1] > m[:-2] + SPIKE) & (m[1:-1] > m[2:] + SPIKE)
     tof, vinf, revs, sun = np.full((n, K), np.nan, np.float32), np.full((n, K, 2), np.nan, np.float32), np.zeros((n, K), np.uint16), np.full((n, K), np.nan, np.float32)
     for d in range(n):
-        keep = ~np.isnan(T0[d]); cand = T0[d][keep]
+        keep = ~np.isnan(T0[d]); cand = np.concatenate([T0[d][keep], Torig[d][~np.isnan(Torig[d])]])     # also the first run's flight times: an option beyond 100 years may have replaced one within them
         if spike[d]:
             near = T0[max(0, d - 7):min(n, d + 8)]; cand = np.concatenate([cand, near[~np.isnan(near)], scan])
         t0 = daily.JD0 + d - 2451544.5; ra, va = A.eph(t0)
@@ -146,9 +146,9 @@ def main_final(src, out, procs=6):
     for a in HELIO:
         if os.path.exists(f'{out}/{a}.npz'):
             continue
-        d = np.load(f'{src}/{a}.npz'); targets = [str(x) for x in d['targets']]
+        d = np.load(f'{src}/{a}.npz'); targets = [str(x) for x in d['targets']]; o = np.load(f'{SRC}/{a}.npz')
         with Pool(procs, maxtasksperchild=4) as p:
-            res = {r[1]: r for r in p.imap_unordered(final_route, [(a, b, d['tof'][i], d['vinf'][i]) for i, b in enumerate(targets)])}
+            res = {r[1]: r for r in p.imap_unordered(final_route, [(a, b, d['tof'][i], d['vinf'][i], o['tof'][i]) for i, b in enumerate(targets)])}
         np.savez_compressed(f'{out}/{a}.tmp.npz', targets=np.array(targets), jd0=daily.JD0, step=1.0, k=daily.K,
                             tof=np.stack([res[x][2] for x in targets]), vinf=np.stack([res[x][3] for x in targets]),
                             revs=np.stack([res[x][4] for x in targets]), sun_au=np.stack([res[x][5] for x in targets]))
