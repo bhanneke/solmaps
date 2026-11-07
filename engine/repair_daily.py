@@ -11,6 +11,7 @@ PASSES rounds carry a good flight time further along the route. Output per origi
   sun_au [n, date, K]   closest distance to the Sun on the arc, AU (float32)
 
 Run: python -m engine.repair_daily OUT_FOLDER [procs] [origin ...]   (in the solmaps-env container, from /work)
+Then: python -m engine.repair_daily final REPAIRED_FOLDER OUT_FOLDER [procs]   (every option solved at its stored flight time)
 """
 import math, os, sys, time
 from multiprocessing import Pool
@@ -20,6 +21,7 @@ import numpy as np
 from engine import daily
 from engine.conventions import HELIO, planet_side_dv
 
+SPIKE, SCAN = 0.5, 4000                                      # the last stage: km/s above both neighbours, flight times scanned
 WINDOW, PASSES, REFINE, R_SUN = 2, 2, 3, 6.957e8            # days either side, rounds, options refined per day, solar radius in metres
 SRC = os.environ.get('REPAIR_SRC', daily.OUT)
 
@@ -81,6 +83,62 @@ def repair_route(args):
         T = tof.astype(np.float64); out = (tof, vinf, revs, sun)
     return (a, b, *out, dropped)
 
+def final_route(args):
+    """the last stage: every option solved again at exactly its stored 32-bit flight time, so the file reproduces itself. The
+    cost can jump by kilometres per second within a thousandth of a day where a solution with one more revolution first
+    exists, so a value solved at an unrounded time need not hold at the stored one. Flights stay within 100 years, and days
+    more than SPIKE km/s above both neighbours also get a scan of SCAN flight times and those of the days around them."""
+    import pykep as pk, bodies
+    from engine.conventions import planet_side_arr
+    a, b, T0, V0 = args
+    atlas = bodies.load_atlas(); A, B = bodies.body(a, atlas), bodies.body(b, atlas); end_b = bodies.coverage_end(b)
+    g = daily.tof_grid(daily.semi_major_axis(a), daily.semi_major_axis(b)); classic = g[daily.NTOF - 1]; scan = np.float32(np.geomspace(g[0], daily.TOF_MAX, SCAN))
+    n, K = T0.shape; C = np.where(np.isnan(T0), np.inf, planet_side_arr(a, V0[..., 0].astype(float))[0] + planet_side_arr(b, V0[..., 1].astype(float))[0]); m = C.min(1)
+    spike = np.zeros(n, bool); spike[1:-1] = (m[1:-1] > m[:-2] + SPIKE) & (m[1:-1] > m[2:] + SPIKE)
+    tof, vinf, revs, sun = np.full((n, K), np.nan, np.float32), np.full((n, K, 2), np.nan, np.float32), np.zeros((n, K), np.uint16), np.full((n, K), np.nan, np.float32)
+    for d in range(n):
+        cand = T0[d][~np.isnan(T0[d])]
+        if spike[d]:
+            near = T0[max(0, d - 7):min(n, d + 8)]; cand = np.concatenate([cand, near[~np.isnan(near)], scan])
+        t0 = daily.JD0 + d - 2451544.5; ra, va = A.eph(t0)
+        Ts, cost, vd, vr, NR, S = [], [], [], [], [], []
+        for x in sorted(set(float(v) for v in cand)):               # 32-bit values, exactly as stored
+            if x <= 0 or x > daily.TOF_MAX or t0 + x > end_b:
+                continue
+            rb, vb = B.eph(t0 + x)
+            try:
+                l = pk.lambert_problem(r0=ra, r1=rb, tof=x * 86400.0, mu=pk.MU_SUN, multi_revs=daily.MAX_REVS)
+            except Exception:
+                continue
+            best = None
+            for q, (w0, w1) in enumerate(zip(l.v0, l.v1)):
+                dd = math.dist(w0, va) / 1000; rr = math.dist(w1, vb) / 1000; c = planet_side_dv(a, dd) + planet_side_dv(b, rr)
+                if best is not None and c >= best[2]:
+                    continue
+                rm = closest_to_sun(ra, w0, rb, w1, pk.MU_SUN, (q + 1) // 2)
+                if rm > R_SUN:
+                    best = (dd, rr, c, (q + 1) // 2, rm)
+            if best:
+                Ts.append(x); vd.append(best[0]); vr.append(best[1]); cost.append(best[2]); NR.append(best[3]); S.append(best[4])
+        if Ts:
+            for i, p in enumerate(daily.pareto_thin(np.array(Ts), np.array(cost), vd, vr, classic=classic)):
+                tof[d, i] = Ts[p]; vinf[d, i, 0] = vd[p]; vinf[d, i, 1] = vr[p]; revs[d, i] = NR[p]; sun[d, i] = S[p] / pk.AU
+    return (a, b, tof, vinf, revs, sun, int(spike.sum()))
+
+def main_final(src, out, procs=6):
+    os.makedirs(out, exist_ok=True); t = time.time()
+    for a in HELIO:
+        if os.path.exists(f'{out}/{a}.npz'):
+            continue
+        d = np.load(f'{src}/{a}.npz'); targets = [str(x) for x in d['targets']]
+        with Pool(procs, maxtasksperchild=4) as p:
+            res = {r[1]: r for r in p.imap_unordered(final_route, [(a, b, d['tof'][i], d['vinf'][i]) for i, b in enumerate(targets)])}
+        np.savez_compressed(f'{out}/{a}.tmp.npz', targets=np.array(targets), jd0=daily.JD0, step=1.0, k=daily.K,
+                            tof=np.stack([res[x][2] for x in targets]), vinf=np.stack([res[x][3] for x in targets]),
+                            revs=np.stack([res[x][4] for x in targets]), sun_au=np.stack([res[x][5] for x in targets]))
+        os.replace(f'{out}/{a}.tmp.npz', f'{out}/{a}.npz')
+        print(f'{a} done, {time.time() - t:.0f} s, spike days scanned {sum(r[6] for r in res.values())}', flush=True)
+
 def main(out, procs=8, origins=None):
     os.makedirs(out, exist_ok=True); t = time.time()
     for a in origins or HELIO:
@@ -98,4 +156,7 @@ def main(out, procs=8, origins=None):
 
 if __name__ == '__main__':
     x = sys.argv[1:]
-    main(x[0], int(x[1]) if len(x) > 1 else 8, x[2:] or None)
+    if x[0] == 'final':                                     # python -m engine.repair_daily final REPAIRED_FOLDER OUT_FOLDER [procs]
+        main_final(x[1], x[2], int(x[3]) if len(x) > 3 else 6)
+    else:
+        main(x[0], int(x[1]) if len(x) > 1 else 8, x[2:] or None)
