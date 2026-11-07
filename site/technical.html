@@ -169,7 +169,7 @@
 
   <h2 id="limits">11. Limits and roadmap</h2>
   <ul>
-    <li>The maps use impulsive burns and two-body conics: no low-thrust transfers (the engine computes them separately), aerocapture or lunar flybys yet. Over decades the planets' pull bends a long arc, so a real ship on a flight of more than about ten years would need small correction burns.</li>
+    <li>The maps use impulsive burns and two-body conics: no low-thrust transfers (the engine computes them separately), aerocapture or lunar flybys yet. The planets pull on a real ship: sampled arcs integrated with all planets and no corrections miss the target by 0.03 to 0.72 AU, so a real flight needs a guided trajectory and these costs compare places and dates.</li>
     <li>The in-browser engine moves small bodies on two-body orbits without planetary perturbations, so its small-body costs lose accuracy over decades; the precomputed network uses the perturbed Horizons states.</li>
     <li>The 10-day date grid can miss the exact bottom of a narrow window by a few days. Depot candidates are coplanar.</li>
     <li>Roadmap: waiting horizons of 5 and 10 years; the network to 2150 (DE440s) and beyond (DE440 to 2650, DE441 for longer spans); up to three and four flybys with Saturn as a flyby planet; sequences enumerated and pruned with the Tisserand graph <a class="cite" href="#r-strange2002">[Strange &amp; Longuski 2002]</a>; hub origins (Earth–Moon L1, Ceres, Vesta, Psyche, Jupiter); new targets and return legs; Earth–Mars cyclers <a class="cite" href="#r-byrnes1993">[Byrnes et al. 1993]</a>; the screening of every asteroid and comet in JPL's Small-Body Database.</li>

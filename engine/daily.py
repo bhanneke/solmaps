@@ -3,9 +3,9 @@
 For each pair of conventions.HELIO (30 bodies, 870 ordered pairs) and each day from 2026-11-01 to 2100-12-31, the module
 solves Lambert's problem (prograde, pykep, every number of revolutions around the Sun the flight time allows, the
 cheapest kept) over 740 flight times up to 100 years (tof_grid), and keeps the Pareto front of flight time against cost, thinned
-to at most K. Long flights circle the Sun many times while the geometry comes right (Earth to Venus: up to ~160
+to at most K. Long flights circle the Sun many times while the geometry comes right (Earth to Venus: up to 125
 revolutions in 100 years) and are often far cheaper than any short one; two-body arcs over decades are idealised
-(the planets' pull would need small correction burns). The cost
+(tests/audit_nbody.py measures how far the planets bend them). The cost
 for the front uses each body's own end state (conventions.end_state); moons and Earth-Moon L1 share their planet's
 front and are priced at query time. Arrivals after the end of a body's ephemeris (Bennu: 2135-09-30) are skipped.
 

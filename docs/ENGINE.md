@@ -50,12 +50,12 @@ compares them with the JavaScript engine's values (`network/nodes.js`).
 ## Places and daily data
 
 The engine knows 40 places: 30 bodies with their own heliocentric legs (`conventions.HELIO`: the planets and Pluto, Ceres,
-Vesta, Psyche, Pallas, Hygiea, Themis, Juno, six near-Earth asteroids, five Jupiter Trojans), nine moons and Earth–Moon L1.
+Vesta, Psyche, Pallas, Hygiea, Themis, Juno, nine near-Earth asteroids, five Jupiter Trojans), nine moons and Earth–Moon L1.
 `engine/daily.py` computes transfer alternatives for all 870 ordered pairs of the 30 bodies for every day from
-2026-11-01 to 2100-12-31. It solves Lambert's problem for 740 flight times in three log-spaced parts: 100 from 0.3 to 2.5
+2026-11-01 to 2100-12-31. It solves Lambert's problem for up to 740 flight times (406 routes hold 740, 402 hold 700, 62 hold 100) in three log-spaced parts: 100 from 0.3 to 2.5
 Hohmann times (at least 10 days), 40 more up to three orbits of the faster body, and 600 more up to 100 years. For each
 flight time it solves every number of revolutions around the Sun the flight time allows and keeps the cheapest; Earth to
-Venus reaches about 160 revolutions in 100 years. It then refines the three cheapest local minima of the single-revolution
+Venus reaches 125 revolutions and Mercury to Venus 267 in 100 years. It then refines the three cheapest local minima of the single-revolution
 cost over the first part, and the cheapest local minima of the overall cost in each part (three, three and five), by two
 rounds of halving. It keeps a Pareto set of at most ten options per day: always the fastest, the cheapest and the cheapest
 at or below each flight-time limit (classic flights, 10 and 30 years), the other slots spread in log flight time. Each
@@ -63,17 +63,22 @@ route and day needs up to 796 Lambert problems, at most 18.8 billion in all. Slo
 rises and falls with every synodic period, and its valleys often lie well below any short transfer.
 
 The grid density follows from measurements. With 40 flight times the daily data missed a narrow valley next to the 180°
-transfer singularity on Psyche to Mercury by 8.5 km/s; with 60 long-flight points the stored cheapest
-option lay a median 0.10 km/s above the valleys of long flights; 600 points brought that below 0.01 km/s. The release audit (`tests/audit_daily.py`,
-`tests/grid_error.py`, `tests/audit_cheap_routes.py`) found no impossible value in 235 million option records. Against
-a scan of 3,000 flight times with golden-section refinement on 300 random route-days, the stored cheapest option lies a
-median 0.002 km/s above the optimum, within 0.05 km/s on 90% and within 0.19 km/s on 99% of them; the largest gap was
-0.34 km/s. The 100 base flight times and the first refinement repeat the earlier single-revolution data, so a day can
-only get cheaper; 818 of 23.6 million route-days came out dearer by more than 0.02 km/s, 817 of them on Mercury to Pluto,
-where the earlier data's 16-bit speeds had rounded down. On 48 routes between bodies on nearly the same orbit (Jupiter Trojans,
-Hygiea and Themis, 2008 EV5 and Mars) the cheapest transfer lies far below the earlier data's best launch window,
-because long flights with many revolutions wait for the phasing; an independent integration of 336 of these records
-reaches the target within a median 0.1 km. `docs/DATASHEET.md` documents the released dataset.
+transfer singularity on Psyche to Mercury by 8.5 km/s; with 60 long-flight points the stored cheapest option lay a median
+0.10 km/s above the valleys of long flights. `engine/repair_daily.py` then improves the first run in two steps. The repair tries
+the flight times of neighbouring days and those with the same arrival date, refines locally, drops arcs inside the Sun and stores
+the closest approach. The last stage solves every option again at its stored 32-bit flight time, keeps flights within 100 years
+and scans 4,000 flight times on days more than 0.5 km/s above both neighbours. Run them in this order, in the container from /work:
+
+    python -m engine.repair_daily OUT_REPAIRED [procs]
+    REPAIR_SRC=FIRST_RUN python -m engine.repair_daily final OUT_REPAIRED OUT_FINAL [procs]
+
+The audits (`tests/audit_daily.py`, `tests/audit_repair.py`, `tests/grid_error.py`, `tests/audit_cheap_routes.py`) found no
+impossible value in 235.7 million option records. Against a fine scan on 1,000 random route-dates, the stored cheapest option lies
+a median 0.000 km/s above the optimum, within 0.05 km/s on 97.1% and within 0.093 km/s on 99% of them; the largest gap was 0.60
+km/s. 2,474 route-days still stand more than 0.5 km/s above both neighbours; a denser scan closed more than half the spike on 18 of
+50 tested. On 48 routes the cheapest transfer lies far below the earlier single-revolution data's best launch window, because long
+flights with many revolutions wait for the phasing; an independent Sun-only integration of 336 of these records reaches the target
+within a median 0.1 km. `docs/DATASHEET.md` documents the released dataset and its limits.
 
 **Positions.** Planets and Pluto come from DE440 through pykep until 2149 and from JPL Horizons barycentre states (DE441)
 afterwards. Small bodies come from daily JPL Horizons states to 2205, interpolated with cubic Hermite polynomials.
@@ -261,8 +266,9 @@ The tests cover:
 ## Limits
 
 - Impulsive legs are two-body Lambert arcs from the daily data (the pages use every tenth day); the refinement cache
-  refines one transfer at an exact date on request. Over decades the planets' pull bends a long arc, so a real ship on a
-  flight longer than about ten years would need small correction burns.
+  refines one transfer at an exact date on request. The planets pull on a real ship: six sampled arcs integrated with
+  all planets and no corrections miss the target by 0.03 to 0.72 AU (`tests/audit_nbody.py`), so a real flight needs a guided
+  trajectory, and the costs compare places and dates.
 - The journey search treats each heliocentric leg independently of the next. Slingshot routes are not yet edges of the
   journey graph, and planetary flybys appear only in the flyby search.
 - Continuous-thrust transfers cover one leg between two sites. These ships are not part of the multi-leg journey
