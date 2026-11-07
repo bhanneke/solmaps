@@ -30,7 +30,7 @@ engine prices them from the same data (`engine/conventions.py`). "Earth" in this
 **Instances.** One record per ordered pair of bodies (870), departure day (27,089) and transfer option (up to 10): a Pareto
 set of flight time against cost, from the fastest to the cheapest option that day.
 
-**Files.** Parquet in the release, one file per origin, one row per option (`engine/export_parquet.py`):
+**Files.** The release holds Parquet and npz, one file per origin. Parquet has one row per option (`engine/export_parquet.py`):
 
 | Column | Meaning | Unit, type |
 | --- | --- | --- |
