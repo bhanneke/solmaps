@@ -27,7 +27,7 @@ def flyby_job(id, title, pairs, note=''):
         o, t, y = u.split('-'); return [f'flyby/routes3_{o}_{t}_{y}_{y}.json']
     return Job(id, title, units, cmd, files, 'optimum', 0.05, note)
 
-# flyby pairs in the maintainers' queues (flyby/run_queue_mini*.sh); every other pair of the 30 bodies is open
+# flyby pairs in the maintainers' queue (flyby/run_flyby_mini.sh); every other pair of the 30 bodies is open
 QUEUED = {'flyby-returns': [(o, t) for o in ('ceres', 'vesta', 'psyche', 'jupiter') for t in ('earth', 'mars')],
           'flyby-earth': [('earth', t) for t in ('jupiter', 'saturn', 'mercury', 'ceres', 'vesta', 'psyche', 'mars', 'venus', '433', '101955', '162173')],
           'flyby-mars': [('mars', t) for t in ('jupiter', 'saturn', 'ceres', 'vesta', 'psyche', 'earth', 'venus', 'mercury')],
@@ -37,7 +37,7 @@ OTHER = [(o, t) for o, t in itertools.permutations(HELIO, 2) if (o, t) not in CO
 
 JOBS = [
     Job('transfers', 'Daily transfer options between 30 bodies, 2026–2100, every number of revolutions, flights up to 100 years',
-        HELIO, lambda u: ['python', '-m', 'engine.daily', 'origin', u, '8'], lambda u: [f'data/daily/{u}.npz'], 'arrays', 1e-6,
+        HELIO, lambda u: ['python', '-m', 'engine.repair_daily', 'unit', u, '8'], lambda u: [f'data/daily/{u}.npz'], 'arrays', 1e-6,
         'one unit = every route from one body: 29 routes, 27,089 days each'),
     Job('screening', 'Every asteroid and comet of the JPL Small-Body Database against Earth, Mars and Ceres, both directions, every day to 2100',
         [f'{u:04d}' for u in range(791)], lambda u: ['python', '-m', 'engine.screen', '4', str(int(u)), str(int(u))],

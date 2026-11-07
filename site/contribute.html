@@ -15,7 +15,7 @@
 
   <h2>Five steps</h2>
   <pre>git clone https://github.com/bhanneke/solmaps.git && cd solmaps
-make image                                                          # 1. build the container (once)
+make image fortran                                                  # 1. build the container and the compiled kernels (once)
 docker run --rm -v "$PWD":/work -w /work solmaps-env:3 python -m contrib setup     # 2. fetch the exact inputs
 docker run --rm -v "$PWD":/work -w /work solmaps-env:3 python -m contrib run screening          # 3. compute an open unit
 docker run --rm -v "$PWD":/work -w /work solmaps-env:3 python -m contrib verify flyby-earth     # 4. or verify a finished one
@@ -32,7 +32,7 @@ docker run --rm -v "$PWD":/work -w /work -e HF_TOKEN=hf_… solmaps-env:3 python
 
   <h2>The jobs</h2>
   <h3 id="transfers">Daily transfer options</h3>
-  <p>One unit is every route from one of the 30 bodies: 29 routes, each for 27,089 departure days with flights up to 100 years. A unit takes a few hours on 8 processor cores. Unit names are the body names used by solmaps (<code>earth</code>, <code>mars</code>, <code>2</code> for Pallas, <code>617</code> for Patroclus and so on).</p>
+  <p>One unit is every route from one of the 30 bodies: 29 routes, each for 27,089 departure days with flights up to 100 years, through the first run, the repair and the last stage. A unit takes a few hours on 8 processor cores. Unit names are the body names used by solmaps (<code>earth</code>, <code>mars</code>, <code>2</code> for Pallas, <code>617</code> for Patroclus and so on).</p>
   <pre>python -m contrib run transfers pluto</pre>
   <h3 id="screening">Catalogue screening</h3>
   <p>One unit is 2,000 objects of the JPL Small-Body Database, each against Earth, Mars and Ceres in both directions for every departure day to 2100. A unit takes about five hours on one core. Units <code>0000</code> to <code>0790</code>; near-Earth objects come first.</p>

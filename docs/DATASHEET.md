@@ -72,8 +72,8 @@ stored set need not contain the best option for a different end state.
   latest arrival at Bennu in the data falls on 2135-09-28.
 - **First run.** For each pair and day: Lambert's problem (pykep, prograde) over three log-spaced parts of flight time: 100
   values from 0.3 to 2.5 Hohmann times (at least 10 days), 40 more up to three orbits of the faster body, and 600 more up to
-  100 years. The grid holds 740 values on 406 routes and 700 on 402, where the second part falls away; 62 routes keep only the
-  first 100 because 2.5 Hohmann times already exceed 100 years or the other parts do not apply. For each flight time solmaps
+  100 years. The grid holds 740 values on 406 routes and 700 on 402, where three orbits of the faster body lie below 2.5 Hohmann times and the second part falls away; 62 routes keep only the
+  first 100 because 2.5 Hohmann times already reach 100 years. For each flight time solmaps
   solves every number of revolutions around the Sun the flight time allows and keeps the cheapest. It then refines the
   cheapest local minima by two rounds of halving and thins the Pareto set to 10 options per day. It always keeps the fastest
   option, the cheapest option and the cheapest at or below each flight-time limit: classic flights (2.5 Hohmann times), 10
@@ -96,14 +96,14 @@ stored set need not contain the best option for a different end state.
 | NASA NHATS round trips, 7 trajectories | asteroid arrival and departure speeds within 0.0015 km/s; Earth departure within 0.012 km/s (Earth's centre against the barycentre) | `tests/test_nhats.py` |
 | Second Lambert solver (numpy), 3,000 random single-revolution transfers | same velocities within 1e-8 (relative) | `tests/test_vlambert.py` |
 | Impossible values (negative or missing speeds, unordered options, a slower option dearer than a faster one), all records | none | `tests/audit_daily.py` |
-| The file reproduces itself: 3,000 random options solved again at their stored flight time | largest speed difference 6.7e-6 km/s; revolution count right on all; no flight over 100 years | `tests/audit_repair.py` and the self check in the release log |
+| The file reproduces itself: 3,000 random options solved again at their stored flight time | largest speed difference 6.7e-6 km/s; revolution count right on all; no flight over 100 years | `tests/audit_self.py` |
 | Repair against the first run, 23,567,430 route-days, cheapest option per day | cheaper by more than 0.001 km/s on 13,484,817 and by more than 0.5 km/s on 70,259; largest gain 20.2 km/s (Mercury to Pallas). No route-day lost a solution | `tests/audit_repair.py` |
-| Repair, same comparison, route-days that became dearer | 172 by more than 0.001 km/s. On 29 the first run used an arc through the Sun (largest 0.30 km/s, Pallas to Pluto); the other 143 stay at or below 0.08 km/s. Classic flights dearer by more than 0.001 km/s on 29 route-days | `tests/audit_repair.py` |
+| Repair, same comparison, route-days that became dearer | 172 by more than 0.001 km/s. On 29 the first run used an arc through the Sun (largest 0.30 km/s, Pallas to Pluto); the other 143 stay at or below 0.08 km/s. Classic flights dearer by more than 0.001 km/s on 29 route-days | `tests/audit_repair.py`, `tests/audit_dearer.py` |
 | Against the earlier single-revolution data, which stored 16-bit speeds and had no Sun filter | dearer by more than 0.02 km/s on 846 route-days, classic flights by more than 0.035 km/s on 28 | `tests/audit_daily.py` |
 | Routes far below the earlier data's best launch window | 48 routes undercut it by more than 0.3 km/s, many between bodies on nearly the same orbit, others not (Mercury to Apophis, Ceres to Itokawa, Pallas to Patroclus, routes to Neptune). 336 of their cheapest records (flights 1.3–100 years, up to 171 revolutions) match a recomputed solution, and an independent integration (scipy DOP853, Sun only) reaches the target within a median 0.1 km and at most 1,223 km | `tests/audit_cheap_routes.py` |
 | Grid resolution: cheapest stored option against a fine scan, 1,000 random route-dates | median 0.000 km/s above the optimum; 90% within 0.013, 95% within 0.027, 99% within 0.093, largest 0.604; 97.1% within 0.05 km/s | `tests/grid_error.py` |
-| Ephemeris join: DE440 against the DE441 planet files, 2139–2149 | within 5.1 m at whole days | release log |
-| Reproducibility: all 29 routes from Mars through each stage | bit-identical (first run on two machines; repair and last stage repeated) | `engine/daily.py`, `engine/repair_daily.py` |
+| Ephemeris join: DE440 against the DE441 planet files, 2140–2149 | within 5.1 m at whole days | `tests/audit_join.py` |
+| Reproducibility: all 29 routes from Mars through each stage | bit-identical (first run on two machines; repair and last stage repeated from their input) | `engine/daily.py`, `engine/repair_daily.py` |
 
 ## Known limits
 
@@ -116,17 +116,17 @@ stored set need not contain the best option for a different end state.
 - **Very close passes of the Sun.** The data removes arcs inside the Sun's radius and nothing else: 5,148,062 records pass within
   10 solar radii, and the closest stays 0.0047 AU from the Sun's centre. `closest_to_sun_au` lets users set their own limit.
 - **Narrow cost valleys.** Near transfer angles of 0° and 180°, and where a solution with another revolution first appears, cost
-  can change by kilometres per second within a thousandth of a day (Earth to Bennu on one day: 19.08 km/s at −0.01 d, 7.07 at
-  the stored time, 19.09 at +0.001 d). Such options need timing to seconds, and 32-bit storage resolves flight times to 0.004
+  can change by kilometres per second within a thousandth of a day (one Earth to Bennu option: 19.08 km/s at −0.01 d, 7.07 at
+  its flight time, 19.09 at +0.001 d). Such options need timing to seconds, and 32-bit storage resolves flight times to 0.004
   days at 100 years.
 - **Remaining spikes.** After the last stage 2,474 route-days on 207 routes stand more than 0.5 km/s above both neighbours, 119
   of them more than 2 km/s; the largest is 7.79 km/s (1996 FG3 to Pluto). A scan of 20,000 flight times on 50 of them (the 25
   largest, 25 random) closes more than half the spike on 18 and leaves the others. The median gap to that scan is 0.09 km/s, the
-  largest 4.05 km/s. These days make up 0.01% of all route-days. Check the days around any isolated value.
+  largest 4.05 km/s (`tests/audit_spikes.py`). These days make up 0.01% of all route-days. Check the days around any isolated value.
 - **Grid.** Daily departures and a finite list of flight times. The stored cheapest option need not be the true optimum: see the
   grid and spike figures.
-- **Interpolated positions.** Flight times end between whole days, where the files interpolate. The error stays around 20 m or
-  less for small bodies in the median. It grows in close planetary encounters: about 3,100 km for Apophis at its April 2029 Earth
+- **Interpolated positions.** Flight times end between whole days, where the files interpolate. The median error per small body
+  stays at or below 42 m. It grows in close planetary encounters: about 3,100 km for Apophis at its April 2029 Earth
   pass and 290 km for Bennu in 2135 (estimates, `tests/audit_hermite.py`). After 2149 Mercury's interpolated position differs by
   up to 20 km mid-day, Venus's by up to 180 m.
 - **Small-body orbits.** The data takes each Horizons solution as given. These solutions carry their own uncertainty, which grows

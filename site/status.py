@@ -10,11 +10,10 @@ from contrib.jobs import JOBS, WINDOWS, QUEUED
 
 CONTRIB = os.environ.get('SOLMAPS_CONTRIB_REPO', 'Deep-Space-Strategy/solmaps-contrib')
 HOST = os.environ.get('SOLMAPS_QUEUE_HOST', 'bjoernmacmini')        # the maintainers' compute host (never shown on the page)
-# the maintainers' queue jobs (flyby/run_queue_mini*.sh) and the registry job each belongs to
-QUEUE = {'ceres:earth,mars': 'flyby-returns', 'vesta:earth,mars': 'flyby-returns', 'psyche:earth,mars': 'flyby-returns',
-         'jupiter:earth,mars': 'flyby-returns', 'earth:jupiter,saturn,mercury': 'flyby-earth', 'earth:ceres,vesta,psyche': 'flyby-earth',
-         'mars:jupiter,saturn': 'flyby-mars', 'mars:ceres,vesta,psyche': 'flyby-mars', 'flyby_mars': 'flyby-mars',
-         'flyby_earth': 'flyby-earth', 'flyby_saturn': 'flyby-saturn', 'cyclers': 'cyclers', 'lowthrust': 'lowthrust'}
+# the maintainers' queue jobs (flyby/run_flyby_mini.sh) and the registry job each belongs to
+QUEUE = {'returns_ceres': 'flyby-returns', 'returns_vesta': 'flyby-returns', 'returns_psyche': 'flyby-returns', 'returns_jupiter': 'flyby-returns',
+         'earth_outer': 'flyby-earth', 'earth_belt': 'flyby-earth', 'earth_near': 'flyby-earth', 'mars_outer': 'flyby-mars', 'mars_belt': 'flyby-mars',
+         'mars_inner': 'flyby-mars', 'saturn_back': 'flyby-saturn', 'cyclers': 'cyclers', 'lowthrust': 'lowthrust'}
 
 def queues():
     """job states, finished units and running jobs on the compute host, or None"""
@@ -22,7 +21,7 @@ def queues():
           "for f in glob.glob('flyby/routes3_*.json'):\n"
           "  try:\n    rs=json.load(open(f))\n  except Exception:\n    continue\n"
           "  for r in rs: print('FLY',r.get('origin'),r.get('target'),r.get('bin'))\n")
-    cmd = ('cd ~/solmaps && for q in queue.log queue2.log; do echo "== $q"; cat $q 2>/dev/null; done; '
+    cmd = ('cd ~/solmaps-flyby && for q in queue.log; do echo "== $q"; cat $q 2>/dev/null; done; '
            f'echo "== fly"; python3 -c "{py}" 2>/dev/null | sort -u; '
            'echo "== screen"; ls ~/solmaps-screen/data/screen_daily 2>/dev/null | grep "^unit_[0-9]*.npz$"; '
            'echo "== screenlog"; tail -1 ~/solmaps-screen/screen.log 2>/dev/null; '
@@ -41,7 +40,7 @@ def queues():
         elif cur:
             sec[cur].append(line)
     states = {}
-    for q in ('queue.log', 'queue2.log'):
+    for q in ('queue.log',):
         for line in sec.get(q, []):
             p = line.split()
             if len(p) >= 4 and p[2] in ('start', 'end'):
@@ -90,10 +89,10 @@ def build():
         verified = sum(1 for n in count.values() if n >= 2)
         runs = [q.get('states', {}).get(k, {}).get('state', 'queued') for k, j in QUEUE.items() if j == job.id]   # planned jobs count as queued
         if job.id == 'transfers':
-            state = 'running' if q.get('daily_running') else 'queued'
+            state = 'done' if len(done) >= len(units) else 'running' if q.get('daily_running') else 'queued'
         elif job.id == 'screening':
             sl = q.get('screen_log', '')
-            state = 'running' if ' start ' in sl else 'paused until the transfer data run finishes' if q.get('daily_running') else 'queued'
+            state = 'done' if len(done) >= len(units) else 'running' if ' start ' in sl else 'queued'
         elif runs:
             state = 'running' if 'running' in runs else 'done' if all(s == 'done' for s in runs) and len(done) >= len(units) else 'queued'
         else:

@@ -11,8 +11,10 @@ PASSES rounds carry a good flight time further along the route. Output per origi
   sun_au [n, date, K]   closest distance to the Sun on the arc, AU (float32)
 
 Run: python -m engine.repair_daily OUT_FOLDER [procs] [origin ...]   (in the solmaps-env container, from /work)
-Then: python -m engine.repair_daily final REPAIRED_FOLDER OUT_FOLDER [procs]   (every option solved at its stored flight time)
+Then: REPAIR_SRC=FIRST_RUN python -m engine.repair_daily final REPAIRED_FOLDER OUT_FOLDER [procs]   (every option solved at its stored flight time)
+One origin through all stages: python -m engine.repair_daily unit BODY [procs]
 """
+import shutil, subprocess
 import math, os, sys, time
 from multiprocessing import Pool
 sys.path.insert(0, '/work/flyby'); sys.path.insert(0, '/work')
@@ -141,9 +143,9 @@ def final_route(args):
                 tof[d, i] = Ts[p]; vinf[d, i, 0] = vd[p]; vinf[d, i, 1] = vr[p]; revs[d, i] = NR[p]; sun[d, i] = S[p] / pk.AU
     return (a, b, tof, vinf, revs, sun, int(spike.sum()))
 
-def main_final(src, out, procs=6):
+def main_final(src, out, procs=6, origins=None):
     os.makedirs(out, exist_ok=True); t = time.time()
-    for a in HELIO:
+    for a in origins or HELIO:
         if os.path.exists(f'{out}/{a}.npz'):
             continue
         d = np.load(f'{src}/{a}.npz'); targets = [str(x) for x in d['targets']]; o = np.load(f'{SRC}/{a}.npz')
@@ -170,9 +172,25 @@ def main(out, procs=8, origins=None):
         os.replace(f'{out}/{a}.tmp.npz', f'{out}/{a}.npz')
         print(f'{a} done, {time.time() - t:.0f} s, solutions through the Sun left out {sum(r[6] for r in res.values())}', flush=True)
 
+def main_unit(a, procs=8):
+    """one origin through all three stages, as a contributor runs it. Scratch folders hold only this run's own results, so an interrupted unit resumes."""
+    global SRC
+    first, rep, last = f'{daily.OUT}_unit/first', f'{daily.OUT}_unit/repaired', f'{daily.OUT}_unit/final'
+    os.makedirs(first, exist_ok=True)
+    if not os.path.exists(f'{first}/{a}.npz'):
+        if os.path.exists(f'{daily.OUT}/{a}.npz'):                  # engine.daily skips an origin whose file exists
+            os.remove(f'{daily.OUT}/{a}.npz')
+        subprocess.run([sys.executable, '-m', 'engine.daily', 'origin', a, str(procs)], check=True)
+        os.replace(f'{daily.OUT}/{a}.npz', f'{first}/{a}.npz')
+    SRC = first
+    main(rep, procs, [a]); main_final(rep, last, procs, [a])
+    os.makedirs(daily.OUT, exist_ok=True); shutil.copy(f'{last}/{a}.npz', f'{daily.OUT}/{a}.npz'); shutil.rmtree(f'{daily.OUT}_unit', ignore_errors=True)
+
 if __name__ == '__main__':
     x = sys.argv[1:]
-    if x[0] == 'final':                                     # python -m engine.repair_daily final REPAIRED_FOLDER OUT_FOLDER [procs]
+    if x[0] == 'unit':                                      # python -m engine.repair_daily unit BODY [procs]
+        main_unit(x[1], int(x[2]) if len(x) > 2 else 8)
+    elif x[0] == 'final':                                     # python -m engine.repair_daily final REPAIRED_FOLDER OUT_FOLDER [procs]
         main_final(x[1], x[2], int(x[3]) if len(x) > 3 else 6)
     else:
         main(x[0], int(x[1]) if len(x) > 1 else 8, x[2:] or None)
