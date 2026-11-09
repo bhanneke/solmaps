@@ -1,6 +1,6 @@
 # solmaps transfer data v0.1: datasheet
 
-Release candidate. Every number names the script that produced it. The Zenodo DOI follows with the release.
+Release 0.1, 2026-11-09, DOI [10.5281/zenodo.24030357](https://doi.org/10.5281/zenodo.24030357). Every number names the script that produced it.
 
 ## Motivation
 
@@ -144,9 +144,9 @@ teaching. Not intended: mission design without higher-fidelity tools (for exampl
 
 ## Distribution and licence
 
-Zenodo (DOI TBD) and Hugging Face (`Deep-Space-Strategy/solmaps-transfers`). Data under CC BY 4.0 and code under MIT
+Zenodo ([10.5281/zenodo.24030357](https://doi.org/10.5281/zenodo.24030357)) and Hugging Face (`Deep-Space-Strategy/solmaps-transfers`). Data under CC BY 4.0 and code under MIT
 (`LICENSE-DATA.md`, `LICENSE`). JPL ephemerides and small-body data keep NASA/JPL's terms; the release archives the exact
-ephemeris files it used (211 MB). Please cite as: Björn Hanneke, solmaps transfer data v0.1, Zenodo, DOI TBD.
+ephemeris files it used (211 MB). Please cite as: Björn Hanneke, solmaps transfer data v0.1 (2026), Zenodo, https://doi.org/10.5281/zenodo.24030357.
 
 ## Maintenance
 

@@ -53,6 +53,9 @@ derives the files the pages use from it.
 ## Citing
 
 Zenodo archives every release with a DOI; `CITATION.cff` gives the citation.
+The transfer data v0.1 (235.7 million options between 30 bodies, 2026–2100) lives on Zenodo,
+[10.5281/zenodo.24030357](https://doi.org/10.5281/zenodo.24030357), and on Hugging Face,
+[Deep-Space-Strategy/solmaps-transfers](https://huggingface.co/datasets/Deep-Space-Strategy/solmaps-transfers); `docs/DATASHEET.md` documents it.
 
 ## Licence
 

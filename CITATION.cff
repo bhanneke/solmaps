@@ -22,3 +22,12 @@ keywords:
   - temporal networks
   - space logistics
   - solar system
+references:
+  - type: dataset
+    title: "solmaps transfer data v0.1"
+    authors:
+      - family-names: Hanneke
+        given-names: Björn
+    year: 2026
+    doi: 10.5281/zenodo.24030357
+    url: "https://doi.org/10.5281/zenodo.24030357"
