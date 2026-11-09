@@ -101,6 +101,8 @@ class HorizonsBody:
         self.t1 = self.rows[-1][0] - 2451544.5
         self.mu_self, self.radius = SMALL_PHYS.get(name, (1.0, 1e3))
     def eph(self, mjd2000):
+        if mjd2000 != mjd2000:                     # NaN from an optimiser's trial point: an invalid state it discards, as for the planets
+            nan = float('nan'); return [nan] * 3, [nan] * 3
         if not self.t0 <= mjd2000 <= self.t1:
             raise ValueError(f'{self.name}: no Horizons states for MJD2000 {mjd2000:.1f} (covered {self.t0:.0f}-{self.t1:.0f})')
         u = (mjd2000 - self.t0) / self.h
