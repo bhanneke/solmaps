@@ -315,7 +315,9 @@ for (const b of HELIO) {
   const big = b.type === 'planet', r = SIZE[b.id] || (b.type === 'asteroid' ? 0.12 : 0.2);
   const color = COLOR[b.id] || 0x9a8f86;
   objs[b.id] = { mesh: addSphere(b.id, r, color), line: addOrbitLine(b.id, big ? 0x5b6884 : 0x3a4560, big ? 0.55 : 0.35), r, kind: b.type };
+  if (b.note) objs[b.id].line.visible = false;
 }
+function syncExtraOrbits() { for (const b of HELIO) if (b.note) objs[b.id].line.visible = state.sel === b.id || (!!state.journey && state.routeFrom === b.id); }
 // saturn rings
 { const ring = new THREE.Mesh(new THREE.RingGeometry(1.9, 3.1, 64), new THREE.MeshBasicMaterial({ color: 0xcdbb8a, side: THREE.DoubleSide, transparent: true, opacity: 0.55 }));
   ring.rotation.x = -Math.PI / 2 + 26.7 * D2R; objs.saturn.mesh.add(ring); }
@@ -341,8 +343,8 @@ for (const b of LAG) { const m = new THREE.Mesh(new THREE.OctahedronGeometry(0.0
 var DOT_TEX = null;
 function cloud(n, gen, color, size, opacity) {
   const g = new THREE.BufferGeometry(); const pos = new Float32Array(n * 3); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  DOT_TEX = DOT_TEX || glowTexture('rgba(255,255,255,1)', 'rgba(255,255,255,0)');   // round particles: plain points draw as squares up close
-  const P = new THREE.Points(g, new THREE.PointsMaterial({ color, size, map: DOT_TEX, sizeAttenuation: true, transparent: true, opacity, depthWrite: false }));
+  if (!DOT_TEX) { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.beginPath(); x.arc(32, 32, 31, 0, 2 * Math.PI); x.fill(); DOT_TEX = new THREE.CanvasTexture(c); }
+  const P = new THREE.Points(g, new THREE.PointsMaterial({ color, size, map: DOT_TEX, alphaTest: 0.5, sizeAttenuation: true, transparent: true, opacity, depthWrite: false }));   // a full disc: round up close, as bright as a plain point from afar
   scene.add(P); const parts = Array.from({ length: n }, gen); return { P, parts };
 }
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -468,7 +470,9 @@ function renderPanel() {
   $('tripTabs').hidden = !trips; $('tripCtl').hidden = !(trips && tab === 'routes');
   for (const t of $('tripTabs').children) t.setAttribute('aria-pressed', String(t.dataset.tab === tab));
   $('panel').innerHTML = b ? dossier(b) : trips ? (tab === 'cargo' ? cargoPanel() : tab === 'journey' ? journeyPanel() : (state.routeFrom ? routesPanel() : routesIntro())) : intro();
-  bindRoutes(); if (trips) { if (tab === 'cargo') bindCargo(); else if (tab === 'journey') bindJourney(); }
+  syncExtraOrbits(); bindRoutes();
+  if (state.hlScroll && state.hl) { const el = $('panel').querySelector(`[data-hl="${state.hl}"]`); if (el) el.closest('.r').scrollIntoView({ block: 'center' }); }
+  if (trips) { if (tab === 'cargo') bindCargo(); else if (tab === 'journey') bindJourney(); }
   $('panel').querySelectorAll('[data-open]').forEach(el => el.addEventListener('click', () => select(el.dataset.open)));
   const back = $('btnBack'); if (back) back.addEventListener('click', () => { select(null); resetView(); });
   $('panel').querySelectorAll('[data-routes]').forEach(el => el.addEventListener('click', () => routesFrom(el.dataset.routes)));
@@ -758,13 +762,16 @@ function syncNetSelects() { $('flightCap').value = state.cap; $('bodySet').value
 const setCap = cap => loadNet(state.bodies, cap);
 async function routesFrom(id) {                            // dossier button: routes from a body, loading all 30 bodies if needed
   if (!NET.nodes.some(n => n.id === id) && !(await loadNet('all', state.cap))) return;
-  state.sel = null; state.follow = null; resetView(); state.journey = true; state.jTab = 'routes'; $('btnJourney').setAttribute('aria-pressed', true);
+  state.sel = null; state.follow = null; resetView(); state.journey = true; state.jTab = 'routes';
+  openPanel(true); $('btnJourney').setAttribute('aria-pressed', true);
   state.routeFrom = id; state.routeMode = 'from'; $('routeMode').value = 'from'; $('routeFrom').value = id; state.hl = null; routeKey = ''; updateRoutes(); renderPanel();
 }
 $('flightCap').addEventListener('change', e => setCap(e.target.value));
 $('bodySet').addEventListener('change', e => loadNet(e.target.value, state.cap));
 $('tBodies').addEventListener('change', e => loadNet(e.target.value, state.cap));
 if (!(DATA.transfer_bodies || []).length) { $('bodySet').hidden = true; $('tBodies').closest('label').hidden = true; }
+else setTimeout(() => { if (state.bodies === 'sites' && !state.bodiesTouched) loadNet('all', state.cap); }, 1500);   // the page opens with the 12 embedded sites, then loads all 30
+$('bodySet').addEventListener('change', () => { state.bodiesTouched = true; }); $('tBodies').addEventListener('change', () => { state.bodiesTouched = true; });
 if (CAPS.length < 2) $('flightCap').hidden = true;      // data without the longer flight-time files
 function fillNodeSelects() {                               // every list of bodies follows the loaded network
   const keep = id => $(id).value;
@@ -1765,4 +1772,17 @@ for (const m of document.querySelectorAll('details.menu')) m.addEventListener('t
 document.addEventListener('pointerdown', e => { for (const m of document.querySelectorAll('details.menu[open]')) if (!m.contains(e.target)) m.open = false; });
 setTimeout(() => document.querySelector('.hint')?.classList.add('gone'), 12000);
 resize(); refreshGlyphs(); setJD(jdOf(TODAY)); renderPanel(); requestAnimationFrame(frame);
+// links into the atlas, e.g. from the Deep Space Strategy library: #route=earth-mars opens the routes from Earth with Mars
+// highlighted; #body=2 opens a body's dossier
+async function openFromHash() {
+  const h = new URLSearchParams(location.hash.slice(1)), route = h.get('route'), body = h.get('body');
+  if (route) {
+    const [a, b] = route.split('-'); if (!BY[a] || !BY[b]) return;
+    await routesFrom(a);
+    const r = routeList.find(x => x.site === b);
+    if (r) { state.hl = r.key; state.hlScroll = true; routeKey = ''; updateRoutes(); renderPanel(); setTimeout(() => { state.hlScroll = false; }, 6000); }   // keeps the row in view through the switch to 30 bodies
+  } else if (body && BY[body]) select(body);
+}
+addEventListener('hashchange', openFromHash);
+if (location.hash.length > 1) openFromHash();
 </script>
