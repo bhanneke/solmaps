@@ -130,7 +130,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
   .brand{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
-.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
+.reach{font-family:var(--f-mono,monospace);font-size:11.5px;color:var(--dim,#8d99b0);margin-left:4px}.reach.never{color:#e0605a}#reachB{font-size:12px;padding:1px 4px}.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
 #dispPop{max-height:70vh;overflow:auto;min-width:280px}
 </style>
 
@@ -1320,13 +1320,26 @@ function groupOf(id) {
   return b && (b.type === 'planet' || id === 'pluto') ? 'Planets' : a > 4.9 && a < 5.6 ? 'Jupiter Trojans' : a > 2.0 && a < 3.6 ? 'Main belt' : 'Near-Earth asteroids';
 }
 const DGROUPS = ['Planets', 'Main belt', 'Near-Earth asteroids', 'Jupiter Trojans'];
+// reach: the share of launch dates 2026-2100 (every tenth day) with a direct route from the network view's starting
+// place that costs at most the chosen budget (departure from its parking orbit plus arrival, as everywhere on this page)
+state.reachB = 8;
+function reachShare(from, to, B) {
+  const r = ROUTES[from + '>' + to]; if (!r) return null;
+  let n = 0, ok = 0; for (let k = 0; k < r.dep.length; k++) { if (r.dep[k] == null) continue; n++; if (r.dep[k] + r.arr[k] <= B) ok++; }
+  return ok / r.dep.length;
+}
+function reachText(v) { return v == null ? '' : v === 0 ? 'never' : v < 0.005 ? '<1%' : Math.round(v * 100) + '%'; }
 function renderDisplay() {
-  const ids = NET.nodes.map(n => n.id), name = id => esc(nodeName(id).replace(/\s*\(.*\)/, ''));
-  $('dispPop').innerHTML = `<div class="grp"><button type="button" data-dall="1">Show all</button></div>` + DGROUPS.map(g => {
+  const ids = NET.nodes.map(n => n.id), name = id => esc(nodeName(id).replace(/\s*\(.*\)/, '')), o = state.jFrom, B = state.reachB;
+  const cell = id => { if (id === o) return '<span class="reach">start</span>'; const v = reachShare(o, id, B); return `<span class="reach${v === 0 ? ' never' : ''}">${reachText(v)}</span>`; };
+  $('dispPop').innerHTML = `<div class="grp"><button type="button" data-dall="1">Show all</button></div>
+    <p class="caveat">Next to each place: on how many launch dates from 2026 to 2100 a direct route from ${esc(nodeName(o))} costs at most
+      <select id="reachB" aria-label="Budget for the reach figures">${[6, 8, 10, 12].map(b => `<option value="${b}" ${b === B ? 'selected' : ''}>${b} km/s</option>`).join('')}</select>
+      (${esc(NET.meta.cap_label || 'classic flights')}). Roughly: up to 6 km/s a chemical stage still carries real payload, 6 to 10 km/s needs staging, refuelling or flybys, above 10 km/s electric propulsion.</p>` + DGROUPS.map(g => {
     const m = ids.filter(id => groupOf(id) === g); if (!m.length) return '';
     const on = m.filter(id => !state.hide.has(id)).length;
     return `<div class="dgrp"><button type="button" data-dgrp="${g}" aria-pressed="${on > 0}">${g} · ${on}/${m.length}</button>
-      <div class="dlist">${m.map(id => `<label><input type="checkbox" data-did="${id}" ${state.hide.has(id) ? '' : 'checked'}> ${name(id)}</label>`).join('')}</div></div>`;
+      <div class="dlist">${m.map(id => `<label><input type="checkbox" data-did="${id}" ${state.hide.has(id) ? '' : 'checked'}> ${name(id)} ${cell(id)}</label>`).join('')}</div></div>`;
   }).join('') + `<p class="caveat">Hidden places leave the network views; journeys may still pass through them.</p>`;
 }
 function applyDisplay() {
@@ -1334,7 +1347,7 @@ function applyDisplay() {
   N3.data = null; N3.coords = null; N3.curve = null; N3.curveKey = null;
   renderDisplay(); if (state.netView) drawNetView(); if (state.net3d) drawNet3d();
 }
-$('dispPop').addEventListener('change', e => { const c = e.target.closest('[data-did]'); if (!c) return; c.checked ? state.hide.delete(c.dataset.did) : state.hide.add(c.dataset.did); applyDisplay(); });
+$('dispPop').addEventListener('change', e => { if (e.target.id === 'reachB') { state.reachB = +e.target.value; renderDisplay(); return; } const c = e.target.closest('[data-did]'); if (!c) return; c.checked ? state.hide.delete(c.dataset.did) : state.hide.add(c.dataset.did); applyDisplay(); });
 $('dispPop').addEventListener('click', e => {
   const g = e.target.closest('[data-dgrp]'), all = e.target.closest('[data-dall]');
   if (all) { state.hide.clear(); applyDisplay(); return; }
@@ -1343,6 +1356,7 @@ $('dispPop').addEventListener('click', e => {
   for (const id of m) anyOn ? state.hide.add(id) : state.hide.delete(id);
   applyDisplay();
 });
+$('mDisplay').addEventListener('toggle', () => { if ($('mDisplay').open) renderDisplay(); });   // figures follow the starting place and the flight-time limit
 renderDisplay();
 function n3matrix(k0) {
   const ids = n3ids(), n = ids.length, T = ids.map(() => new Array(n).fill(NaN)), C = ids.map(() => new Array(n).fill(NaN));
