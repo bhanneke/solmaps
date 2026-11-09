@@ -131,6 +131,8 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
   .brand{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
+#dispPop{max-height:70vh;overflow:auto;min-width:280px}
 </style>
 
 <div id="stage" aria-label="3D view of the solar system"></div>
@@ -146,7 +148,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
   </div></details>
   <button type="button" id="btnJourney" aria-pressed="false">Trips</button>
   <details class="menu" id="mCamera"><summary>Camera</summary><div class="pop"><div class="grp"><button type="button" id="btnTop">Top view</button><button type="button" id="btnReset">Whole system</button><button type="button" id="btnLabels" aria-pressed="true">Labels</button></div></div></details>
-  <div class="grp" id="viewOpts"><span id="n3ctl" class="grp" hidden><select id="n3Color" aria-label="Line colour in the whole-network view"><option value="imbalance">colour = go-return imbalance</option><option value="time">colour = travel time</option><option value="cost">colour = km/s</option></select></span><select id="n3Scale" aria-label="Distance scale in the network views" hidden><option value="log">log scale</option><option value="sqrt">square-root scale</option><option value="linear">linear scale</option></select><select id="nvMetric" aria-label="Distance in the network view" hidden><option value="time">distance = travel time</option><option value="fuel">distance = fuel</option></select></div>
+  <div class="grp" id="viewOpts"><details class="menu" id="mDisplay" hidden><summary>Display</summary><div class="pop" id="dispPop"></div></details><span id="n3ctl" class="grp" hidden><select id="n3Color" aria-label="Line colour in the whole-network view"><option value="imbalance">colour = go-return imbalance</option><option value="time">colour = travel time</option><option value="cost">colour = km/s</option></select></span><select id="n3Scale" aria-label="Distance scale in the network views" hidden><option value="log">log scale</option><option value="sqrt">square-root scale</option><option value="linear">linear scale</option></select><select id="nvMetric" aria-label="Distance in the network view" hidden><option value="time">distance = travel time</option><option value="fuel">distance = fuel</option></select></div>
   <div class="grp datebar"><span class="lbl">Date</span><input type="range" id="dateSlider" min="0" max="1" step="1" aria-label="Date"><span class="date" id="dateOut"></span>
     <select id="speed" aria-label="Playback speed"><option value="0">paused</option><option value="0.00011574">10 seconds per frame</option><option value="0.00069444">1 minute per frame</option><option value="0.006944">10 minutes per frame</option><option value="0.041667" selected>1 hour per frame</option><option value="0.25">6 hours per frame</option><option value="1">1 day per frame</option><option value="5">5 days per frame</option><option value="20">20 days per frame</option></select></div>
   <a class="exp" href="https://bhanneke.github.io/solmaps/how-it-works.html" target="_blank" rel="noopener" title="Orbits are approximations and the display scale is compressed. Click for how it is built.">Experimental · how it is built</a>
@@ -858,7 +860,7 @@ async function loadNet(bodies, cap) {
   const c = NETCACHE[key]; state.cap = cap; state.bodies = bodies;
   NET.routes = c.routes; NET.nodes = c.nodes; NET.meta.method = c.meta.method; NET.meta.cap_label = c.meta.cap_label;
   for (const k of Object.keys(ROUTES)) delete ROUTES[k]; for (const r of NET.routes) ROUTES[r.from + '>' + r.to] = r;
-  resetSites(); fillNodeSelects();
+  resetSites(); fillNodeSelects(); if (typeof renderDisplay === 'function') renderDisplay();
   ARCS = null; TROWS = null; TSTOPS = []; state.jResult = null; state.cResult = null; N3.data = null; N3.coords = null; N3.curve = null; N3.curveKey = null;
   routeKey = ''; updateRoutes(); renderPanel(); if (state.net3d) drawNet3d(); if (state.netView) drawNetView(); if (state.tableView) drawTable();
   $('capMsg').textContent = ''; syncNetSelects(); return true;
@@ -1333,7 +1335,7 @@ function scaleOf(v, fuel) {
   return state.n3Scale === 'sqrt' ? Math.sqrt(x) : x;
 }
 const scaleWords = () => ({ log: 'on a log scale', sqrt: 'on a square-root scale', linear: 'on a linear scale' }[state.n3Scale]);
-const showScale = () => { $('n3Scale').hidden = !(state.netView || state.net3d); };
+const showScale = () => { $('n3Scale').hidden = !(state.netView || state.net3d); $('mDisplay').hidden = !(state.netView || state.net3d); };
 function drawNetView() {
   const svg = $('netview'); if (!state.netView) { svg.style.display = 'none'; return; }
   svg.style.display = 'block';
@@ -1346,7 +1348,7 @@ function drawNetView() {
   const ang = id => { const b = bodyOf(id), st = b && ENG.stateAt(b, state.jd); return st ? Math.atan2(st.r[1], st.r[0]) : 0; };
   const ink = '#dfe5ef', dim = '#8a96ad', grid = '#233049', gold = '#f0b347';
   const pos = {};
-  SITE_IDS.forEach((id, i) => { if (id === state.jFrom) { pos[id] = [cx, cy]; return; } const p = pick[i]; if (!p) return; const a = ang(id), r = rad(val(p)); pos[id] = [cx + r * Math.cos(a), cy - r * Math.sin(a)]; });
+  SITE_IDS.forEach((id, i) => { if (id === state.jFrom) { pos[id] = [cx, cy]; return; } if (!shownNode(id)) return; const p = pick[i]; if (!p) return; const a = ang(id), r = rad(val(p)); pos[id] = [cx + r * Math.cos(a), cy - r * Math.sin(a)]; });
   let g = `<rect width="${W}" height="${H}" fill="#05070d" opacity="0.94"/>`;
   const rings = byTime ? (state.n3Scale === 'log' ? [0.25, 0.5] : []).concat([1, 2, 5, 10, 15, 25]).filter(v => v <= state.jYears) : [2, 5, 10, 15, 20, 30].filter(v => v <= maxV);
   for (const v of rings) g += `<circle cx="${cx}" cy="${cy}" r="${rad(v)}" fill="none" stroke="${grid}"/><text x="${cx + 0.5 * rad(v) + 4}" y="${cy + 0.866 * rad(v) + 4}" font-size="11" fill="${dim}">${byTime && v < 1 ? Math.round(v * 12) + ' months' : v + ' ' + (byTime ? (v === 1 ? 'year' : 'years') : 'km/s')}</text>`;
@@ -1358,6 +1360,7 @@ function drawNetView() {
   const unreached = [], placed = [];
   SITE_IDS.forEach((id, i) => {
     if (i >= NSITE && !activeStations().has(id)) return;
+    if (!shownNode(id)) return;
     if (!pos[id]) { unreached.push(nodeName(id)); return; }
     const [x, y] = pos[id], p = pick[i], isO = id === state.jFrom, stn = id.startsWith('stn');
     const label = isO ? nodeName(id) : `${nodeName(id)} · ${byTime ? val(p).toFixed(1) + ' yr' : p.c.toFixed(1) + ' km/s'}`;
@@ -1412,7 +1415,40 @@ const n3controls = new THREE.OrbitControls(n3camera, N3.canvas); n3controls.enab
 n3scene.add(new THREE.AmbientLight(0xffffff, 0.9));
 const n3nodes = new THREE.Group(), n3edges = new THREE.Group(); n3scene.add(n3edges); n3scene.add(n3nodes);
 
-function n3ids() { const live = activeStations(); return SITE_IDS.filter((id, i) => i < NSITE || live.has(id)); }
+function n3ids() { const live = activeStations(); return SITE_IDS.filter((id, i) => (i < NSITE || live.has(id)) && shownNode(id)); }
+/* ---------- display: which places the two network views show ---------- */
+// The journeys still use every place; the menu only thins out the picture. The choice stays in this browser.
+state.hide = new Set(); try { state.hide = new Set(JSON.parse(localStorage.getItem('solmaps.hide') || '[]')); } catch (e) {}
+const shownNode = id => id.startsWith('stn') || id === state.jFrom || !state.hide.has(id);
+function groupOf(id) {
+  const b = BY[id], a = b && b.orbit ? +b.orbit.semi_major_axis_au : 0;
+  return b && (b.type === 'planet' || id === 'pluto') ? 'Planets' : a > 4.9 && a < 5.6 ? 'Jupiter Trojans' : a > 2.0 && a < 3.6 ? 'Main belt' : 'Near-Earth asteroids';
+}
+const DGROUPS = ['Planets', 'Main belt', 'Near-Earth asteroids', 'Jupiter Trojans'];
+function renderDisplay() {
+  const ids = NET.nodes.map(n => n.id), name = id => esc(nodeName(id).replace(/\s*\(.*\)/, ''));
+  $('dispPop').innerHTML = `<div class="grp"><button type="button" data-dall="1">Show all</button></div>` + DGROUPS.map(g => {
+    const m = ids.filter(id => groupOf(id) === g); if (!m.length) return '';
+    const on = m.filter(id => !state.hide.has(id)).length;
+    return `<div class="dgrp"><button type="button" data-dgrp="${g}" aria-pressed="${on > 0}">${g} · ${on}/${m.length}</button>
+      <div class="dlist">${m.map(id => `<label><input type="checkbox" data-did="${id}" ${state.hide.has(id) ? '' : 'checked'}> ${name(id)}</label>`).join('')}</div></div>`;
+  }).join('') + `<p class="caveat">Hidden places leave the network views; journeys may still pass through them.</p>`;
+}
+function applyDisplay() {
+  try { localStorage.setItem('solmaps.hide', JSON.stringify([...state.hide])); } catch (e) {}
+  N3.data = null; N3.coords = null; N3.curve = null; N3.curveKey = null;
+  renderDisplay(); if (state.netView) drawNetView(); if (state.net3d) drawNet3d();
+}
+$('dispPop').addEventListener('change', e => { const c = e.target.closest('[data-did]'); if (!c) return; c.checked ? state.hide.delete(c.dataset.did) : state.hide.add(c.dataset.did); applyDisplay(); });
+$('dispPop').addEventListener('click', e => {
+  const g = e.target.closest('[data-dgrp]'), all = e.target.closest('[data-dall]');
+  if (all) { state.hide.clear(); applyDisplay(); return; }
+  if (!g) return;
+  const m = NET.nodes.map(n => n.id).filter(id => groupOf(id) === g.dataset.dgrp), anyOn = m.some(id => !state.hide.has(id));
+  for (const id of m) anyOn ? state.hide.add(id) : state.hide.delete(id);
+  applyDisplay();
+});
+renderDisplay();
 function n3matrix(k0) {
   const ids = n3ids(), n = ids.length, T = ids.map(() => new Array(n).fill(NaN)), C = ids.map(() => new Array(n).fill(NaN));
   ids.forEach((a, i) => {
