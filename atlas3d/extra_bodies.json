@@ -1,0 +1,380 @@
+{
+ "fetched": "2026-11-09",
+ "bodies": [
+  {
+   "id": "2",
+   "name": "2 Pallas",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Main-belt Asteroid",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=2&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 2.769559010737709,
+    "eccentricity": 0.2307000995648547,
+    "inclination_deg": 34.93279321851542,
+    "elements": {
+     "a_au": 2.769559010737709,
+     "e": 0.2307000995648547,
+     "i_deg": 34.93279321851542,
+     "node_deg": 172.8866193357694,
+     "arg_peri_deg": 310.9699161652136,
+     "M_deg": 254.2496521742734,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "10",
+   "name": "10 Hygiea",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Main-belt Asteroid",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=10&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 3.150974033963701,
+    "eccentricity": 0.1067092741240963,
+    "inclination_deg": 3.829529946447122,
+    "elements": {
+     "a_au": 3.150974033963701,
+     "e": 0.1067092741240963,
+     "i_deg": 3.829529946447122,
+     "node_deg": 283.1198927508594,
+     "arg_peri_deg": 312.4242387344704,
+     "M_deg": 252.0344242359649,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "24",
+   "name": "24 Themis",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Main-belt Asteroid",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=24&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 3.143997721720467,
+    "eccentricity": 0.115379978796777,
+    "inclination_deg": 0.7366196417446064,
+    "elements": {
+     "a_au": 3.143997721720467,
+     "e": 0.115379978796777,
+     "i_deg": 0.7366196417446064,
+     "node_deg": 36.39075346960584,
+     "arg_peri_deg": 109.2217643897621,
+     "M_deg": 92.01695639431603,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "3",
+   "name": "3 Juno",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Main-belt Asteroid",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=3&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 2.670989527103278,
+    "eccentricity": 0.2556999836681878,
+    "inclination_deg": 12.98659236598085,
+    "elements": {
+     "a_au": 2.670989527103278,
+     "e": 0.2556999836681878,
+     "i_deg": 12.98659236598085,
+     "node_deg": 169.8115953492418,
+     "arg_peri_deg": 247.8950743075613,
+     "M_deg": 262.7322944883855,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "99942",
+   "name": "99942 Apophis",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Aten",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=99942&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 0.9223592206975018,
+    "eccentricity": 0.1911492279663492,
+    "inclination_deg": 3.340996879880978,
+    "elements": {
+     "a_au": 0.9223592206975018,
+     "e": 0.1911492279663492,
+     "i_deg": 3.340996879880978,
+     "node_deg": 203.8936514240762,
+     "arg_peri_deg": 126.6795706895841,
+     "M_deg": 175.3304026592739,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "65803",
+   "name": "65803 Didymos",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Apollo",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=65803&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 1.642709608529702,
+    "eccentricity": 0.3831233242624545,
+    "inclination_deg": 3.413876519313629,
+    "elements": {
+     "a_au": 1.642709608529702,
+     "e": 0.3831233242624545,
+     "i_deg": 3.413876519313629,
+     "node_deg": 72.9858236207145,
+     "arg_peri_deg": 319.5807001349104,
+     "M_deg": 260.8612886320632,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "25143",
+   "name": "25143 Itokawa",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Apollo",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=25143&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 1.324052284342771,
+    "eccentricity": 0.2801776414987972,
+    "inclination_deg": 1.620940810523569,
+    "elements": {
+     "a_au": 1.324052284342771,
+     "e": 0.2801776414987972,
+     "i_deg": 1.620940810523569,
+     "node_deg": 69.07449749929083,
+     "arg_peri_deg": 162.8409022415483,
+     "M_deg": 170.653905937934,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "341843",
+   "name": "2008 EV5",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Aten",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=341843&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 0.9597666157323917,
+    "eccentricity": 0.08289135234564231,
+    "inclination_deg": 7.447864888634731,
+    "elements": {
+     "a_au": 0.9597666157323917,
+     "e": 0.08289135234564231,
+     "i_deg": 7.447864888634731,
+     "node_deg": 93.18792074829541,
+     "arg_peri_deg": 235.9306323569786,
+     "M_deg": 332.501162376447,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "175706",
+   "name": "1996 FG3",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Apollo",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=175706&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 1.054888537713788,
+    "eccentricity": 0.3501936262880359,
+    "inclination_deg": 1.972616813185401,
+    "elements": {
+     "a_au": 1.054888537713788,
+     "e": 0.3501936262880359,
+     "i_deg": 1.972616813185401,
+     "node_deg": 299.4691274128914,
+     "arg_peri_deg": 24.07594895179171,
+     "M_deg": 218.5654807288887,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "4660",
+   "name": "4660 Nereus",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Apollo",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=4660&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 1.485112611970113,
+    "eccentricity": 0.3587435768252949,
+    "inclination_deg": 1.453541710528756,
+    "elements": {
+     "a_au": 1.485112611970113,
+     "e": 0.3587435768252949,
+     "i_deg": 1.453541710528756,
+     "node_deg": 313.105557499926,
+     "arg_peri_deg": 159.5568090407644,
+     "M_deg": 158.7251334482576,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "3548",
+   "name": "3548 Eurybates",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Jupiter Trojan",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=3548&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 5.217371617810976,
+    "eccentricity": 0.09059867172297777,
+    "inclination_deg": 8.05147293527498,
+    "elements": {
+     "a_au": 5.217371617810976,
+     "e": 0.09059867172297777,
+     "i_deg": 8.05147293527498,
+     "node_deg": 43.5587275998936,
+     "arg_peri_deg": 28.69968222483612,
+     "M_deg": 125.7480299363769,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "15094",
+   "name": "15094 Polymele",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Jupiter Trojan",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=15094&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 5.191514133435046,
+    "eccentricity": 0.09592245810512318,
+    "inclination_deg": 12.97735158439746,
+    "elements": {
+     "a_au": 5.191514133435046,
+     "e": 0.09592245810512318,
+     "i_deg": 12.97735158439746,
+     "node_deg": 50.33105662992578,
+     "arg_peri_deg": 5.86529887136951,
+     "M_deg": 143.4220008064438,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "11351",
+   "name": "11351 Leucus",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Jupiter Trojan",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=11351&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 5.312382832170665,
+    "eccentricity": 0.06495789797701287,
+    "inclination_deg": 11.54341670108032,
+    "elements": {
+     "a_au": 5.312382832170665,
+     "e": 0.06495789797701287,
+     "i_deg": 11.54341670108032,
+     "node_deg": 251.0799335752079,
+     "arg_peri_deg": 162.4048390063255,
+     "M_deg": 139.1721755085774,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "21900",
+   "name": "21900 Orus",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Jupiter Trojan",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=21900&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 5.123374239403683,
+    "eccentricity": 0.03672540559818106,
+    "inclination_deg": 8.468580378470353,
+    "elements": {
+     "a_au": 5.123374239403683,
+     "e": 0.03672540559818106,
+     "i_deg": 8.468580378470353,
+     "node_deg": 258.5504431073313,
+     "arg_peri_deg": 182.7884930129634,
+     "M_deg": 96.92267457127365,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  },
+  {
+   "id": "617",
+   "name": "617 Patroclus",
+   "type": "asteroid",
+   "parent": "Sun",
+   "class": "Jupiter Trojan",
+   "orbit": {
+    "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=617&full-prec=1",
+    "verification": "fetched",
+    "table": "JPL Small-Body Database API (full precision), heliocentric ecliptic J2000",
+    "semi_major_axis_au": 5.205975173988769,
+    "eccentricity": 0.1391467916238868,
+    "inclination_deg": 22.06359071054631,
+    "elements": {
+     "a_au": 5.205975173988769,
+     "e": 0.1391467916238868,
+     "i_deg": 22.06359071054631,
+     "node_deg": 44.34968792774898,
+     "arg_peri_deg": 308.8377281363527,
+     "M_deg": 58.67543160284279,
+     "epoch_jd_tdb": 2461200.5
+    }
+   },
+   "note": "listed for its transfers; the resource atlas has no entry for it"
+  }
+ ]
+}

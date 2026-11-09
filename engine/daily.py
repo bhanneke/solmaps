@@ -189,17 +189,34 @@ def main(procs=8, origins=None):
 CAPS = [('classic', None, 'classic flights, up to 2.5 Hohmann times'), ('10y', 10 * 365.25, 'flights up to 10 years'),
         ('30y', 30 * 365.25, 'flights up to 30 years'), ('100y', 100 * 365.25, 'flights up to 100 years')]
 
-def derive_pages(step=10):
+def pack_delta(r):
+    """route arrays as differences from the previous value (hundredths of km/s, whole days), skipping gaps; the 3D atlas
+    decodes them (decodeNet). Smooth series compress about twice as well this way."""
+    out = {'from': r['from'], 'to': r['to']}
+    for f, s in (('dep', 100), ('arr', 100), ('tof', 1)):
+        prev, d = 0, []
+        for x in r[f]:
+            if x is None:
+                d.append(None); continue
+            v = round(x * s); d.append(v - prev); prev = v
+        out[f] = d
+    return out
+
+def derive_pages(step=10, places=None):
     """the 12-site, 10-day files the pages and the 10-day engine data use, from the daily data: network/network.json
     (cheapest priced transfer per route and date among classic flights, the pages' default), network/network_<cap>.json
     for the longer flight-time limits in CAPS, and data/alternatives.npz (all alternatives). Within a limit the cheapest
     stored alternative is the slowest one under it, since the alternatives form a Pareto set of flight time against cost."""
     import bodies
     atlas = bodies.load_atlas(); names = {x['id']: x['name'] for x in atlas['bodies']}
+    extra = '/work/atlas3d/extra_bodies.json'                       # bodies the resource atlas does not list (Pallas, the Trojans, ...)
+    if os.path.exists(extra):
+        names.update({x['id']: x['name'] for x in json.load(open(extra))['bodies'] if x['id'] not in names})
+    places = places or SITES; full = places == HELIO; prefix = 'network30' if full else 'network'
     routes = {c: [] for c, _, _ in CAPS}; alt, pairs = [], []
-    for a in SITES:
+    for a in places:
         d = np.load(f'{OUT}/{a}.npz'); tg = list(d['targets'])
-        for b in SITES:
+        for b in places:
             if a == b:
                 continue
             i = tg.index(b)
@@ -211,24 +228,26 @@ def derive_pages(step=10):
                 lim = g[NTOF - 1] * 1.0001 if limit is None else limit          # classic: the end of the base grid
                 tot = np.where(np.isnan(T) | (T > lim), np.inf, dep + arr); k = tot.argmin(axis=1); ok = np.isfinite(tot.min(axis=1))
                 n = np.arange(len(k))
-                routes[cap].append({'from': a, 'to': b,
-                                    'dep': [round(float(x), 2) if o else None for x, o in zip(dep[n, k], ok)],
-                                    'arr': [round(float(x), 2) if o else None for x, o in zip(arr[n, k], ok)],
-                                    'tof': [round(float(x)) if o else None for x, o in zip(T[n, k], ok)]})
-            alt.append(np.concatenate([T[..., None], V], axis=-1).astype(np.float32)); pairs.append(f'{a}>{b}')
+                r = {'from': a, 'to': b, 'dep': [round(float(x), 2) if o else None for x, o in zip(dep[n, k], ok)],
+                     'arr': [round(float(x), 2) if o else None for x, o in zip(arr[n, k], ok)],
+                     'tof': [round(float(x)) if o else None for x, o in zip(T[n, k], ok)]}
+                routes[cap].append(pack_delta(r) if full else r)
+            if not full:
+                alt.append(np.concatenate([T[..., None], V], axis=-1).astype(np.float32)); pairs.append(f'{a}>{b}')
     n = len(routes['classic'][0]['dep'])
     for cap, limit, label in CAPS:
         out = {'meta': {'built': time.strftime('%Y-%m-%d'), 'jd0': JD0, 'step_days': step, 'n': n, 'tof_steps': NTOF + NMULTI + NLONG,
-                        'cap': cap, 'cap_label': label, 'caps': [[c, l] for c, _, l in CAPS],
+                        'cap': cap, 'cap_label': label, 'caps': [[c, l] for c, _, l in CAPS], **({'packed': 'delta'} if full else {}),
                         'ephemeris': 'JPL DE440 for planets (Horizons DE441 barycentres after 2149); daily JPL Horizons states for small bodies',
                         'method': f'Cheapest of the daily transfer alternatives (engine/daily.py) among {label}: Lambert transfers (pykep) '
                                   'with every number of revolutions around the Sun the flight time allows. Departure and arrival burns from '
                                   'the stated parking orbits via the Oberth relation sqrt(vinf^2 + 2mu/r) - sqrt(mu/r); small bodies use '
                                   'rendezvous vinf. Impulsive burns, no gravity assists, no low-thrust.'},
-               'nodes': [{'id': k, 'name': names[k], 'park': end_state(k)['label']} for k in SITES], 'routes': routes[cap]}
-        name = 'network.json' if cap == 'classic' else f'network_{cap}.json'
+               'nodes': [{'id': k, 'name': names[k], 'park': end_state(k)['label']} for k in places], 'routes': routes[cap]}
+        name = f'{prefix}.json' if cap == 'classic' else f'{prefix}_{cap}.json'
         json.dump(out, open(f'/work/network/{name}', 'w'), separators=(',', ':'))
-    np.savez_compressed('/work/data/alternatives.npz', alt=np.stack(alt), pairs=np.array(pairs), jd0=JD0, step=step, k=K)
+    if not full:
+        np.savez_compressed('/work/data/alternatives.npz', alt=np.stack(alt), pairs=np.array(pairs), jd0=JD0, step=step, k=K)
     print('pages: routes', len(routes['classic']), 'dates', n, 'flight-time limits', [c for c, _, _ in CAPS])
 
 def derive_options(step=10, src=None):
@@ -254,8 +273,8 @@ def derive_options(step=10, src=None):
     print('options: routes', len(SITES) * (len(SITES) - 1), 'from', src)
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == 'pages':
-        derive_pages()
+    if len(sys.argv) > 1 and sys.argv[1] == 'pages':               # python -m engine.daily pages [all]: 12 sites, or all 30 bodies (network30*.json)
+        derive_pages(places=HELIO if sys.argv[2:] == ['all'] else None)
     elif len(sys.argv) > 1 and sys.argv[1] == 'options':         # python -m engine.daily options [daily folder]
         derive_options(src=sys.argv[2] if len(sys.argv) > 2 else None)
     elif len(sys.argv) > 2 and sys.argv[1] == 'origin':          # python -m engine.daily origin <body> [procs]

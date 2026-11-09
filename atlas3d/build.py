@@ -3,6 +3,9 @@ here = pathlib.Path(__file__).parent
 root = here.parent
 j = lambda o: json.dumps(o, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
 data = json.load(open(root / 'atlas' / 'atlas_dataset.json'))
+extra = json.load(open(here / 'extra_bodies.json'))['bodies']          # atlas3d/fetch_extra_bodies.py: Pallas, the Trojans, ...
+data['bodies'] += [b for b in extra if b['id'] not in {x['id'] for x in data['bodies']}]
+data['transfer_bodies'] = [n['id'] for n in json.load(open(root / 'network' / 'network30.json'))['nodes']] if (root / 'network' / 'network30.json').exists() else []
 net = json.load(open(root / 'network' / 'network.json'))
 flyby = []
 for p in sorted((root / 'flyby').glob('routes2_*.json')):
