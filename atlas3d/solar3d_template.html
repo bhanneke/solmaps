@@ -694,6 +694,7 @@ function updateRoutes() {
     if (f.ship.visible && f.samples) f.ship.position.copy(S(sampleAt(f.samples, state.jd)));
     else if (f.ship.visible && f.legs) { const l = f.legs.find(x => state.jd <= x.jd + x.tof) || f.legs[f.legs.length - 1]; f.ship.position.copy(S(arcAt(l.el, Math.max(0, state.jd - l.jd)))); }
     else if (f.ship.visible) f.ship.position.copy(S(arcAt(f.el, t)));
+    if (f.ship.visible) flybyOffset(f, f.ship.position);
     if (f.group) f.group.children.forEach(c => { c.material.opacity = t > f.tof ? 0.25 : 0.95; });
     else f.line.material.opacity = t > f.tof ? 0.25 : 0.95;
   }
@@ -898,7 +899,27 @@ function ride(list) {
   $('rideHud').hidden = false; $('ridePause').textContent = 'Pause'; $('rideCam').textContent = 'Free camera'; controls.enabled = false;
   if (innerWidth < 820) openPanel(false);
 }
-function endRide() { state.ride = null; $('rideHud').hidden = true; controls.enabled = true; routeGroup.visible = true; }
+// The planets are drawn far larger than true scale, so on a close flyby the ship's path runs through the sphere. Near a
+// flyby the body shrinks to at most half its size as the ship comes near, and the ship is drawn just outside its surface,
+// so it skims past the planet; both return to normal after the pass. The destination keeps its size.
+const FLYBY_MIN = 0.5, FLYBY_CLEAR = 1.25;
+function flybyOffset(f, P) {
+  for (const s of (f && f.stops) || []) {
+    const o = objs[s.id], q = pos3[s.id]; if (!s.fly || !o || !q) continue;
+    const v = P.clone().sub(q), d = v.length(), rMin = FLYBY_CLEAR * FLYBY_MIN * o.r;
+    if (d < rMin) P.copy(q.clone().add(d > 1e-9 ? v.multiplyScalar(rMin / d) : new THREE.Vector3(rMin, 0, 0)));
+  }
+  return P;
+}
+function shrinkForFlyby(f, P) {
+  for (const o of Object.values(objs)) if (o._shrunk) { o.mesh.scale.setScalar(1); o._shrunk = false; }
+  for (const s of (f && f.stops) || []) {
+    const o = objs[s.id], q = pos3[s.id]; if (!s.fly || !o || !q) continue;
+    const sc = Math.min(1, Math.max(FLYBY_MIN, P.distanceTo(q) / (FLYBY_CLEAR * o.r)));
+    if (sc < 1) { o.mesh.scale.setScalar(sc); o._shrunk = true; }
+  }
+}
+function endRide() { shrinkForFlyby(null); state.ride = null; $('rideHud').hidden = true; controls.enabled = true; routeGroup.visible = true; }
 $('ridePause').onclick = () => { const r = state.ride; if (!r) return; if (r.done) { r.done = false; r.i = 0; setJD(r.list[0].jdDep); } r.paused = !r.paused; $('ridePause').textContent = r.paused ? 'Play' : 'Pause'; };
 $('rideCam').onclick = () => { const r = state.ride; if (!r) return; r.cam = r.cam === 'ship' ? 'free' : 'ship'; controls.enabled = r.cam === 'free'; $('rideCam').textContent = r.cam === 'ship' ? 'Free camera' : 'Ship view'; };
 $('rideEnd').onclick = endRide;
@@ -915,10 +936,11 @@ function rideStep() {
     }
     setJD(jd);
   }
-  const g = r.list[r.i], a = flightAU(g, Math.min(state.jd, g.jdDep + g.tof)), P = S(a);
+  const g = r.list[r.i], a = flightAU(g, Math.min(state.jd, g.jdDep + g.tof)), P = flybyOffset(g, S(a));
   const ahead = S(flightAU(g, Math.min(state.jd + Math.max(0.5, g.tof / 400), g.jdDep + g.tof)));
   const d = ahead.clone().sub(P); if (d.lengthSq() > 1e-10) r.dir.lerp(d.normalize(), 0.2).normalize();
   if (g.ship.visible) g.ship.lookAt(P.clone().add(r.dir));
+  shrinkForFlyby(g, P);
   const g2 = r.list[r.i], st2 = (g2.stops || []).find(x => x.jd >= state.jd - 0.5 * encWin(g2)) || null;
   const w2 = r.done ? 1 : st2 && pos3[st2.id] ? encWeight(st2.jd - state.jd, encWin(g2)) : 0;
   const Q = r.done ? pos3[g2.to] : st2 && pos3[st2.id];
