@@ -221,9 +221,9 @@ def main():
     budget = dict(islands=int(sys.argv[5]), gens=int(sys.argv[6]), pop=int(sys.argv[7]), evolves=int(sys.argv[8]))
     starts = int(sys.argv[9]) if len(sys.argv) > 9 else 3
     width, out = 2, []
-    tag = f'{origin}_{"_".join(targets)}_{first}_{last}'
+    rerun = int(os.environ.get('FLYBY_RERUN', '0'))         # an independent second run: other seeds, its own file (verification)
+    tag = f'{origin}_{"_".join(targets)}_{first}_{last}' + (f'_rerun{rerun}' if rerun else '')
     path = f'/work/flyby/routes3_{tag}.json'
-    import os
     if os.path.exists(path):                      # resume an interrupted run
         out = json.load(open(path))
     done = {(r['target'], r['bin'], '-'.join(r['seq']), r['arrival']) for r in out}
@@ -239,7 +239,7 @@ def main():
                     t = time.time()
                     # optimizer_study*.log: three independent runs, five for two-flyby sequences (the least reliable)
                     n = starts + (9 if len(seq) > 3 else 0)      # two-flyby sequences: 12 starts beat 5 on five of six test routes
-                    runs = [solve(seq, t0, arrival, seed=y * 100 + k, **budget) for k in range(n)]
+                    runs = [solve(seq, t0, arrival, seed=y * 100 + k + 1_000_000 * rerun, **budget) for k in range(n)]
                     r = min(runs, key=lambda s: s['dv'])
                     r.update(origin=origin, target=tgt, bin=f'{y}-{y + width - 1}', feasible=bool(r['dv'] < OUT_OF_RANGE),
                              starts_dv=[s['dv'] for s in runs], seconds=round(time.time() - t, 1))

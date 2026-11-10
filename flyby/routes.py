@@ -19,6 +19,12 @@ def park_burn(vinf, node):                   # km/s, burn between the node's end
 
 A = {'mercury': 0.387, 'venus': 0.723, 'earth': 1.0, 'mars': 1.524, 'ceres': 2.77, 'vesta': 2.36, 'psyche': 2.92, 'jupiter': 5.20, 'saturn': 9.54,
      '433': 1.458, '101955': 1.126, '162173': 1.191}
+def _all_axes():                             # every other body of the transfer data (Pallas, the Trojans, Uranus, ...): SBDB or atlas value
+    from engine.conventions import HELIO
+    from engine.daily import semi_major_axis
+    for b in HELIO:
+        A.setdefault(b, float(semi_major_axis(b)))
+_all_axes()
 def hohmann_days(a1, a2):
     at = (a1 + a2) / 2
     return math.pi * math.sqrt(at ** 3 / 2.9591220828e-4)
