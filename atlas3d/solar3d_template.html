@@ -130,7 +130,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
   .brand{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
-.reach{font-family:var(--f-mono,monospace);font-size:11.5px;color:var(--dim,#8d99b0);margin-left:4px}.reach.never{color:#e0605a}#reachB{font-size:12px;padding:1px 4px}.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
+.reach{font-family:var(--f-mono,monospace);font-size:11.5px;color:var(--dim,#8d99b0);margin-left:4px}.reach.never{color:#e0605a}#reachB{font-size:12px;padding:1px 4px}.mh{font-size:16px;margin:2px 0 8px}.mstop{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end;margin:8px 0;padding:8px;border:1px solid var(--rule);border-radius:8px}.mstop label{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--dim)}.mstop input[type=number]{width:6.5em}.mchk{flex-direction:row!important;align-items:center;gap:6px!important}#missionView .tfilters{margin:6px 0}#missionView .tfilters input[type=date]{background:var(--deck-solid);border:1px solid var(--rule);border-radius:4px;padding:3px 6px;color:inherit}.primary{border-color:var(--sun)!important;color:var(--sun)}.warn{color:#e0905a}.myrs{display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end}.myr{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;padding:2px 3px;min-width:22px}.myr span{display:block;width:12px;background:#f2b84b;border-radius:2px}.myr[disabled]{opacity:.35}.myr[aria-pressed=true]{border-color:var(--sun)}#missionView .kpis{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}#missionView .kpi{border:1px solid var(--rule);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;font-size:12px;color:var(--dim)}#missionView .kpi b{font-size:15px;color:var(--ink,#dfe5ef);font-family:var(--f-mono,monospace)}.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
 #dispPop{max-height:70vh;overflow:auto;min-width:280px}
 </style>
 
@@ -141,7 +141,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
 
 <header class="top">
   <div class="brand"><span style="color:var(--sun);font-size:.62em;letter-spacing:.12em;display:block;line-height:1">DEEP SPACE STRATEGY · GEOGRAPHY AND TOPOLOGY</span>3D Atlas</div>
-  <div class="grp seg" role="group" aria-label="View"><button type="button" id="btnAtlas" aria-pressed="true">3D atlas</button><button type="button" id="btnNet" aria-pressed="false">Network</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button><button type="button" id="btnTable" aria-pressed="false">Table</button><button type="button" id="btnTrade" aria-pressed="false">Trade-offs</button></div>
+  <div class="grp seg" role="group" aria-label="View"><button type="button" id="btnAtlas" aria-pressed="true">3D atlas</button><button type="button" id="btnNet" aria-pressed="false">Network</button><button type="button" id="btnNet3" aria-pressed="false">Whole network</button><button type="button" id="btnTable" aria-pressed="false">Table</button><button type="button" id="btnTrade" aria-pressed="false">Trade-offs</button><button type="button" id="btnMission" aria-pressed="false">Missions</button></div>
   <details class="menu" id="mLayers"><summary>Resources</summary><div class="pop">
     <div><span class="lbl">Resources</span><div id="chips" class="grp"></div><select id="evMin" aria-label="Minimum evidence"><option value="0">all evidence</option><option value="1">inferred and better</option><option value="2">strong and better</option><option value="3">confirmed only</option></select></div>
   </div></details>
@@ -169,6 +169,28 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
   <figure class="xsurf"><figcaption>Cost surface: wait before leaving (left to right), flight time (front to back, log scale), cost (height and colour); the ring marks the best option for the price of time. Drag to turn.</figcaption><div id="xC"></div></figure>
   <div class="xlegend"><span>cheapest</span><span class="xramp"></span><span id="xRampHi"></span></div>
   <div id="xTip" class="n3tip" hidden></div>
+</section>
+<section id="missionView" class="tview" hidden aria-label="Mission planner">
+  <h2 class="mh">Mission planner</h2>
+  <div class="tfilters">
+    <label>Ship <select id="mPreset"></select></label>
+    <label>Dry mass, t <input id="mDry" type="number" min="0" step="1"></label><label>Payload, t <input id="mPay" type="number" min="0" step="1"></label>
+    <label>Tank, t <input id="mTank" type="number" min="0" step="1"></label><label>Thrust, kN <input id="mThrust" type="number" min="0" step="1"></label>
+    <label>Exhaust, Isp s <input id="mIsp" type="number" min="1" step="10"></label><label class="mchk"><input type="checkbox" id="mCrew"> crew</label>
+    <label>Crew: years per leg <input id="mLegYears" type="number" min="0" step="0.5" value="3"></label><label>Reserve, t <input id="mReserve" type="number" min="0" step="0.5" value="0"></label>
+  </div>
+  <div class="tfilters">
+    <label>Start at <select id="mFrom"></select></label>
+    <label>The rocket brings the ship <select id="mStart"><option value="orbit">to low orbit (the ship departs from there)</option><option value="escape">to escape (the ship adds the excess speed)</option><option value="launcher">all the way (the rocket supplies the departure)</option></select></label>
+    <label>Earliest launch <input id="mEarliest" type="date" min="2026-11-01" max="2100-12-31"></label><label>Latest end <input id="mLatest" type="date" min="2026-11-01" max="2100-12-31"></label>
+  </div>
+  <div id="mStops"></div>
+  <div class="tfilters"><button type="button" id="mAdd">Add a stop</button>
+    <label class="mchk"><input type="checkbox" id="mReturn" checked> return to the start</label>
+    <label>Arrive back <select id="mRetHow"><option value="aero">braking in the atmosphere</option><option value="orbit">into low orbit</option><option value="loose">into a loose orbit</option></select></label>
+    <button type="button" id="mPlan" class="primary">Plan the mission</button></div>
+  <p class="caveat" id="mMsg"></p>
+  <div id="mOut"></div>
 </section>
 <section id="tableView" class="tview" hidden aria-label="Trip options as a table">
   <div class="tfilters">
@@ -198,6 +220,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
 <script id="net-data" type="application/json">/*NET*/</script>
 <script id="fb-data" type="application/json">/*FLYBY*/</script>
 <script id="stn-journey" type="application/json">/*STNJ*/</script>
+<script id="mission-data" type="application/json">/*MISSION_DATA*/</script>
 <script>/*ENGINE*/</script>
 <script>
 const DATA = JSON.parse(document.getElementById('atlas-data').textContent);
@@ -1836,3 +1859,4 @@ async function openFromHash() {
 addEventListener('hashchange', openFromHash);
 if (location.hash.length > 1) openFromHash();
 </script>
+<script>/*MISSION_JS*/</script>

@@ -32,5 +32,16 @@ stj = {'epoch_jd': pairs['epoch_jd'], 'step_days': pairs['step_days'], 'sites': 
        'ns': {k: [pairs['node_site'][k][i] for i in sub] for k in ('cost', 'tof')},
        'sn': {k: [[row[i] for i in sub] for row in pairs['site_node'][k]] for k in ('cost', 'tof')}}
 html = html.replace('/*ATLAS_DATA*/', j(data)).replace('/*NET*/', j(net)).replace('/*FLYBY*/', j(flyby)).replace('/*ENGINE*/', (root / 'network' / 'engine.js').read_text()).replace('/*STNJ*/', j(stj))
+# mission planner: its own script and data (parking orbits, aerocapture limits as flyby/routes3.AERO, ship presets)
+import sys; sys.path.insert(0, str(root))
+from engine.conventions import PARKING, HELIO
+from engine.ship import PRESETS
+pidx = json.load(open(root / 'network' / 'planner' / 'index.json')) if (root / 'network' / 'planner' / 'index.json').exists() else {'jd0': 2461345.5, 'step_days': 10, 'dates': 2709, 'k': 10}
+mission = {'hub': 'https://huggingface.co/datasets/Deep-Space-Strategy/solmaps-transfers/resolve/main/planner/v0.1',
+           'jd0': pidx['jd0'], 'step_days': pidx['step_days'], 'dates': pidx['dates'], 'k': pidx['k'], 'bodies': list(HELIO),
+           'parking': {k: {'mu': v['mu'], 'r': v['r'], 'label': v['label']} for k, v in PARKING.items()},
+           'aero': {'earth': {'vinf_max': 6.0, 'trim': 0.1}, 'mars': {'vinf_max': 7.0, 'trim': 0.1}}, 'a_continuous': 4e-3,
+           'presets': {k: v.to_dict() for k, v in PRESETS.items()}}
+html = html.replace('/*MISSION_DATA*/', j(mission)).replace('/*MISSION_JS*/', (here / 'mission.js').read_text())
 (here / 'solar-system-3d.html').write_text(html)
 print('built', len(html), 'bytes;', len(flyby), 'flyby routes;', sum('path' in r for r in flyby), 'with sampled trajectories')
