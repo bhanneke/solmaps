@@ -45,3 +45,4 @@ engine/fortran/screen_unit
 engine/fortran/*.mod
 engine/fortran/flyby_fit.so
 network/network30*.json
+network/planner/

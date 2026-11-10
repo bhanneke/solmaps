@@ -272,9 +272,33 @@ def derive_options(step=10, src=None):
                       open(f'/work/network/options/{a}_{b}.json', 'w'), separators=(',', ':'))
     print('options: routes', len(SITES) * (len(SITES) - 1), 'from', src)
 
+def derive_planner(step=10, src=None, out='/work/network/planner'):
+    """the mission planner's leg data: for every ordered pair of the 30 bodies and every tenth day, every stored option as
+    flight time and the two excess speeds, so the planner prices each end itself (parking orbit, planet edge, aerocapture).
+    Binary, little-endian uint16, shape (dates, K, 3): days, vinf at departure x 100, vinf at arrival x 100 (km/s); 65535
+    marks an empty slot. Plus index.json. The planner loads only the routes a mission uses (about 160 kB each)."""
+    src = src or OUT
+    os.makedirs(out, exist_ok=True); routes = []
+    for a in HELIO:
+        d = np.load(f'{src}/{a}.npz'); tg = [str(x) for x in d['targets']]
+        for i, b in enumerate(tg):
+            T = d['tof'][i, ::step].astype(np.float64); V = d['vinf'][i, ::step].astype(np.float64)
+            arr = np.full(T.shape + (3,), 65535, np.uint16); ok = np.isfinite(T)
+            arr[..., 0][ok] = np.clip(np.round(T[ok]), 0, 65534)
+            arr[..., 1][ok] = np.clip(np.round(V[..., 0][ok] * 100), 0, 65534)
+            arr[..., 2][ok] = np.clip(np.round(V[..., 1][ok] * 100), 0, 65534)
+            arr.astype('<u2').tofile(f'{out}/{a}_{b}.bin'); routes.append(f'{a}_{b}')
+            n = T.shape[0]
+    json.dump({'source': 'solmaps transfer data v0.1, https://doi.org/10.5281/zenodo.24030357', 'jd0': JD0, 'step_days': step, 'dates': n,
+               'k': K, 'layout': 'uint16 little-endian [date][option][days, vinf_dep*100, vinf_arr*100], 65535 = empty',
+               'bodies': list(HELIO), 'routes': routes}, open(f'{out}/index.json', 'w'), indent=1)
+    print('planner: routes', len(routes), 'dates', n, 'to', out)
+
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'pages':               # python -m engine.daily pages [all]: 12 sites, or all 30 bodies (network30*.json)
         derive_pages(places=HELIO if sys.argv[2:] == ['all'] else None)
+    elif len(sys.argv) > 1 and sys.argv[1] == 'planner':           # python -m engine.daily planner
+        derive_planner()
     elif len(sys.argv) > 1 and sys.argv[1] == 'options':         # python -m engine.daily options [daily folder]
         derive_options(src=sys.argv[2] if len(sys.argv) > 2 else None)
     elif len(sys.argv) > 2 and sys.argv[1] == 'origin':          # python -m engine.daily origin <body> [procs]
