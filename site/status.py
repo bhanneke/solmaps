@@ -88,6 +88,8 @@ def build():
         count = {u: (1 if u in mine else 0) + theirs.get(u, 0) for u in done}
         verified = sum(1 for n in count.values() if n >= 2)
         runs = [q.get('states', {}).get(k, {}).get('state', 'queued') for k, j in QUEUE.items() if j == job.id]   # planned jobs count as queued
+        if job.id == 'flyby-other':                  # second queue (flyby/run_more_mini.sh): one job per origin, other_<origin>
+            runs = [s['state'] for k, s in q.get('states', {}).items() if k.startswith('other_')] or ['queued']
         if job.id == 'transfers':
             state = 'done' if len(done) >= len(units) else 'running' if q.get('daily_running') else 'queued'
         elif job.id == 'screening':
