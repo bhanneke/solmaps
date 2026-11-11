@@ -1,0 +1,1845 @@
+{
+ "checked": "2026-11-11",
+ "note": "Facts checked on 2026-11-11 against the agencies' pages, NASA NSSDCA and JPL Horizons; where sources differ by a day, the card shows one and the notes keep both.",
+ "missions": [
+  {
+   "name": "Psyche",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2023-10-13",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2023-10-13",
+     "what": "Launch, Falcon Heavy, KSC LC-39A",
+     "detail": "Launch, Falcon Heavy, KSC LC-39A (14:19:43 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2023-157A"
+    },
+    {
+     "date": "2026-05-15",
+     "what": "Mars gravity-assist flyby",
+     "detail": "Mars gravity-assist flyby (~4,500 km altitude per NASA blog; Horizons: 19:28:03 UTC, 4618 km altitude)",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "past",
+     "source": "https://science.nasa.gov/blogs/psyche/"
+    },
+    {
+     "date": "2029-07 (late July)",
+     "what": "Capture into orbit around Psyche",
+     "detail": "Capture into orbit around Psyche (Horizons header)",
+     "body": "16 Psyche",
+     "body_id": "psyche",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-255'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2029-08",
+     "what": "Prime mission at Psyche begins",
+     "detail": "Prime mission at Psyche begins (NASA page, NSSDCA)",
+     "body": "16 Psyche",
+     "body_id": "psyche",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/psyche/"
+    }
+   ],
+   "purpose": "Orbit and map the metal-rich asteroid 16 Psyche to learn what it is made of and how it formed.",
+   "sources": [
+    "https://science.nasa.gov/mission/psyche/",
+    "https://science.nasa.gov/blogs/psyche/",
+    "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2023-157A"
+   ],
+   "status_as_of": "2026-10-22 (NASA blog); NASA page updated 2026-11-03",
+   "notes": "NASA page gives only 'August 2029' for start of prime mission; Horizons says capture late July 2029. Mars flyby altitude: NSSDCA ~3,000 km, NASA blog 2,800 mi (4,500 km), Horizons 4618 km. Planned end: two-year prime mission at the asteroid (no end date stated).",
+   "status_detail": "cruise (ion thrusting toward asteroid belt after Mars gravity assist; NASA blog 2026-10-22)",
+   "id": "psyche",
+   "short": "Psyche",
+   "status": "cruise to 16 Psyche",
+   "targets": [
+    "psyche"
+   ],
+   "target_names": [
+    "16 Psyche"
+   ],
+   "horizons_id": "-255"
+  },
+  {
+   "name": "Lucy",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2021-10-16",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2021-10-16",
+     "what": "Launch, Atlas V 401, Cape Canaveral SLC-41",
+     "detail": "Launch, Atlas V 401, Cape Canaveral SLC-41 (09:34 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-49'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2022-10-16",
+     "what": "Earth gravity assist #1",
+     "detail": "Earth gravity assist #1",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2021-093A"
+    },
+    {
+     "date": "2023-11-01",
+     "what": "Flyby of 152830 Dinkinesh",
+     "detail": "Flyby of 152830 Dinkinesh (and satellite Selam)",
+     "body": "Dinkinesh",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/lucy/"
+    },
+    {
+     "date": "2024-12-13",
+     "what": "Earth gravity assist #2",
+     "detail": "Earth gravity assist #2",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2021-093A"
+    },
+    {
+     "date": "2025-04-20",
+     "what": "Flyby of 52246 Donaldjohanson",
+     "detail": "Flyby of 52246 Donaldjohanson",
+     "body": "Donaldjohanson",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/lucy/"
+    },
+    {
+     "date": "2027-08-11",
+     "what": "Flyby of 3548 Eurybates and satellite Queta; NSSDCA: 2027-08-12",
+     "detail": "Flyby of 3548 Eurybates and satellite Queta (NASA, Horizons); NSSDCA: 2027-08-12",
+     "body": "Eurybates",
+     "body_id": "3548",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/lucy/"
+    },
+    {
+     "date": "2027-09-14",
+     "what": "Flyby of 15094 Polymele; NSSDCA and Horizons: 2027-09-15",
+     "detail": "Flyby of 15094 Polymele (NASA); NSSDCA and Horizons: 2027-09-15",
+     "body": "Polymele",
+     "body_id": "15094",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/lucy/"
+    },
+    {
+     "date": "2028-04-18",
+     "what": "Flyby of 11351 Leucus",
+     "detail": "Flyby of 11351 Leucus",
+     "body": "Leucus",
+     "body_id": "11351",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/lucy/"
+    },
+    {
+     "date": "2028-11-11",
+     "what": "Flyby of 21900 Orus",
+     "detail": "Flyby of 21900 Orus",
+     "body": "Orus",
+     "body_id": "21900",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/lucy/"
+    },
+    {
+     "date": "2030-12-26",
+     "what": "Earth gravity assist #3",
+     "detail": "Earth gravity assist #3",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "planned",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2021-093A"
+    },
+    {
+     "date": "2033-03-03",
+     "what": "Flyby of 617 Patroclus/Menoetius; NSSDCA: 2033-03-02; Horizons: 2033-02-27",
+     "detail": "Flyby of 617 Patroclus/Menoetius (NASA); NSSDCA: 2033-03-02; Horizons: 2033-02-27",
+     "body": "Patroclus",
+     "body_id": "617",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/lucy/"
+    },
+    {
+     "date": "2033",
+     "what": "Nominal end of mission after Patroclus flyby",
+     "detail": "Nominal end of mission after Patroclus flyby (NSSDCA, Horizons)",
+     "body": "",
+     "body_id": null,
+     "status": "planned",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2021-093A"
+    }
+   ],
+   "purpose": "Fly past several Jupiter Trojan asteroids, remnants of planet formation, plus two main-belt asteroids.",
+   "sources": [
+    "https://science.nasa.gov/mission/lucy/",
+    "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2021-093A"
+   ],
+   "status_as_of": "2026-10-28",
+   "notes": "Date conflicts: Eurybates 11 vs 12 Aug 2027; Polymele 14 vs 15 Sep 2027; Patroclus 3 Mar (NASA) vs 2 Mar (NSSDCA) vs 27 Feb 2033 (Horizons). NASA mission page treated as primary.",
+   "status_detail": "cruise toward L4 Trojan swarm (NASA blog title ~2026-10-28: 'Lucy Reaches Trojan Asteroid Region')",
+   "id": "lucy",
+   "short": "Lucy",
+   "status": "cruise to the Jupiter Trojans",
+   "targets": [
+    "3548",
+    "15094",
+    "11351",
+    "21900",
+    "617"
+   ],
+   "target_names": [
+    "Jupiter Trojans: Eurybates, Polymele, Leucus, Orus, Patroclus"
+   ],
+   "horizons_id": "-49"
+  },
+  {
+   "name": "Hera",
+   "agencies": [
+    "ESA"
+   ],
+   "launch_date": "2024-10-07",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2024-10-07",
+     "what": "Launch, Falcon 9, Cape Canaveral",
+     "detail": "Launch, Falcon 9, Cape Canaveral (14:52 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://www.esa.int/Space_Safety/Hera/ESA_s_Hera_targets_early_arrival_at_Didymos_asteroids"
+    },
+    {
+     "date": "2025-03",
+     "what": "Mars flyby",
+     "detail": "Mars flyby (Horizons: ~6,000 km from Mars, ~1,000 km from Deimos)",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "past",
+     "source": "https://www.esa.int/Space_Safety/Hera/ESA_s_Hera_targets_early_arrival_at_Didymos_asteroids"
+    },
+    {
+     "date": "2026-10-27",
+     "what": "First light: Hera resolves Didymos and Dimorphos separately",
+     "detail": "First light: Hera resolves Didymos and Dimorphos separately (ESA news)",
+     "body": "Didymos",
+     "body_id": "65803",
+     "status": "past",
+     "source": "https://www.esa.int/Space_Safety/Hera"
+    },
+    {
+     "date": "2026-11",
+     "what": "Arrival at Didymos system",
+     "detail": "Arrival at Didymos system (ESA: November 2026, one month earlier than planned; Horizons milestone list: 2026-11-04)",
+     "body": "Didymos",
+     "body_id": "65803",
+     "status": "past or imminent - unconfirmed by ESA",
+     "source": "https://www.esa.int/Space_Safety/Hera/ESA_s_Hera_targets_early_arrival_at_Didymos_asteroids"
+    },
+    {
+     "date": "unverified",
+     "what": "Deployment of CubeSats Milani and Juventas",
+     "detail": "Deployment of CubeSats Milani and Juventas",
+     "body": "Didymos",
+     "body_id": "65803",
+     "status": "planned",
+     "source": "https://www.esa.int/Space_Safety/Hera"
+    }
+   ],
+   "purpose": "Survey the binary asteroid Didymos/Dimorphos after NASA's DART impact to measure how well the kinetic-impact deflection worked.",
+   "sources": [
+    "https://www.esa.int/Space_Safety/Hera",
+    "https://www.esa.int/Space_Safety/Hera/ESA_s_Hera_targets_early_arrival_at_Didymos_asteroids"
+   ],
+   "status_as_of": "2026-10-27 (ESA Hera page news); Horizons header revised 2026-11-03",
+   "notes": "CONFLICT/OPEN: TechTimes (2026-11-05) says arrival on 2026-11-05; Horizons milestone list says 2026-11-04; ESA pages opened say only 'November 2026'. Old plan: December 2026 (ESA article 2025-10-07). CubeSat deployment and end-of-mission dates unverified.",
+   "status_detail": "arriving at Didymos; ESA had not announced arrival in its latest news (2026-10-27)",
+   "id": "hera",
+   "short": "Hera",
+   "status": "arriving at Didymos",
+   "targets": [
+    "65803"
+   ],
+   "target_names": [
+    "Didymos and Dimorphos"
+   ],
+   "horizons_id": "-91"
+  },
+  {
+   "name": "Juice",
+   "agencies": [
+    "ESA"
+   ],
+   "launch_date": "2023-04-14",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2023-04-14",
+     "what": "Launch, Ariane 5, Kourou",
+     "detail": "Launch, Ariane 5, Kourou (12:14 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-28'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2024-08-20",
+     "what": "Lunar-Earth gravity assist",
+     "detail": "Lunar-Earth gravity assist (ESA: August 2024; Horizons: Earth closest approach 2024-08-20 21:56 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-28'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2025-08-31",
+     "what": "Venus gravity assist",
+     "detail": "Venus gravity assist (ESA: August 2025; Horizons: 05:28:51 UTC)",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-28'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2026-09-28",
+     "what": "Earth gravity assist #2",
+     "detail": "Earth gravity assist #2 (11:45 UTC, ~8,640 km altitude)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Juice/Successful_Earth_flyby_improves_Juice_s_course_to_Jupiter"
+    },
+    {
+     "date": "2029-01",
+     "what": "Earth gravity assist #3",
+     "detail": "Earth gravity assist #3",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Juice"
+    },
+    {
+     "date": "2029-10",
+     "what": "Flyby of asteroid 223 Rosa [PROPOSED per Horizons]",
+     "detail": "Flyby of asteroid 223 Rosa [PROPOSED per Horizons]",
+     "body": "223 Rosa",
+     "body_id": null,
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-28'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2031-07",
+     "what": "Jupiter arrival / orbit insertion",
+     "detail": "Jupiter arrival / orbit insertion",
+     "body": "Jupiter",
+     "body_id": "jupiter",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Juice"
+    },
+    {
+     "date": "2032-07",
+     "what": "First Europa flyby",
+     "detail": "First Europa flyby (Horizons header)",
+     "body": "Europa",
+     "body_id": "europa",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-28'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2034-12",
+     "what": "Ganymede orbit insertion",
+     "detail": "Ganymede orbit insertion (Horizons header)",
+     "body": "Ganymede",
+     "body_id": "ganymede",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-28'&MAKE_EPHEM=NO"
+    }
+   ],
+   "purpose": "Study Jupiter and its icy moons Ganymede, Europa and Callisto, ending in orbit around Ganymede.",
+   "sources": [
+    "https://www.esa.int/Science_Exploration/Space_Science/Juice",
+    "https://www.esa.int/Science_Exploration/Space_Science/Juice/Successful_Earth_flyby_improves_Juice_s_course_to_Jupiter"
+   ],
+   "status_as_of": "2026-09-28 (ESA Earth-flyby article)",
+   "notes": "ESA mission page gives month/year only for flybys and arrival; exact days from Horizons. Ganymede orbit date (Dec 2034) only from Horizons. End of mission unverified.",
+   "status_detail": "cruise",
+   "id": "juice",
+   "short": "Juice",
+   "status": "cruise to Jupiter",
+   "targets": [
+    "jupiter"
+   ],
+   "target_names": [
+    "Jupiter, Ganymede, Europa, Callisto"
+   ],
+   "horizons_id": "-28"
+  },
+  {
+   "name": "Europa Clipper",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2024-10-14",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2024-10-14",
+     "what": "Launch, Falcon Heavy, KSC LC-39A",
+     "detail": "Launch, Falcon Heavy, KSC LC-39A (16:06 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/europa-clipper/"
+    },
+    {
+     "date": "2025-03-01",
+     "what": "Mars gravity assist",
+     "detail": "Mars gravity assist (NASA page: 'Mars flyby in 2025')",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-159'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2026-12-03",
+     "what": "Earth gravity assist",
+     "detail": "Earth gravity assist",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/europa-clipper/"
+    },
+    {
+     "date": "2030-04-11",
+     "what": "Jupiter arrival",
+     "detail": "Jupiter arrival (NASA page: April 2030)",
+     "body": "Jupiter",
+     "body_id": "jupiter",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-159'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2034-09",
+     "what": "End of mission: directed Ganymede impact ~30 days after 49th Europa flyby",
+     "detail": "End of mission: directed Ganymede impact ~30 days after 49th Europa flyby (Horizons header)",
+     "body": "Ganymede",
+     "body_id": "ganymede",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-159'&MAKE_EPHEM=NO"
+    }
+   ],
+   "purpose": "Make 49 close flybys of Europa to judge whether its subsurface ocean could support life.",
+   "sources": [
+    "https://science.nasa.gov/mission/europa-clipper/"
+   ],
+   "status_as_of": "NASA page updated 2026-11-03; Horizons tracking through 2026-10-15",
+   "notes": "Exact Mars-flyby day, Jupiter-arrival day and end of mission from Horizons only; NASA page gives 2025 / April 2030 / no end date.",
+   "status_detail": "cruise",
+   "id": "europa-clipper",
+   "short": "Europa Clipper",
+   "status": "cruise to Jupiter",
+   "targets": [
+    "jupiter"
+   ],
+   "target_names": [
+    "Jupiter and Europa"
+   ],
+   "horizons_id": "-159"
+  },
+  {
+   "name": "BepiColombo (MPO + Mio)",
+   "agencies": [
+    "ESA",
+    "JAXA"
+   ],
+   "launch_date": "2018-10-20",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2018-10-20",
+     "what": "Launch, Ariane 5, Kourou",
+     "detail": "Launch, Ariane 5, Kourou (01:45 UTC; factsheet header '19/20 October 2018')",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2020-04-10",
+     "what": "Earth flyby",
+     "detail": "Earth flyby",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2020-10-15",
+     "what": "Venus flyby #1",
+     "detail": "Venus flyby #1",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2021-08-11",
+     "what": "Venus flyby #2",
+     "detail": "Venus flyby #2",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2021-10-01",
+     "what": "Mercury flyby #1",
+     "detail": "Mercury flyby #1",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2022-06-23",
+     "what": "Mercury flyby #2",
+     "detail": "Mercury flyby #2",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2023-06-19",
+     "what": "Mercury flyby #3",
+     "detail": "Mercury flyby #3 (Horizons: 2023-06-20)",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2024-09-04",
+     "what": "Mercury flyby #4",
+     "detail": "Mercury flyby #4",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2024-12-01",
+     "what": "Mercury flyby #5",
+     "detail": "Mercury flyby #5",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2025-01-08",
+     "what": "Mercury flyby #6",
+     "detail": "Mercury flyby #6",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"
+    },
+    {
+     "date": "2026-09-03",
+     "what": "Mercury Transfer Module separation",
+     "detail": "Mercury Transfer Module separation",
+     "body": "",
+     "body_id": null,
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+    },
+    {
+     "date": "2026-11-21",
+     "what": "Mercury orbit insertion",
+     "detail": "Mercury orbit insertion (start of 16-burn capture sequence)",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+    },
+    {
+     "date": "2026-12-09/10",
+     "what": "MPO and Mio separate",
+     "detail": "MPO and Mio separate",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+    },
+    {
+     "date": "2027-04",
+     "what": "Start of science operations",
+     "detail": "Start of science operations",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+    },
+    {
+     "date": "2028-04",
+     "what": "End of nominal mission",
+     "detail": "End of nominal mission (Horizons header)",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-121'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2029-04",
+     "what": "End of extended mission",
+     "detail": "End of extended mission (Horizons header)",
+     "body": "Mercury",
+     "body_id": "mercury",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-121'&MAKE_EPHEM=NO"
+    }
+   ],
+   "purpose": "Put two orbiters around Mercury to study its surface, interior and magnetic environment.",
+   "sources": [
+    "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet",
+    "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+   ],
+   "status_as_of": "2026-09-21 (latest ESA arrival-updates entry); Horizons fit through 2026-10-22",
+   "notes": "RECENT CHANGE: arrival moved from Dec 2025 to Nov 2026 because of reduced electric-propulsion thrust (Horizons note dated 2024-09-02). Mercury flyby #3: ESA 19 June 2023 vs Horizons 20 June 2023. Nominal/extended mission ends from Horizons only.",
+   "status_detail": "final approach; Mercury orbit insertion due 2026-11-21",
+   "id": "bepicolombo",
+   "short": "BepiColombo",
+   "status": "final approach to Mercury",
+   "targets": [
+    "mercury"
+   ],
+   "target_names": [
+    "Mercury"
+   ],
+   "horizons_id": "-121"
+  },
+  {
+   "name": "OSIRIS-APEX",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2016-09-08",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2016-09-08",
+     "what": "Launch, Atlas V, Cape Canaveral",
+     "detail": "Launch, Atlas V, Cape Canaveral (23:05 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2016-055A"
+    },
+    {
+     "date": "2017-09-22",
+     "what": "Earth gravity assist",
+     "detail": "Earth gravity assist",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2016-055A"
+    },
+    {
+     "date": "2018-12-03",
+     "what": "Arrival at Bennu",
+     "detail": "Arrival at Bennu",
+     "body": "Bennu",
+     "body_id": "101955",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2016-055A"
+    },
+    {
+     "date": "2020-10-20",
+     "what": "Sample collection",
+     "detail": "Sample collection (touch-and-go)",
+     "body": "Bennu",
+     "body_id": "101955",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2016-055A"
+    },
+    {
+     "date": "2021-05-10",
+     "what": "Departure from Bennu, return cruise begins",
+     "detail": "Departure from Bennu, return cruise begins",
+     "body": "Bennu",
+     "body_id": "101955",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2016-055A"
+    },
+    {
+     "date": "2023-09-24",
+     "what": "Sample capsule lands in Utah",
+     "detail": "Sample capsule lands in Utah",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/osiris-apex/"
+    },
+    {
+     "date": "2025-09-23",
+     "what": "Earth flyby",
+     "detail": "Earth flyby (3,438 km)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/osiris-apex/"
+    },
+    {
+     "date": "2029-04",
+     "what": "Apophis's close pass by Earth",
+     "detail": "Apophis's close pass by Earth (asteroid event)",
+     "body": "Apophis",
+     "body_id": "99942",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/osiris-apex/"
+    },
+    {
+     "date": "2029-06",
+     "what": "Rendezvous with Apophis",
+     "detail": "Rendezvous with Apophis",
+     "body": "Apophis",
+     "body_id": "99942",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/osiris-apex/"
+    }
+   ],
+   "purpose": "Having returned a Bennu sample, it now heads to study asteroid Apophis right after Apophis passes close to Earth in 2029.",
+   "sources": [
+    "https://science.nasa.gov/mission/osiris-apex/",
+    "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2016-055A"
+   ],
+   "status_as_of": "NASA page updated 2026-09-23; latest news 2025-11-25",
+   "notes": "Horizons header for -64 last revised 2025-09-18. End of Apophis phase unverified (Horizons note: mission approved 2022 for an 18-month Apophis rendezvous).",
+   "status_detail": "cruise to Apophis (extended mission)",
+   "id": "osiris-apex",
+   "short": "OSIRIS-APEX",
+   "status": "cruise to Apophis",
+   "targets": [
+    "99942"
+   ],
+   "target_names": [
+    "Apophis"
+   ],
+   "horizons_id": "-64"
+  },
+  {
+   "name": "Hayabusa2",
+   "agencies": [
+    "JAXA"
+   ],
+   "launch_date": "2014-12-03",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2014-12-03",
+     "what": "Launch, H-IIA F26, Tanegashima",
+     "detail": "Launch, H-IIA F26, Tanegashima (04:22 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://global.jaxa.jp/projects/sas/hayabusa2/"
+    },
+    {
+     "date": "2015-12-03",
+     "what": "Earth swing-by",
+     "detail": "Earth swing-by",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-37'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2018-06-27",
+     "what": "Arrival at Ryugu",
+     "detail": "Arrival at Ryugu (JAXA page: 'mid-2018')",
+     "body": "Ryugu",
+     "body_id": "162173",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-37'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2019-11-13",
+     "what": "Departure from Ryugu",
+     "detail": "Departure from Ryugu",
+     "body": "Ryugu",
+     "body_id": "162173",
+     "status": "past",
+     "source": "https://global.jaxa.jp/projects/sas/hayabusa2/"
+    },
+    {
+     "date": "2020-12-05",
+     "what": "Sample capsule to Earth; recovered in Australia 2020-12-06",
+     "detail": "Sample capsule to Earth; recovered in Australia 2020-12-06",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://global.jaxa.jp/projects/sas/hayabusa2/"
+    },
+    {
+     "date": "2026-07-05",
+     "what": "Flyby of 98943 Torifune, 18:30 JST",
+     "detail": "Flyby of 98943 Torifune, 18:30 JST (09:30 UTC)",
+     "body": "Torifune",
+     "body_id": null,
+     "status": "past",
+     "source": "https://global.jaxa.jp/press/2026/07/20260706-3_e.html"
+    },
+    {
+     "date": "2027-12",
+     "what": "Earth swing-by #3",
+     "detail": "Earth swing-by #3 (Horizons; Planetary Society: 2027)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-37'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2028-06",
+     "what": "Earth swing-by #4",
+     "detail": "Earth swing-by #4 (Horizons; Planetary Society: 2028)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-37'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2031-07",
+     "what": "Rendezvous with 1998 KY26",
+     "detail": "Rendezvous with 1998 KY26 (JAXA page: 2031)",
+     "body": "1998 KY26",
+     "body_id": null,
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-37'&MAKE_EPHEM=NO"
+    }
+   ],
+   "purpose": "After returning Ryugu samples, fly past asteroid Torifune and then rendezvous with the small, fast-spinning asteroid 1998 KY26.",
+   "sources": [
+    "https://global.jaxa.jp/projects/sas/hayabusa2/",
+    "https://global.jaxa.jp/press/2026/07/20260706-3_e.html",
+    "https://www.hayabusa2.jaxa.jp/en/",
+    "https://www.planetary.org/space-missions/hayabusa2"
+   ],
+   "status_as_of": "2026-07-06 (JAXA press release); Horizons tracking through 2026-10-28",
+   "notes": "Torifune closest distance: Horizons ~4.2 km vs JAXA pre-flyby target ~1 km; a JAXA 2026-07-30 release reportedly gives ~744 m (seen only in a search summary, page not opened - unverified). Ryugu arrival day and Earth swing-by months from Horizons only.",
+   "status_detail": "extended-mission cruise after Torifune flyby",
+   "id": "hayabusa2",
+   "short": "Hayabusa2",
+   "status": "extended mission, cruise to 1998 KY26",
+   "targets": [],
+   "target_names": [
+    "1998 KY26"
+   ],
+   "horizons_id": "-37"
+  },
+  {
+   "name": "Juno",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2011-08-05",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2011-08-05",
+     "what": "Launch, Atlas V 551, Cape Canaveral",
+     "detail": "Launch, Atlas V 551, Cape Canaveral (16:25 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2011-040A"
+    },
+    {
+     "date": "2013-10-09",
+     "what": "Earth gravity assist",
+     "detail": "Earth gravity assist",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2011-040A"
+    },
+    {
+     "date": "2016-07-05",
+     "what": "Jupiter orbit insertion",
+     "detail": "Jupiter orbit insertion (UTC; NASA page: July 4, 2016, US time)",
+     "body": "Jupiter",
+     "body_id": "jupiter",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2011-040A"
+    },
+    {
+     "date": "2021-06-07",
+     "what": "Ganymede flyby",
+     "detail": "Ganymede flyby (PJ34)",
+     "body": "Ganymede",
+     "body_id": "ganymede",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-61'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2022-09-29",
+     "what": "Europa flyby",
+     "detail": "Europa flyby (PJ45)",
+     "body": "Europa",
+     "body_id": "europa",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-61'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2023-12-30",
+     "what": "Io flyby",
+     "detail": "Io flyby (PJ57)",
+     "body": "Io",
+     "body_id": "io",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-61'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2024-02-03",
+     "what": "Io flyby",
+     "detail": "Io flyby (PJ58)",
+     "body": "Io",
+     "body_id": "io",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-61'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2025-09",
+     "what": "Planned end of mission with Jupiter impact; not carried out per 2026 NASA items",
+     "detail": "Planned end of mission with Jupiter impact (NASA page, NSSDCA, Horizons); not carried out per 2026 NASA items",
+     "body": "Jupiter",
+     "body_id": "jupiter",
+     "status": "planned date passed - superseded",
+     "source": "https://science.nasa.gov/mission/juno/"
+    }
+   ],
+   "purpose": "Orbit Jupiter over its poles to map its interior, gravity and magnetic fields, and atmosphere.",
+   "sources": [
+    "https://science.nasa.gov/mission/juno/",
+    "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2011-040A",
+    "https://lasp.colorado.edu/mop/missions/juno/trajectory-information/"
+   ],
+   "status_as_of": "2026-11-03 (NASA page label) / 2026-06-03 (latest dated NASA news)",
+   "notes": "CONFLICT: all official pages opened still state end of mission September 2025, yet NASA lists Juno as active and posts 2026 news. Secondary reporting (AIAA 2026-03-24 summary) says the extension expired 2025-09-30 and the FY2026 budget request zeroed Juno; no confirmed new extension found. Suggest showing 'operating, extension unconfirmed'.",
+   "status_detail": "UNCERTAIN: NASA labels it 'Active Mission' (page updated 2026-11-03), NASA news dated 2026-06-03, LASP science plots updated 2026-11-06; formal extension beyond Sept 2025 unverified",
+   "id": "juno",
+   "short": "Juno",
+   "status": "in orbit at Jupiter; extension beyond Sept 2025 unconfirmed",
+   "targets": [
+    "jupiter"
+   ],
+   "target_names": [
+    "Jupiter"
+   ],
+   "horizons_id": "-61"
+  },
+  {
+   "name": "New Horizons",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2006-01-19",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2006-01-19",
+     "what": "Launch, Atlas V 551, Cape Canaveral",
+     "detail": "Launch, Atlas V 551, Cape Canaveral (19:00 UT)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/new-horizons/"
+    },
+    {
+     "date": "2007-02-28",
+     "what": "Jupiter gravity assist",
+     "detail": "Jupiter gravity assist",
+     "body": "Jupiter",
+     "body_id": "jupiter",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/new-horizons/"
+    },
+    {
+     "date": "2015-07-14",
+     "what": "Pluto flyby",
+     "detail": "Pluto flyby (11:49 UT)",
+     "body": "Pluto",
+     "body_id": "pluto",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/new-horizons/"
+    },
+    {
+     "date": "2019-01-01",
+     "what": "Arrokoth flyby",
+     "detail": "Arrokoth flyby",
+     "body": "Arrokoth",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/new-horizons/"
+    },
+    {
+     "date": "2025-08",
+     "what": "Entered its longest hibernation period",
+     "detail": "Entered its longest hibernation period",
+     "body": "",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/new-horizons/"
+    },
+    {
+     "date": "2026-06 (from article URL, approx.)",
+     "what": "Woke from hibernation in good health",
+     "detail": "Woke from hibernation in good health",
+     "body": "",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/new-horizons/"
+    }
+   ],
+   "purpose": "After flying past Pluto and Arrokoth, it measures the outer heliosphere and Kuiper Belt environment.",
+   "sources": [
+    "https://science.nasa.gov/mission/new-horizons/"
+   ],
+   "status_as_of": "NASA page updated 2026-05-11; latest news 2026-08-05",
+   "notes": "No end-of-mission date stated on pages opened.",
+   "status_detail": "extended mission in the Kuiper Belt (heliophysics focus)",
+   "id": "new-horizons",
+   "short": "New Horizons",
+   "status": "extended mission in the Kuiper belt",
+   "targets": [],
+   "target_names": [
+    "Kuiper belt"
+   ],
+   "horizons_id": "-98"
+  },
+  {
+   "name": "Voyager 1",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "1977-09-05",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "1977-09-05",
+     "what": "Launch, Titan IIIE-Centaur, Cape Canaveral",
+     "detail": "Launch, Titan IIIE-Centaur, Cape Canaveral (Horizons: 1977-09-06 12:56 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-1/"
+    },
+    {
+     "date": "1979-03-05",
+     "what": "Jupiter closest approach",
+     "detail": "Jupiter closest approach",
+     "body": "Jupiter",
+     "body_id": "jupiter",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-1/"
+    },
+    {
+     "date": "1980-11-12",
+     "what": "Saturn closest approach",
+     "detail": "Saturn closest approach",
+     "body": "Saturn",
+     "body_id": "saturn",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-1/"
+    },
+    {
+     "date": "2012-08-25",
+     "what": "Crossed heliopause into interstellar space",
+     "detail": "Crossed heliopause into interstellar space",
+     "body": "heliopause",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-1/"
+    },
+    {
+     "date": "2026-04-17",
+     "what": "Science instrument shut off to save power",
+     "detail": "Science instrument shut off to save power (not named on page)",
+     "body": "",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/"
+    },
+    {
+     "date": "2026-11-18",
+     "what": "Reaches one light-day from Earth",
+     "detail": "Reaches one light-day from Earth (05:16 EST)",
+     "body": "",
+     "body_id": null,
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/voyager/"
+    }
+   ],
+   "purpose": "Measure particles, fields and plasma waves in interstellar space after its Jupiter and Saturn flybys.",
+   "sources": [
+    "https://science.nasa.gov/mission/voyager/voyager-1/",
+    "https://science.nasa.gov/mission/voyager/",
+    "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1977-084A"
+   ],
+   "status_as_of": "2026-11-10 (NASA page update)",
+   "notes": "Launch date conflict: NASA and NSSDCA 5 Sep 1977; Horizons 1977-Sep-06 12:56 UTC. NASA page inconsistent on how many instruments remain on (two vs four). Horizons trajectory is a 2022 extrapolation (no radiometric tracking since 1992).",
+   "status_detail": "extended (interstellar) mission",
+   "id": "voyager-1",
+   "short": "Voyager 1",
+   "status": "interstellar mission",
+   "targets": [],
+   "target_names": [
+    "interstellar space"
+   ],
+   "horizons_id": "-31"
+  },
+  {
+   "name": "Voyager 2",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "1977-08-20",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "1977-08-20",
+     "what": "Launch, Titan IIIE-Centaur, Cape Canaveral",
+     "detail": "Launch, Titan IIIE-Centaur, Cape Canaveral (14:29 UT)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-2/"
+    },
+    {
+     "date": "1979-07-09",
+     "what": "Jupiter closest approach",
+     "detail": "Jupiter closest approach",
+     "body": "Jupiter",
+     "body_id": "jupiter",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-2/"
+    },
+    {
+     "date": "1981-08-25",
+     "what": "Saturn flyby",
+     "detail": "Saturn flyby (same page's text: closest approach 1981-08-26)",
+     "body": "Saturn",
+     "body_id": "saturn",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-2/"
+    },
+    {
+     "date": "1986-01-24",
+     "what": "Uranus flyby",
+     "detail": "Uranus flyby",
+     "body": "Uranus",
+     "body_id": "uranus",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-2/"
+    },
+    {
+     "date": "1989-08-25",
+     "what": "Neptune flyby",
+     "detail": "Neptune flyby",
+     "body": "Neptune",
+     "body_id": "neptune",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-2/"
+    },
+    {
+     "date": "2018-11",
+     "what": "Crossed heliopause",
+     "detail": "Crossed heliopause (NASA key dates 2018-11-25; NASA text 2018-12-10; Horizons 2018-11-15)",
+     "body": "heliopause",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/voyager-2/"
+    },
+    {
+     "date": "2026-08-04",
+     "what": "Engineers free up power to extend science operations",
+     "detail": "Engineers free up power to extend science operations (NASA blog)",
+     "body": "",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/voyager/"
+    }
+   ],
+   "purpose": "Measure interstellar space after making the only flybys so far of Uranus and Neptune.",
+   "sources": [
+    "https://science.nasa.gov/mission/voyager/voyager-2/",
+    "https://science.nasa.gov/mission/voyager/",
+    "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1977-076A"
+   ],
+   "status_as_of": "2026-09-28 (NASA page update)",
+   "notes": "CONFLICT on heliopause date (15 Nov / 25 Nov / 10 Dec 2018 across sources; 10 Dec may be the announcement date). Saturn 25 vs 26 Aug 1981 on the same NASA page.",
+   "status_detail": "extended (interstellar) mission",
+   "id": "voyager-2",
+   "short": "Voyager 2",
+   "status": "interstellar mission",
+   "targets": [],
+   "target_names": [
+    "interstellar space"
+   ],
+   "horizons_id": "-32"
+  },
+  {
+   "name": "Parker Solar Probe",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2018-08-12",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2018-08-12",
+     "what": "Launch, Delta IV Heavy, Cape Canaveral",
+     "detail": "Launch, Delta IV Heavy, Cape Canaveral (07:31 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/parker-solar-probe/"
+    },
+    {
+     "date": "2018-10-03",
+     "what": "Venus gravity assist #1",
+     "detail": "Venus gravity assist #1",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2019-12-26",
+     "what": "Venus gravity assist #2",
+     "detail": "Venus gravity assist #2",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2020-07-11",
+     "what": "Venus gravity assist #3",
+     "detail": "Venus gravity assist #3",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2021-02-20",
+     "what": "Venus gravity assist #4",
+     "detail": "Venus gravity assist #4",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2021-10-16",
+     "what": "Venus gravity assist #5",
+     "detail": "Venus gravity assist #5",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2023-08-21",
+     "what": "Venus gravity assist #6",
+     "detail": "Venus gravity assist #6",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2024-11-06",
+     "what": "Venus gravity assist #7",
+     "detail": "Venus gravity assist #7",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2018-11-06",
+     "what": "Perihelion #1",
+     "detail": "Perihelion #1",
+     "body": "Sun",
+     "body_id": null,
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2024-12-24",
+     "what": "Perihelion #22, first of the closest approaches",
+     "detail": "Perihelion #22, first of the closest approaches (~6.2 million km)",
+     "body": "Sun",
+     "body_id": null,
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2025-03-22",
+     "what": "Perihelion #23",
+     "detail": "Perihelion #23",
+     "body": "Sun",
+     "body_id": null,
+     "status": "past",
+     "source": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+    },
+    {
+     "date": "2025-06-19",
+     "what": "Perihelion #24",
+     "detail": "Perihelion #24 (Horizons; NSSDCA: 2025-06-15)",
+     "body": "Sun",
+     "body_id": null,
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-96'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2026 (by 2026-06-11)",
+     "what": "28th close pass of the Sun",
+     "detail": "28th close pass of the Sun (NASA news)",
+     "body": "Sun",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/parker-solar-probe/"
+    }
+   ],
+   "purpose": "Fly through the Sun's outer corona to learn how the corona is heated and the solar wind accelerated.",
+   "sources": [
+    "https://science.nasa.gov/mission/parker-solar-probe/",
+    "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-065A"
+   ],
+   "status_as_of": "2026-09-10 (latest NASA news); page updated 2026-03-19",
+   "notes": "CONFLICT: perihelion #24 on 15 Jun 2025 (NSSDCA) vs 19 Jun 2025 (Horizons). NASA page still says 'Primary Mission in Progress'; extended-mission end date not found.",
+   "status_detail": "operating in its final ~88-day solar orbit; NASA news 2026-09-10 'After Latest Swing Past Sun, Parker Checks In'",
+   "id": "parker",
+   "short": "Parker Solar Probe",
+   "status": "orbiting the Sun close in",
+   "targets": [],
+   "target_names": [
+    "the Sun"
+   ],
+   "horizons_id": "-96"
+  },
+  {
+   "name": "Solar Orbiter",
+   "agencies": [
+    "ESA",
+    "NASA"
+   ],
+   "launch_date": "2020-02-10",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2020-02-10",
+     "what": "Launch, Atlas V 411, Cape Canaveral SLC-41",
+     "detail": "Launch, Atlas V 411, Cape Canaveral SLC-41 (04:03 UTC; ESA page: February 2020)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-144'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2020-12-27",
+     "what": "Venus flyby",
+     "detail": "Venus flyby (Horizons: 2020-12-26)",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    },
+    {
+     "date": "2021-08-09",
+     "what": "Venus flyby",
+     "detail": "Venus flyby (Horizons: 2021-08-08)",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    },
+    {
+     "date": "2021-11-27",
+     "what": "Earth flyby, end of cruise",
+     "detail": "Earth flyby, end of cruise",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    },
+    {
+     "date": "2022-09-04",
+     "what": "Venus flyby",
+     "detail": "Venus flyby",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    },
+    {
+     "date": "2025-02-18",
+     "what": "Venus flyby",
+     "detail": "Venus flyby (inclination ~17 deg)",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "past",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    },
+    {
+     "date": "2026-12-24",
+     "what": "Venus flyby: inclination to ~24 deg, start of high-latitude phase",
+     "detail": "Venus flyby: inclination to ~24 deg, start of high-latitude phase",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    },
+    {
+     "date": "2028-03-18",
+     "what": "Venus flyby",
+     "detail": "Venus flyby (Horizons: 2028-03-17)",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    },
+    {
+     "date": "2029-06-10",
+     "what": "Venus flyby",
+     "detail": "Venus flyby",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    },
+    {
+     "date": "2030-09-02",
+     "what": "Venus flyby",
+     "detail": "Venus flyby (inclination toward ~33 deg)",
+     "body": "Venus",
+     "body_id": "venus",
+     "status": "planned",
+     "source": "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+    }
+   ],
+   "purpose": "Image the Sun close up and from increasingly high latitudes, including its poles, while sampling the solar wind.",
+   "sources": [
+    "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter",
+    "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter/Solar_Orbiter_perihelia_and_flybys"
+   ],
+   "status_as_of": "2026-10-08 (latest ESA news)",
+   "notes": "ESA flyby page dated 2022-05-12 says dates are 'subject to change'; Horizons (revised 2026-11-03) confirms 2026-12-24 as next flyby. One-day differences for 2020/2021/2028 flybys between ESA and Horizons. End-of-mission date unverified.",
+   "status_detail": "science operations (routine since Nov 2021)",
+   "id": "solar-orbiter",
+   "short": "Solar Orbiter",
+   "status": "orbiting the Sun",
+   "targets": [],
+   "target_names": [
+    "the Sun"
+   ],
+   "horizons_id": "-144"
+  },
+  {
+   "name": "Tianwen-2",
+   "agencies": [
+    "CNSA"
+   ],
+   "launch_date": "2025-05-28",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2025-05-28",
+     "what": "Launch, Long March 3B, Xichang",
+     "detail": "Launch, Long March 3B, Xichang (1:31 pm EDT May 28 = 17:31 UTC = 01:31 Beijing time May 29; Chinese sources say 29 May 2025)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://spacepolicyonline.com/news/china-launches-tianwen-2-asteroid-sample-return-mission/"
+    },
+    {
+     "date": "2026-06-06",
+     "what": "First optical detection of the asteroid",
+     "detail": "First optical detection of the asteroid",
+     "body": "Kamo'oalewa",
+     "body_id": null,
+     "status": "past",
+     "source": "https://english.spacechina.com/n17212/c4644603/content.html"
+    },
+    {
+     "date": "2026-06-07",
+     "what": "Entered coplanar trajectory with asteroid at 30,000 km",
+     "detail": "Entered coplanar trajectory with asteroid at 30,000 km (Planetary Society: probable rendezvous)",
+     "body": "Kamo'oalewa",
+     "body_id": null,
+     "status": "past",
+     "source": "https://english.spacechina.com/n17212/c4644603/content.html"
+    },
+    {
+     "date": "2026-06-19",
+     "what": "Within 2,000 km of asteroid",
+     "detail": "Within 2,000 km of asteroid",
+     "body": "Kamo'oalewa",
+     "body_id": null,
+     "status": "past",
+     "source": "https://english.spacechina.com/n17212/c4644603/content.html"
+    },
+    {
+     "date": "2026-07-02",
+     "what": "First close image, from ~20 km",
+     "detail": "First close image, from ~20 km",
+     "body": "Kamo'oalewa",
+     "body_id": null,
+     "status": "past",
+     "source": "https://www.astronomy.com/space-exploration/tianwen-2-arrives-at-target-asteroid-kamo%CA%BBoalewa/"
+    },
+    {
+     "date": "2026-07-06",
+     "what": "CNSA announces arrival 20 km from asteroid and start of science exploration",
+     "detail": "CNSA announces arrival 20 km from asteroid and start of science exploration",
+     "body": "Kamo'oalewa",
+     "body_id": null,
+     "status": "past",
+     "source": "https://english.spacechina.com/n17212/c4644603/content.html"
+    },
+    {
+     "date": "unverified",
+     "what": "Sample collection",
+     "detail": "Sample collection (after mapping; no date given)",
+     "body": "Kamo'oalewa",
+     "body_id": null,
+     "status": "planned",
+     "source": "https://www.planetary.org/articles/chinas-tianwen-2-mission-has-probably-arrived-at-a-quasi-moon-of-earth"
+    },
+    {
+     "date": "2027-04 (Planetary Society: 2027-04-24)",
+     "what": "Departure from asteroid",
+     "detail": "Departure from asteroid",
+     "body": "Kamo'oalewa",
+     "body_id": null,
+     "status": "planned",
+     "source": "https://spacepolicyonline.com/news/china-launches-tianwen-2-asteroid-sample-return-mission/"
+    },
+    {
+     "date": "2027-11",
+     "what": "Sample capsule return to Earth during Earth gravity assist",
+     "detail": "Sample capsule return to Earth during Earth gravity assist",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "planned",
+     "source": "https://spacepolicyonline.com/news/china-launches-tianwen-2-asteroid-sample-return-mission/"
+    },
+    {
+     "date": "2035 (Astronomy.com: January 2035)",
+     "what": "Arrival at comet 311P/PANSTARRS",
+     "detail": "Arrival at comet 311P/PANSTARRS",
+     "body": "311P",
+     "body_id": null,
+     "status": "planned",
+     "source": "https://spacepolicyonline.com/news/china-launches-tianwen-2-asteroid-sample-return-mission/"
+    }
+   ],
+   "purpose": "Collect a sample from the small near-Earth quasi-satellite Kamo'oalewa, return it to Earth in 2027, then go on to study a main-belt comet.",
+   "sources": [
+    "https://english.spacechina.com/n17212/c4644603/content.html",
+    "https://qna.org.qa/en/News-Area/News/2026-7/6/chinas-tianwen-2-probe-reaches-target-asteroid-starts-scientific-exploration",
+    "https://spacepolicyonline.com/news/china-launches-tianwen-2-asteroid-sample-return-mission/",
+    "https://www.planetary.org/articles/chinas-tianwen-2-mission-has-probably-arrived-at-a-quasi-moon-of-earth",
+    "https://www.astronomy.com/space-exploration/tianwen-2-arrives-at-target-asteroid-kamo%CA%BBoalewa/"
+   ],
+   "status_as_of": "2026-07-07 (Xinhua report via CAST english.spacechina.com)",
+   "notes": "cnsa.gov.cn could not be opened (connection failed); CNSA statements via Xinhua (spacechina.com, QNA). Not in JPL Horizons (name searches returned no match). All post-arrival dates come from secondary sources (spacepolicyonline, Planetary Society, Astronomy) and are unverified against CNSA.",
+   "status_detail": "at target asteroid, proximity science before sampling",
+   "id": "tianwen-2",
+   "short": "Tianwen-2",
+   "status": "at asteroid Kamo'oalewa (no trajectory in Horizons)",
+   "targets": [],
+   "target_names": [
+    "Kamo'oalewa, later comet 311P"
+   ],
+   "horizons_id": null
+  },
+  {
+   "name": "ESCAPADE Blue",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2025-11-13",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2025-11-13",
+     "what": "Launch of both spacecraft, New Glenn, Cape Canaveral LC-36",
+     "detail": "Launch of both spacecraft, New Glenn, Cape Canaveral LC-36 (3:55 pm EST = 20:55 UTC; Horizons: 20:45 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/escapade/"
+    },
+    {
+     "date": "2025-11 to 2026-11",
+     "what": "Loiter orbit around Sun-Earth L2",
+     "detail": "Loiter orbit around Sun-Earth L2",
+     "body": "Sun-Earth L2",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/escapade/"
+    },
+    {
+     "date": "2026-11-07",
+     "what": "First spacecraft: powered Earth flyby and trans-Mars burn",
+     "detail": "First spacecraft: powered Earth flyby and trans-Mars burn (~5 am EST, ~1,000 mi altitude)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/?p=1509114"
+    },
+    {
+     "date": "2026-11-09",
+     "what": "Second spacecraft: powered Earth flyby and trans-Mars burn",
+     "detail": "Second spacecraft: powered Earth flyby and trans-Mars burn (~6 am EST, ~650 mi altitude)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/?p=1509114"
+    },
+    {
+     "date": "2027-09-07",
+     "what": "Mars orbit insertion, first spacecraft",
+     "detail": "Mars orbit insertion, first spacecraft",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "planned",
+     "source": "https://science.nasa.gov/?p=1509114"
+    },
+    {
+     "date": "2027-09-09",
+     "what": "Mars orbit insertion, second spacecraft",
+     "detail": "Mars orbit insertion, second spacecraft",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "planned",
+     "source": "https://science.nasa.gov/?p=1509114"
+    },
+    {
+     "date": "2028 (mid)",
+     "what": "Both in near-matching science orbits; 11-month prime science",
+     "detail": "Both in near-matching science orbits; 11-month prime science",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/escapade/"
+    }
+   ],
+   "purpose": "Two small orbiters measuring, from two places at once, how the solar wind strips Mars's upper atmosphere.",
+   "sources": [
+    "https://science.nasa.gov/mission/escapade/",
+    "https://science.nasa.gov/?p=1509114",
+    "https://science.nasa.gov/blogs/escapade/2026/11/02/nasas-twin-escapade-spacecraft-to-slingshot-past-earth-on-way-to-mars/"
+   ],
+   "status_as_of": "2026-11-09 (NASA article); NASA page updated 2026-11-10",
+   "notes": "Built/operated with UC Berkeley SSL and Rocket Lab (Horizons header). RECENT: Earth flybys completed 7 and 9 Nov 2026. Launch time 20:55 vs 20:45 UTC (date unaffected). NASA articles say 'first/second spacecraft' without naming Blue/Gold.",
+   "status_detail": "interplanetary cruise to Mars (since 2026-11-09)",
+   "id": "escapade-blue",
+   "short": "ESCAPADE Blue",
+   "status": "cruise to Mars",
+   "targets": [
+    "mars"
+   ],
+   "target_names": [
+    "Mars"
+   ],
+   "horizons_id": "-9"
+  },
+  {
+   "name": "ESCAPADE Gold",
+   "agencies": [
+    "NASA"
+   ],
+   "launch_date": "2025-11-13",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2025-11-13",
+     "what": "Launch of both spacecraft, New Glenn, Cape Canaveral LC-36",
+     "detail": "Launch of both spacecraft, New Glenn, Cape Canaveral LC-36 (3:55 pm EST = 20:55 UTC; Horizons: 20:45 UTC)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/escapade/"
+    },
+    {
+     "date": "2025-11 to 2026-11",
+     "what": "Loiter orbit around Sun-Earth L2",
+     "detail": "Loiter orbit around Sun-Earth L2",
+     "body": "Sun-Earth L2",
+     "body_id": null,
+     "status": "past",
+     "source": "https://science.nasa.gov/mission/escapade/"
+    },
+    {
+     "date": "2026-11-07",
+     "what": "First spacecraft: powered Earth flyby and trans-Mars burn",
+     "detail": "First spacecraft: powered Earth flyby and trans-Mars burn (~5 am EST, ~1,000 mi altitude)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/?p=1509114"
+    },
+    {
+     "date": "2026-11-09",
+     "what": "Second spacecraft: powered Earth flyby and trans-Mars burn",
+     "detail": "Second spacecraft: powered Earth flyby and trans-Mars burn (~6 am EST, ~650 mi altitude)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://science.nasa.gov/?p=1509114"
+    },
+    {
+     "date": "2027-09-07",
+     "what": "Mars orbit insertion, first spacecraft",
+     "detail": "Mars orbit insertion, first spacecraft",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "planned",
+     "source": "https://science.nasa.gov/?p=1509114"
+    },
+    {
+     "date": "2027-09-09",
+     "what": "Mars orbit insertion, second spacecraft",
+     "detail": "Mars orbit insertion, second spacecraft",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "planned",
+     "source": "https://science.nasa.gov/?p=1509114"
+    },
+    {
+     "date": "2028 (mid)",
+     "what": "Both in near-matching science orbits; 11-month prime science",
+     "detail": "Both in near-matching science orbits; 11-month prime science",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "planned",
+     "source": "https://science.nasa.gov/mission/escapade/"
+    }
+   ],
+   "purpose": "Two small orbiters measuring, from two places at once, how the solar wind strips Mars's upper atmosphere.",
+   "sources": [
+    "https://science.nasa.gov/mission/escapade/",
+    "https://science.nasa.gov/?p=1509114",
+    "https://science.nasa.gov/blogs/escapade/2026/11/02/nasas-twin-escapade-spacecraft-to-slingshot-past-earth-on-way-to-mars/"
+   ],
+   "status_as_of": "2026-11-09 (NASA article); NASA page updated 2026-11-10",
+   "notes": "Built/operated with UC Berkeley SSL and Rocket Lab (Horizons header). RECENT: Earth flybys completed 7 and 9 Nov 2026. Launch time 20:55 vs 20:45 UTC (date unaffected). NASA articles say 'first/second spacecraft' without naming Blue/Gold.",
+   "status_detail": "interplanetary cruise to Mars (since 2026-11-09)",
+   "id": "escapade-gold",
+   "short": "ESCAPADE Gold",
+   "status": "cruise to Mars",
+   "targets": [
+    "mars"
+   ],
+   "target_names": [
+    "Mars"
+   ],
+   "horizons_id": "-10"
+  },
+  {
+   "name": "MMX",
+   "agencies": [
+    "JAXA"
+   ],
+   "launch_date": "2026-10-19",
+   "launch_body": "earth",
+   "events": [
+    {
+     "date": "2026-10-19",
+     "what": "Launch, H3 F10, Tanegashima",
+     "detail": "Launch, H3 F10, Tanegashima (19:41:03 UTC = 2026-10-20 04:41:03 JST)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "past",
+     "source": "https://global.jaxa.jp/press/2026/10/20261020-1_e.html"
+    },
+    {
+     "date": "2027-08",
+     "what": "Mars arrival",
+     "detail": "Mars arrival (Horizons; JAXA site: ~1 year after launch)",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "planned",
+     "source": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='-239'&MAKE_EPHEM=NO"
+    },
+    {
+     "date": "2027-2030",
+     "what": "Phobos quasi-satellite orbit, two landings and sampling",
+     "detail": "Phobos quasi-satellite orbit, two landings and sampling",
+     "body": "Phobos",
+     "body_id": "phobos",
+     "status": "planned",
+     "source": "https://www.mmx.jaxa.jp/en/"
+    },
+    {
+     "date": "2030",
+     "what": "Departure from Mars system",
+     "detail": "Departure from Mars system",
+     "body": "Mars",
+     "body_id": "mars",
+     "status": "planned",
+     "source": "https://www.mmx.jaxa.jp/en/"
+    },
+    {
+     "date": "2031",
+     "what": "Sample capsule return to Earth",
+     "detail": "Sample capsule return to Earth (Australia)",
+     "body": "Earth",
+     "body_id": "earth",
+     "status": "planned",
+     "source": "https://www.mmx.jaxa.jp/en/"
+    }
+   ],
+   "purpose": "Study Mars's moons and bring at least 10 g of Phobos surface material to Earth to find out where the moons came from.",
+   "sources": [
+    "https://global.jaxa.jp/press/2026/10/20261020-1_e.html",
+    "https://www.isas.jaxa.jp/en/missions/spacecraft/current/mmx.html",
+    "https://www.mmx.jaxa.jp/en/"
+   ],
+   "status_as_of": "2026-10-20 (JAXA launch release); Horizons tracking through 2026-11-09",
+   "notes": "ADDED (not in original candidate list): launched Oct 2026. Carries CNES/DLR rover Idefix and NASA MEGANE instrument (Horizons header). JAXA pages give years only for later phases.",
+   "status_detail": "early cruise to Mars",
+   "id": "mmx",
+   "short": "MMX",
+   "status": "early cruise to Mars",
+   "targets": [
+    "mars",
+    "phobos"
+   ],
+   "target_names": [
+    "Mars, Phobos and Deimos"
+   ],
+   "horizons_id": "-239"
+  }
+ ]
+}

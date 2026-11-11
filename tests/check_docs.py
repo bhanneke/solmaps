@@ -25,7 +25,7 @@ views = re.findall(r'<button[^>]*>([^<]+)</button>', seg.group(1)) if seg else [
 if not views:
     err('could not read the view buttons of atlas3d/solar3d_template.html')
 how = plain(TEXT['site/how-it-works.html']).lower().replace('-', ' ')
-for v in views + ['Trips', 'Display', 'Bodies']:
+for v in views + ['Trips', 'Display', 'Bodies', 'Live missions']:
     if v.lower().replace('-', ' ') not in how:
         err(f'how-it-works.html does not describe the 3D atlas view or menu "{v}"')
 

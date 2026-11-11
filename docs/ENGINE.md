@@ -271,6 +271,15 @@ Every command runs in the solmaps-env container from `/work` (`make` targets wra
 | `python -m engine.screen <workers> <first> <last>` | the catalogue screening: every object of the JPL Small-Body Database against Earth, Mars and Ceres (`data/screen_daily/`) |
 | `python -m engine.lt_atlas [edges\|spirals] [procs]` | the low-thrust atlas, edges scenario by default |
 
+## Live missions
+
+`python3 flyby/fetch_missions.py` (on the host) fetches the trajectories of the spacecraft in `atlas3d/missions_registry.json`
+from JPL Horizons: heliocentric positions in AU, ecliptic J2000 (the frame of `flyby/fetch_horizons.py`), daily from launch
+to the end of what Horizons holds, every ten days for flights longer than 30 years, at most to 2100. It writes
+`atlas3d/missions_tracks.json` (about 1.5 MB), which the 3D atlas loads when the Live missions view opens. The registry holds
+the facts with their sources, checked by hand; rerun the fetch now and then, since planned trajectories change after course
+corrections.
+
 ## Mission planner
 
 The Missions tab of the 3D atlas (`atlas3d/mission.js`) plans impulsive missions in the browser. Its leg data comes from

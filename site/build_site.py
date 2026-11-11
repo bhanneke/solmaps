@@ -30,6 +30,8 @@ for name, src in pages.items():
 shutil.copy(root / 'site' / 'page.css', docs / 'page.css')
 if (root / 'network' / 'options').is_dir():                     # every option per route, for the trade-off view
     shutil.copytree(root / 'network' / 'options', docs / 'options', dirs_exist_ok=True)
+if (root / 'atlas3d' / 'missions_tracks.json').exists():
+    shutil.copy(root / 'atlas3d' / 'missions_tracks.json', docs / 'missions_tracks.json')   # live missions, loaded by the 3D atlas on request
 for p in sorted((root / 'network').glob('network_*.json')) + sorted((root / 'network').glob('network30*.json')):
     shutil.copy(p, docs / p.name)                               # longer flight-time limits and all 30 bodies, loaded by the pages on request
 if (root / 'site' / 'progress.json').exists():

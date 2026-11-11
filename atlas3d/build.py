@@ -43,5 +43,8 @@ mission = {'hub': 'https://huggingface.co/datasets/Deep-Space-Strategy/solmaps-t
            'aero': {'earth': {'vinf_max': 6.0, 'trim': 0.1}, 'mars': {'vinf_max': 7.0, 'trim': 0.1}}, 'a_continuous': 4e-3,
            'presets': {k: v.to_dict() for k, v in PRESETS.items()}}
 html = html.replace('/*MISSION_DATA*/', j(mission)).replace('/*MISSION_JS*/', (here / 'mission.js').read_text())
+# live missions: the curated registry (facts and sources) embedded, the trajectories (missions_tracks.json) loaded on demand
+live = json.load(open(here / 'missions_registry.json')) if (here / 'missions_registry.json').exists() else {'missions': []}
+html = html.replace('/*LIVE_DATA*/', j(live)).replace('/*LIVE_JS*/', (here / 'live.js').read_text())
 (here / 'solar-system-3d.html').write_text(html)
 print('built', len(html), 'bytes;', len(flyby), 'flyby routes;', sum('path' in r for r in flyby), 'with sampled trajectories')

@@ -130,7 +130,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
   .brand{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
-.reach{font-family:var(--f-mono,monospace);font-size:11.5px;color:var(--dim,#8d99b0);margin-left:4px}.reach.never{color:#e0605a}#reachB{font-size:12px;padding:1px 4px}.mh{font-size:16px;margin:2px 0 8px}.mstop{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end;margin:8px 0;padding:8px;border:1px solid var(--rule);border-radius:8px}.mstop label{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--dim)}.mstop input[type=number]{width:6.5em}.mchk{flex-direction:row!important;align-items:center;gap:6px!important}#missionView .tfilters{margin:6px 0}#missionView .tfilters input[type=date]{background:var(--deck-solid);border:1px solid var(--rule);border-radius:4px;padding:3px 6px;color:inherit}.primary{border-color:var(--sun)!important;color:var(--sun)}.warn{color:#e0905a}.myrs{display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end}.myr{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;padding:2px 3px;min-width:22px}.myr span{display:block;width:12px;background:#f2b84b;border-radius:2px}.myr[disabled]{opacity:.35}.myr[aria-pressed=true]{border-color:var(--sun)}#missionView .kpis{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}#missionView .kpi{border:1px solid var(--rule);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;font-size:12px;color:var(--dim)}#missionView .kpi b{font-size:15px;color:var(--ink,#dfe5ef);font-family:var(--f-mono,monospace)}.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
+.reach{font-family:var(--f-mono,monospace);font-size:11.5px;color:var(--dim,#8d99b0);margin-left:4px}.reach.never{color:#e0605a}#reachB{font-size:12px;padding:1px 4px}.mh{font-size:16px;margin:2px 0 8px}.mstop{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end;margin:8px 0;padding:8px;border:1px solid var(--rule);border-radius:8px}.mstop label{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--dim)}.mstop input[type=number]{width:6.5em}.mchk{flex-direction:row!important;align-items:center;gap:6px!important}#missionView .tfilters{margin:6px 0}#missionView .tfilters input[type=date]{background:var(--deck-solid);border:1px solid var(--rule);border-radius:4px;padding:3px 6px;color:inherit}.primary{border-color:var(--sun)!important;color:var(--sun)}.warn{color:#e0905a}.myrs{display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end}.myr{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;padding:2px 3px;min-width:22px}.myr span{display:block;width:12px;background:#f2b84b;border-radius:2px}.myr[disabled]{opacity:.35}.myr[aria-pressed=true]{border-color:var(--sun)}#missionView .kpis{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}#missionView .kpi{border:1px solid var(--rule);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;font-size:12px;color:var(--dim)}#missionView .kpi b{font-size:15px;color:var(--ink,#dfe5ef);font-family:var(--f-mono,monospace)}.lab.live span:first-child{color:#8fe9f5}.r.live{border-left-color:#4fd6e8}.r.planned .name{opacity:.8}.r.planned{border-left-style:dashed}.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
 #dispPop{max-height:70vh;overflow:auto;min-width:280px}
 </style>
 
@@ -146,6 +146,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
     <div><span class="lbl">Resources</span><div id="chips" class="grp"></div><select id="evMin" aria-label="Minimum evidence"><option value="0">all evidence</option><option value="1">inferred and better</option><option value="2">strong and better</option><option value="3">confirmed only</option></select></div>
   </div></details>
   <button type="button" id="btnJourney" aria-pressed="false">Trips</button>
+  <button type="button" id="btnLive" aria-pressed="false">Live missions</button>
   <details class="menu" id="mCamera"><summary>Camera</summary><div class="pop"><div class="grp"><button type="button" id="btnTop">Top view</button><button type="button" id="btnReset">Whole system</button><button type="button" id="btnLabels" aria-pressed="true">Labels</button></div></div></details>
   <div class="grp" id="viewOpts"><details class="menu" id="mDisplay" hidden><summary>Display</summary><div class="pop" id="dispPop"></div></details><span id="n3ctl" class="grp" hidden><select id="n3Color" aria-label="Line colour in the whole-network view"><option value="imbalance">colour = go-return imbalance</option><option value="time">colour = travel time</option><option value="cost">colour = km/s</option></select></span><select id="n3Scale" aria-label="Distance scale in the network views" hidden><option value="log">log scale</option><option value="sqrt">square-root scale</option><option value="linear">linear scale</option></select><select id="nvMetric" aria-label="Distance in the network view" hidden><option value="time">distance = travel time</option><option value="fuel">distance = fuel</option></select></div>
   <div class="grp datebar"><span class="lbl">Date</span><input type="range" id="dateSlider" min="0" max="1" step="1" aria-label="Date"><span class="date" id="dateOut"></span>
@@ -221,6 +222,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
 <script id="fb-data" type="application/json">/*FLYBY*/</script>
 <script id="stn-journey" type="application/json">/*STNJ*/</script>
 <script id="mission-data" type="application/json">/*MISSION_DATA*/</script>
+<script id="live-data" type="application/json">/*LIVE_DATA*/</script>
 <script>/*ENGINE*/</script>
 <script>
 const DATA = JSON.parse(document.getElementById('atlas-data').textContent);
@@ -494,7 +496,8 @@ function renderPanel() {
   const trips = state.journey && !b, tab = state.jTab || 'routes';
   $('tripTabs').hidden = !trips; $('tripCtl').hidden = !(trips && tab === 'routes');
   for (const t of $('tripTabs').children) t.setAttribute('aria-pressed', String(t.dataset.tab === tab));
-  $('panel').innerHTML = b ? dossier(b) : trips ? (tab === 'cargo' ? cargoPanel() : tab === 'journey' ? journeyPanel() : (state.routeFrom ? routesPanel() : routesIntro())) : intro();
+  $('panel').innerHTML = b ? (b.type === 'mission' ? liveCard(b) : dossier(b)) : trips ? (tab === 'cargo' ? cargoPanel() : tab === 'journey' ? journeyPanel() : (state.routeFrom ? routesPanel() : routesIntro())) : state.live ? liveList() : intro();
+  if (state.live || (b && b.type === 'mission')) bindLive();
   syncExtraOrbits(); bindRoutes();
   if (state.hlScroll && state.hl) { const el = $('panel').querySelector(`[data-hl="${state.hl}"]`); if (el) el.closest('.r').scrollIntoView({ block: 'center' }); }
   if (trips) { if (tab === 'cargo') bindCargo(); else if (tab === 'journey') bindJourney(); }
@@ -1870,7 +1873,8 @@ resize(); refreshGlyphs(); setJD(jdOf(TODAY)); renderPanel(); requestAnimationFr
 // links into the atlas, e.g. from the Deep Space Strategy library: #route=earth-mars opens the routes from Earth with Mars
 // highlighted; #body=2 opens a body's dossier
 async function openFromHash() {
-  const h = new URLSearchParams(location.hash.slice(1)), route = h.get('route'), body = h.get('body');
+  const h = new URLSearchParams(location.hash.slice(1)), route = h.get('route'), body = h.get('body'), mission = h.get('mission');
+  if (mission && typeof liveSelect === 'function') { await liveSelect(mission); const t = h.get('date'); if (t) setJD(jdOf(Date.parse(t + 'T00:00:00Z'))); return; }
   if (route) {
     const [a, b] = route.split('-'); if (!BY[a] || !BY[b]) return;
     await routesFrom(a);
@@ -1882,3 +1886,4 @@ addEventListener('hashchange', openFromHash);
 if (location.hash.length > 1) openFromHash();
 </script>
 <script>/*MISSION_JS*/</script>
+<script>/*LIVE_JS*/</script>
