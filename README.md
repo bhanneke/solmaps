@@ -9,10 +9,13 @@ Maps and documentation: https://bhanneke.github.io/solmaps/ · computation statu
 ## What it computes
 
 - Daily transfer alternatives between 30 bodies (planets, Pluto, 18 asteroids including near-Earth asteroids and Jupiter
-  Trojans), every day from November 2026 to 2100, flights up to 100 years: about 2.6 billion Lambert solutions. Nine
-  moons and Earth–Moon L1 share their planet's legs; 40 places in all.
+  Trojans), every day from November 2026 to 2100, flights up to 100 years: up to 18.8 billion Lambert problems. Nine
+  moons and Earth–Moon L1 share their planet's legs; 40 places in all. Released as open data (Zenodo,
+  [10.5281/zenodo.24030357](https://doi.org/10.5281/zenodo.24030357)).
+- A mission planner in the 3D atlas: ships, stops, cargo, refuelling and return, with the mass carried through every
+  burn; its leg files live on Hugging Face (`planner/v0.1`, built by `python -m engine.daily planner`).
 - Flyby (slingshot) routes with an evolutionary optimiser, Earth–Mars cyclers, low-thrust transfers with an
-  independent check, station siting, and chronological journeys for ships with fuel, payload and refuelling.
+  independent check (and a low-thrust atlas of heliocentric legs for four reference accelerations), station siting, and chronological journeys for ships with fuel, payload and refuelling.
 - The JPL Small-Body Database catalogue (1,582,717 objects) as the basis for screening every asteroid and comet.
 
 Positions come from JPL DE440 and daily JPL Horizons states. The checks include NASA NHATS round trips (asteroid legs
@@ -26,7 +29,7 @@ assumptions and limits.
 | `engine/` | Routing engine: end-state conventions, daily precompute (`daily.py`), transfer alternatives, ships, journeys, low thrust, refinement cache, comparison service (`docs/ENGINE.md`) |
 | `flyby/` | Bodies (DE440, JPL Horizons), ephemeris and catalogue fetchers, flyby search, cyclers, trajectories, compute queues |
 | `atlas/` | Resource atlas: verified dataset (`atlas_dataset.json`, every entry with evidence level and source) and its map |
-| `atlas3d/` | The 3D atlas: routes, slingshots, journeys, round trips, network views |
+| `atlas3d/` | The 3D atlas: routes, slingshots, journeys, round trips, network views, trade-offs, mission planner (`mission.js`) |
 | `network/` | Growth map and the JavaScript transfer engine used by the pages |
 | `stations/` | Station siting: candidate orbits, objectives, station-to-station edges |
 | `surrogate/` | Route dataset generator and a first learned surrogate |

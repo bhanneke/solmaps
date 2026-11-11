@@ -50,7 +50,7 @@ JOBS = [
               'one unit = one pair and one two-year window'),
     Job('cyclers', 'Earth–Mars cyclers, 2027–2097', ['all'], lambda u: ['python', 'flyby/cyclers.py', '2027', '2097', '8', '2000', '30', '6'],
         lambda u: ['flyby/cyclers_2027_2097.json'], 'optimum', 0.05, 'one unit: the whole scan'),
-    Job('lowthrust', 'Low-thrust atlas: an electric ship on every site pair and two-year window', ['all'],
-        lambda u: ['python', '-m', 'engine.lt_atlas'], lambda u: ['data/lowthrust_atlas.json'], 'arrays', 1e-3, 'one unit: the whole atlas'),
+    Job('lowthrust', 'Low-thrust atlas: heliocentric legs of electric ships, every site pair and two-year window, four accelerations', ['all'],
+        lambda u: ['python', '-m', 'engine.lt_atlas'], lambda u: ['data/lowthrust_edges.json'], 'arrays', 1e-3, 'one unit: the whole atlas'),
 ]
 BY_ID = {j.id: j for j in JOBS}

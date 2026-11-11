@@ -8,7 +8,7 @@
   <p><a href="https://bhanneke.github.io/deep-space-strategy/">Deep Space Strategy</a> · <a href="index.html">solmaps</a> · <a href="status.html">Computation status</a> · <a href="how-it-works.html">How solmaps works</a></p>
   <h1>Contribute computing</h1>
   <p class="lede">solmaps splits every computation into work units. You can compute an open unit, or recompute a finished one so that two independent runs back each published number.</p>
-  <p class="exp"><strong>Opening with data release v0.1.</strong> The commands below and the public contributions dataset on Hugging Face go live together with the first data release. This page already describes how it will work.</p>
+  <p class="exp"><strong>Status.</strong> For now we compute every job ourselves and publish the results with the datasets; the public contributions dataset for submitting results opens later. You can already run any unit and verify a published one on your own computer with the commands below; only <code>submit</code> waits for that dataset.</p>
 
   <h2>What you need</h2>
   <p>Docker, Git and about 6 GB of free disk space. To submit results you also need a free <a href="https://huggingface.co/join">Hugging Face account</a> and an access token with write permission. Everything else runs in the solmaps container, so your results come from the same libraries as everyone else's.</p>
@@ -51,7 +51,7 @@ docker run --rm -v "$PWD":/work -w /work -e HF_TOKEN=hf_… solmaps-env:3 python
   <h3 id="cyclers">Earth–Mars cyclers</h3>
   <p>One unit: the whole scan from 2027 to 2097.</p>
   <h3 id="lowthrust">Low-thrust atlas</h3>
-  <p>One unit: an electric ship on every pair of the 12 sites and every two-year window.</p>
+  <p>One unit: the heliocentric leg of an electric ship between every pair of the 12 sites and every two-year window, for four reference accelerations from 0.05 to 0.4 mm/s².</p>
 
   <p class="foot">Code under the MIT licence, data under CC BY 4.0. Questions go to the <a href="https://github.com/bhanneke/solmaps/issues">issue tracker</a>.</p>
 </main>

@@ -1,0 +1,9 @@
+# Phrasings that were wrong once and must not come back (tests/check_docs.py). One per line; text after # is a comment.
+small correction burns          # the planets bend long arcs by 0.03-0.72 AU (tests/audit_nbody.py), far more than small corrections
+DOI TBD                         # the DOI exists: 10.5281/zenodo.24030357
+Release candidate               # v0.1 is released
+Opening with data release v0.1  # contributions: we compute ourselves for now
+go live together with the first data release
+about 2.6 billion               # the data needs up to 18.8 billion Lambert problems
+all on nearly the same orbit    # wrong for Mercury to Apophis, Ceres to Itokawa, Pallas to Patroclus
+at most a few tenths            # grid error: see the datasheet figures

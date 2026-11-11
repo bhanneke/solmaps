@@ -62,7 +62,7 @@
   <h3>Best flight time</h3>
   <p>For each date, solmaps tries 740 flight times \(\mathcal F_{ij}\) in three log-spaced parts: 100 from \(0.3\,T_H\) to \(2.5\,T_H\) (at least 10 days), 40 more up to three orbits of the faster body, and 600 more up to 100 years, where \(T_H\) is the Hohmann transfer time between the mean orbital radii. It refines the cheapest local minima of each part and keeps the cheapest:</p>
   $$T_H = \pi\sqrt{\frac{\left(\tfrac{a_i + a_j}{2}\right)^3}{\mu_\odot}}, \qquad c(i,j,t) = \min_{T \in \mathcal F_{ij}} \Big[ \Delta v_{\mathrm{park},i}\big(v_{\infty,\mathrm{dep}}(t,T)\big) + \Delta v_{\mathrm{park},j}\big(v_{\infty,\mathrm{arr}}(t,T)\big) \Big] .$$
-  <p>The minimising \(T\) is \(\tau(i,j,t)\). The engine computes this for every day and for all 870 routes between 30 bodies, up to 18.5 billion Lambert solutions; the 3D atlas uses every tenth day and all 870 routes, and the growth map the 132 routes between 12 sites.</p>
+  <p>The minimising \(T\) is \(\tau(i,j,t)\). The engine computes this for every day and for all 870 routes between 30 bodies, up to 18.8 billion Lambert problems; the 3D atlas uses every tenth day and all 870 routes, and the growth map the 132 routes between 12 sites.</p>
 
   <h2 id="windows">4. Launch windows</h2>
   <p>The cost series of an edge repeats with the synodic period of its two nodes. Bodies with orbital periods \(P_i\), \(P_j\) return to the same relative geometry after</p>

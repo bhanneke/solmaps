@@ -185,6 +185,16 @@ A continuous-thrust transfer has three phases, reported separately:
    (1.5 km, 0.3 mm/s); scaling a profile to another thrust level adds about 5e-9 of round-off.
 3. **Capture.** The reverse burn or spiral into the destination's parking orbit; none at small bodies.
 
+**Low-thrust atlas.** `python -m engine.lt_atlas` precomputes the heliocentric leg alone, from escape at the origin to
+arrival with zero excess speed at the target's edge, for every ordered pair of the 12 sites and every two-year window
+2027–2098 (`data/lowthrust_edges.json`). It solves four reference ships that differ only in their initial acceleration
+(0.05, 0.1, 0.2 and 0.4 mm/s², exhaust speed 24.5 km/s). For a given acceleration and exhaust speed the trajectory and
+the propellant share do not depend on the absolute mass, so the mission planner can scale these legs to any electric
+ship and add the planet ends itself. The levels run in ascending order, and each level also refines the weaker level's
+leg with the throttles scaled down; without that the search missed legs a weaker ship had found. The first atlas
+(`python -m engine.lt_atlas spirals`) flew the cargo preset with full spirals from and into 300 km orbits at both ends;
+the two spirals alone cost up to 15 km/s of that ship's 16.7 km/s, which left most planet-to-planet routes infeasible.
+
 **Alternatives.** The comparison service solves each continuous-thrust query under up to six flight-time caps (the
 time to the deadline times 1, 0.6, 0.4, 0.25, 0.15 and 0.1, at least 60 days) and keeps the options where each slower
 one saves at least 0.5% fuel.
@@ -244,6 +254,34 @@ depends on the exhaust speed: 5.739, 5.731 and 5.723 km/s at Isp 2,000, 4,000 an
 | Independent inbound and outbound hub scoring | Confirmed in the growth map and in the station evaluation | Onward legs leave after the arrival. Earth–Moon L1 leverage 52–84% with slingshots (was 57–90%); station fuel saved 70% for L1 (was 82%) |
 | Low thrust approximated by a speed multiplier | Not found; the code had no low-thrust model, only exhaust speeds applied to impulsive Δv | Continuous-thrust model above |
 | Only the minimum Δv per date | Confirmed | Transfer alternatives |
+
+## Commands
+
+Every command runs in the solmaps-env container from `/work` (`make` targets wrap the common ones).
+
+| Command | What it does |
+| --- | --- |
+| `python -m engine.daily [procs]` | the daily transfer data for all 30 origins (`data/daily/<origin>.npz`) |
+| `python -m engine.daily origin <body> [procs]` | the same for one origin |
+| `python -m engine.repair_daily OUT [procs]`, then `... final REPAIRED OUT [procs]`, or `... unit <body> [procs]` | the repair pass and its last stage; `unit` runs all three stages for one origin |
+| `python -m engine.daily pages [all]` | the page files: `network/network.json` and `network_<limit>.json` for the 12 sites, `network30*.json` for all 30 bodies |
+| `python -m engine.daily options [folder]` | every option per route between the 12 sites, for the trade-offs view (`network/options/`) |
+| `python -m engine.daily planner` | the mission planner's leg files (`network/planner/`, on Hugging Face as `planner/v0.1`) |
+| `python -m engine.export_parquet OUT [origin ...]` | the Parquet files of the data release, checked value by value against the npz |
+| `python -m engine.screen <workers> <first> <last>` | the catalogue screening: every object of the JPL Small-Body Database against Earth, Mars and Ceres (`data/screen_daily/`) |
+| `python -m engine.lt_atlas [edges\|spirals] [procs]` | the low-thrust atlas, edges scenario by default |
+
+## Mission planner
+
+The Missions tab of the 3D atlas (`atlas3d/mission.js`) plans impulsive missions in the browser. Its leg data comes from
+`python -m engine.daily planner`: for every ordered pair of the 30 bodies and every tenth departure day, every stored
+option as flight time and the two excess speeds (uint16, `network/planner/`, published on Hugging Face under
+`planner/v0.1`, about 160 kB per route). The planner prices both ends of each leg with the parking orbits of
+`conventions.PARKING` (Oberth burn into or out of low orbit, a loose orbit that just stays bound, aerocapture at Earth
+and Mars within the limits of the flyby search, rendezvous at small bodies) and carries the mass with the rocket
+equation. Its search keeps the largest propellant reserve for every stop and arrival date: with fixed dry mass and
+cargo, more propellant at the same place and date never hurts. Electric ships and slingshot legs follow; the planner
+answers electric ships with a notice for now.
 
 ## Build and test
 
