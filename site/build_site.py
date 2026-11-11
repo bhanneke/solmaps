@@ -37,3 +37,8 @@ if (root / 'site' / 'progress.json').exists():
 (docs / '.nojekyll').write_text('')          # serve the files as they are
 for p in sorted(docs.iterdir()):
     print(f'{p.name:24s} {p.stat().st_size:>10,d} bytes')
+# the documentation check runs with every build (GitHub Actions also runs it, when the account can run workflows)
+check = subprocess.run([sys.executable, str(root / 'tests' / 'check_docs.py')], capture_output=True, text=True)
+print(check.stdout.strip())
+if check.returncode:
+    print('DOCUMENTATION OUT OF DATE: fix the errors above before publishing (tests/check_docs.py)')
