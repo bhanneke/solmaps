@@ -272,6 +272,42 @@ def derive_options(step=10, src=None):
                       open(f'/work/network/options/{a}_{b}.json', 'w'), separators=(',', ':'))
     print('options: routes', len(SITES) * (len(SITES) - 1), 'from', src)
 
+def derive_snapshots(out='/work/network/api/v1', src=None, days=None):
+    """the read interface's daily snapshots: for every departure day one JSON file with, for each of the 870 routes, the
+    cheapest classic flight (up to 2.5 Hohmann times), the cheapest flight overall (up to 100 years) and the fastest option,
+    each as [cost km/s, flight days]; cost priced at each end's own end state (conventions.planet_side_dv), as on the pages.
+    Layout: <out>/snapshot/<year>/<date>.json  {"date", "fields", "routes": {origin: {target: [6 numbers or null]}}},
+    and <out>/index.json describing it. days: a list of day indices to write (default: all)."""
+    import datetime as dt
+    from engine.conventions import planet_side_arr
+    src = src or OUT; n = None; vals = {}
+    for a in HELIO:
+        d = np.load(f'{src}/{a}.npz'); tg = [str(x) for x in d['targets']]
+        T = d['tof'].astype(np.float64); V = d['vinf'].astype(np.float64); n = T.shape[1]
+        for i, b in enumerate(tg):
+            dep = planet_side_arr(a, V[i, ..., 0])[0]; arr = planet_side_arr(b, V[i, ..., 1])[0]
+            cost = np.where(np.isnan(T[i]), np.inf, dep + arr)
+            classic = tof_grid(semi_major_axis(a), semi_major_axis(b))[NTOF - 1] * 1.0001
+            cc = np.where(T[i] <= classic, cost, np.inf); kc = cc.argmin(1); ka = cost.argmin(1)
+            Tf = np.where(np.isnan(T[i]), np.inf, T[i]); kf = Tf.argmin(1); r = np.arange(n)
+            v = np.stack([cc[r, kc], T[i][r, kc], cost[r, ka], T[i][r, ka], cost[r, kf], T[i][r, kf]], 1).astype(np.float32)
+            v[~np.isfinite(cc[r, kc]), 0:2] = np.nan; v[~np.isfinite(cost[r, ka]), 2:6] = np.nan
+            vals.setdefault(a, {})[b] = v
+        print('snapshots: read', a, flush=True)
+    fields = ['classic_dv_kms', 'classic_days', 'cheapest_dv_kms', 'cheapest_days', 'fastest_dv_kms', 'fastest_days']
+    day0 = dt.date(2026, 11, 1)
+    for k in (days if days is not None else range(n)):
+        date = day0 + dt.timedelta(days=int(k)); folder = f'{out}/snapshot/{date.year}'; os.makedirs(folder, exist_ok=True)
+        routes = {a: {b: [None if x != x else (round(float(x), 2) if j % 2 == 0 else int(round(float(x)))) for j, x in enumerate(v[k])]
+                      for b, v in tg.items()} for a, tg in vals.items()}
+        json.dump({'date': date.isoformat(), 'fields': fields, 'routes': routes}, open(f'{folder}/{date.isoformat()}.json', 'w'), separators=(',', ':'))
+    json.dump({'version': 'v1', 'source': 'solmaps transfer data v0.1, https://doi.org/10.5281/zenodo.24030357', 'first': day0.isoformat(),
+               'last': (day0 + dt.timedelta(days=n - 1)).isoformat(), 'path': 'snapshot/<year>/<YYYY-MM-DD>.json', 'fields': fields,
+               'units': {'dv': 'km/s, departure burn from the origin plus arrival burn at the target (parking orbits as in engine/conventions.py; rendezvous at small bodies)', 'days': 'flight time in days'},
+               'classic': 'flights up to 2.5 Hohmann times of the pair (the crewed default on the site)', 'bodies': list(HELIO)},
+              open(f'{out}/index.json', 'w'), indent=1)
+    print('snapshots: wrote', len(days) if days is not None else n, 'days to', out)
+
 def derive_planner(step=10, src=None, out='/work/network/planner'):
     """the mission planner's leg data: for every ordered pair of the 30 bodies and every tenth day, every stored option as
     flight time and the two excess speeds, so the planner prices each end itself (parking orbit, planet edge, aerocapture).
@@ -297,6 +333,8 @@ def derive_planner(step=10, src=None, out='/work/network/planner'):
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'pages':               # python -m engine.daily pages [all]: 12 sites, or all 30 bodies (network30*.json)
         derive_pages(places=HELIO if sys.argv[2:] == ['all'] else None)
+    elif len(sys.argv) > 1 and sys.argv[1] == 'snapshots':         # python -m engine.daily snapshots [day ...]
+        derive_snapshots(days=[int(x) for x in sys.argv[2:]] or None)
     elif len(sys.argv) > 1 and sys.argv[1] == 'planner':           # python -m engine.daily planner
         derive_planner()
     elif len(sys.argv) > 1 and sys.argv[1] == 'options':         # python -m engine.daily options [daily folder]

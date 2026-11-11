@@ -20,6 +20,7 @@ pages = {
     'technical.html': root / 'site' / 'technical.html',
     'status.html': root / 'site' / 'status.html',
     'contribute.html': root / 'site' / 'contribute.html',
+    'data.html': root / 'site' / 'data.html',
     'atlas.html': root / 'atlas' / 'solar-system-atlas.html',
     'growth-map.html': root / 'network' / 'solar-system-growth-map.html',
     'solar-system-3d.html': root / 'atlas3d' / 'solar-system-3d.html',

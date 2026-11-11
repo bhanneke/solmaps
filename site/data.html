@@ -1,0 +1,55 @@
+<title>solmaps data</title>
+<meta name="description" content="Every solmaps dataset with its address, format and a tested example: transfer data, daily network snapshots, mission planner files and live mission paths.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="page.css">
+<style>
+.dtab{border-collapse:collapse;width:100%;font-size:14px}.dtab th,.dtab td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid var(--rule,#2a3448)}
+.dtab th{font-weight:500;color:var(--dim,#8d99b0)}.tablewrap{overflow-x:auto}
+pre{white-space:pre-wrap;word-break:break-word}
+</style>
+<main>
+  <p><a href="https://bhanneke.github.io/deep-space-strategy/">Deep Space Strategy</a> · <a href="index.html">solmaps</a> · <a href="how-it-works.html">How solmaps works</a> · <a href="status.html">Computation status</a></p>
+  <h1>Data</h1>
+  <p class="lede">All solmaps data is open under CC BY 4.0. Each dataset below sits at a fixed address, so a script, an app or a game can fetch exactly what it needs without a server of its own. Every example on this page runs in our tests against the published files.</p>
+
+  <h2>What is where</h2>
+  <div class="tablewrap"><table class="dtab">
+    <thead><tr><th>Dataset</th><th>What it holds</th><th>Where</th><th>Format, size</th></tr></thead>
+    <tbody>
+      <tr id="transfers"><td>Transfer data v0.1</td><td>Every transfer option between 30 bodies for every departure day from 1 November 2026 to 31 December 2100, flights up to 100 years: 235.7 million options with flight time, the excess speeds at both ends, revolutions around the Sun and closest distance to the Sun. The citable release.</td>
+        <td><a href="https://doi.org/10.5281/zenodo.24030357">Zenodo, DOI 10.5281/zenodo.24030357</a>; <a href="https://huggingface.co/datasets/Deep-Space-Strategy/solmaps-transfers">Hugging Face</a> (<code>data/&lt;origin&gt;.parquet</code>)</td><td>Parquet, one file per origin, 3 GB in all; the <a href="https://github.com/bhanneke/solmaps/blob/main/docs/DATASHEET.md">datasheet</a> lists every column and every check</td></tr>
+      <tr id="snapshots"><td>Daily network snapshots</td><td>For every departure day one file: for each of the 870 routes the cheapest classic flight (up to 2.5 Hohmann times), the cheapest flight overall (up to 100 years) and the fastest option, each as cost (km/s, both burns at the parking orbits) and flight time (days).</td>
+        <td><code>…/resolve/main/api/v1/snapshot/&lt;year&gt;/&lt;YYYY-MM-DD&gt;.json</code> on Hugging Face; <code>api/v1/index.json</code> describes the fields</td><td>JSON, about 36 kB per day, 27,089 days</td></tr>
+      <tr id="planner"><td>Mission planner legs</td><td>For every route and every tenth day all stored options as flight time and both excess speeds, so a program can price the ends itself (low orbit, loose orbit, aerocapture).</td>
+        <td><code>…/resolve/main/planner/v0.1/&lt;origin&gt;_&lt;target&gt;.bin</code> on Hugging Face, layout in <code>planner/v0.1/index.json</code></td><td>binary, uint16, about 160 kB per route</td></tr>
+      <tr id="live"><td>Live mission paths</td><td>Heliocentric positions of 17 spacecraft in flight, from JPL Horizons, with the facts and sources in a separate registry.</td>
+        <td><a href="missions_tracks.json">missions_tracks.json</a> on this site; facts in <a href="https://github.com/bhanneke/solmaps/blob/main/atlas3d/missions_registry.json">missions_registry.json</a></td><td>JSON, 1.5 MB</td></tr>
+    </tbody>
+  </table></div>
+  <p>Next release (v0.2): the screening of 1.58 million asteroids and comets against Earth, Mars and Ceres, the first flyby routes and the low-thrust atlas.</p>
+
+  <h2>Examples</h2>
+  <h3>Earth to Mars on one day, in the browser (JavaScript)</h3>
+  <pre data-test="js"><code>const day = '2031-04-09';
+const url = `https://huggingface.co/datasets/Deep-Space-Strategy/solmaps-transfers/resolve/main/api/v1/snapshot/${day.slice(0, 4)}/${day}.json`;
+const snap = await (await fetch(url)).json();
+const [classicDv, classicDays] = snap.routes.earth.mars;
+console.log(`Earth to Mars on ${day}: ${classicDv} km/s, ${classicDays} days`);</code></pre>
+
+  <h3>All options of a route, in Python</h3>
+  <pre data-test="python"><code>import pandas as pd
+url = 'https://huggingface.co/datasets/Deep-Space-Strategy/solmaps-transfers/resolve/main/data/earth.parquet'
+df = pd.read_parquet(url, filters=[('target', '==', 'mars')])
+best = df.loc[df.groupby('departure')['vinf_departure_kms'].idxmin()]
+print(len(df), 'options from Earth to Mars;', best.head())</code></pre>
+  <p class="caveat">The Parquet file holds every option from Earth (about 100 MB); pandas downloads it once. The columns give the excess speeds; the cost at a parking orbit follows from them as the <a href="https://github.com/bhanneke/solmaps/blob/main/docs/DATASHEET.md">datasheet</a> describes.</p>
+
+  <h3>Queries without a download</h3>
+  <p>Hugging Face runs a query service for public datasets (the Dataset Viewer API), which would answer filters such as one route on one day without any download. In our tests on 11 November 2026 it did not yet answer for this dataset ("server busier than usual"), so this page shows no example for it; the snapshot files and the Parquet files above work without it.</p>
+
+  <h2>Citing</h2>
+  <p>Björn Hanneke, solmaps transfer data v0.1 (2026), Zenodo, <a href="https://doi.org/10.5281/zenodo.24030357">https://doi.org/10.5281/zenodo.24030357</a>. Positions come from JPL DE440 and JPL Horizons; please cite those as the datasheet lists.</p>
+  <p class="foot">Data under CC BY 4.0, code under MIT. Questions go to the <a href="https://github.com/bhanneke/solmaps/issues">issue tracker</a>.</p>
+</main>

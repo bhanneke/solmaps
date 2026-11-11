@@ -266,6 +266,7 @@ Every command runs in the solmaps-env container from `/work` (`make` targets wra
 | `python -m engine.repair_daily OUT [procs]`, then `... final REPAIRED OUT [procs]`, or `... unit <body> [procs]` | the repair pass and its last stage; `unit` runs all three stages for one origin |
 | `python -m engine.daily pages [all]` | the page files: `network/network.json` and `network_<limit>.json` for the 12 sites, `network30*.json` for all 30 bodies |
 | `python -m engine.daily options [folder]` | every option per route between the 12 sites, for the trade-offs view (`network/options/`) |
+| `python -m engine.daily snapshots [day ...]` | the daily network snapshots of the read interface (`network/api/v1/`, on Hugging Face as `api/v1`): per day and route the cheapest classic flight, the cheapest overall and the fastest option |
 | `python -m engine.daily planner` | the mission planner's leg files (`network/planner/`, on Hugging Face as `planner/v0.1`) |
 | `python -m engine.export_parquet OUT [origin ...]` | the Parquet files of the data release, checked value by value against the npz |
 | `python -m engine.screen <workers> <first> <last>` | the catalogue screening: every object of the JPL Small-Body Database against Earth, Mars and Ceres (`data/screen_daily/`) |
