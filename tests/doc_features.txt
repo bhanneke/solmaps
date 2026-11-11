@@ -1,0 +1,22 @@
+# What each document must mention (tests/check_docs.py): "<document> | <term>", case-insensitive. When a feature, dataset or
+# component is added, add its terms here for every document that has to describe it; the check fails until they do.
+site/technical.html | 30 nodes
+site/technical.html | 870 directed edges
+site/technical.html | every departure day
+site/technical.html | mission planner
+site/technical.html | low-thrust atlas
+site/technical.html | live missions
+site/technical.html | datasheet
+site/technical.html | snapshots
+site/how-it-works.html | mission planner
+site/how-it-works.html | live missions
+site/how-it-works.html | low-thrust
+site/how-it-works.html | data page
+README.md | mission planner
+README.md | live missions
+README.md | snapshots
+docs/ENGINE.md | engine.daily snapshots
+docs/ENGINE.md | fetch_missions
+site/data.html | snapshot
+site/data.html | planner
+site/data.html | missions_tracks

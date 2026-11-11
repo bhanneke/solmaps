@@ -17,6 +17,11 @@ Maps and documentation: https://bhanneke.github.io/solmaps/ · computation statu
 - Flyby (slingshot) routes with an evolutionary optimiser, Earth–Mars cyclers, low-thrust transfers with an
   independent check (and a low-thrust atlas of heliocentric legs for four reference accelerations), station siting, and chronological journeys for ships with fuel, payload and refuelling.
 - The JPL Small-Body Database catalogue (1,582,717 objects) as the basis for screening every asteroid and comet.
+- Live missions: the trajectories of spacecraft in flight from JPL Horizons (`flyby/fetch_missions.py`), with their facts and
+  sources, shown in the 3D atlas.
+- Daily network snapshots for apps and games (`python -m engine.daily snapshots`): for every day to 2100 the cheapest classic,
+  cheapest overall and fastest option of all 870 routes, on Hugging Face under `api/v1`; the site's Data page lists every
+  dataset with tested examples.
 
 Positions come from JPL DE440 and daily JPL Horizons states. The checks include NASA NHATS round trips (asteroid legs
 within 0.001 km/s), an independent integrator and a second Lambert solver; `docs/ENGINE.md` lists them with the models,

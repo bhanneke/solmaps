@@ -76,6 +76,16 @@ for line in (ROOT / 'tests' / 'stale_phrases.txt').read_text().splitlines():
         if ph.lower() in plain(t).lower():
             err(f'{d}: outdated phrase "{ph}"')
 
+# 5b. every document mentions what tests/doc_features.txt requires of it
+for line in (ROOT / 'tests' / 'doc_features.txt').read_text().splitlines():
+    if not line.strip() or line.startswith('#'):
+        continue
+    d, term = [x.strip() for x in line.split('|', 1)]
+    if d not in TEXT:
+        err(f'doc_features.txt names {d}, which is not among the checked documents'); continue
+    if term.lower() not in plain(TEXT[d]).lower().replace('-', ' ') and term.lower() not in TEXT[d].lower():
+        err(f'{d} does not mention "{term}" (tests/doc_features.txt)')
+
 # 6. links between the pages resolve (targets in site/ or the built docs/), with their anchors
 for d in DOCS:
     if not d.startswith('site/'):

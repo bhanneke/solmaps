@@ -7,3 +7,7 @@ go live together with the first data release
 about 2.6 billion               # the data needs up to 18.8 billion Lambert problems
 all on nearly the same orbit    # wrong for Mercury to Apophis, Ceres to Itokawa, Pallas to Patroclus
 at most a few tenths            # grid error: see the datasheet figures
+next build step                 # the journey and mission planners exist
+12 nodes:                       # the graph has 30 nodes
+132 directed edges              # 870 directed edges (the growth map keeps 132)
+departure dates every 10 days   # the data covers every day; only the pages use every tenth
