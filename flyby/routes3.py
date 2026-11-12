@@ -37,7 +37,10 @@ def leg_bounds(p, q):
         per = 365.25 * A[p] ** 1.5
         return [0.8 * per, 2.2 * per]
     t = hohmann_days(A[p], A[q])
-    return [max(30, 0.3 * t), min(5000, 2.5 * t)]
+    lo, hi = max(30, 0.3 * t), min(5000, 2.5 * t)
+    if lo >= hi:              # Pluto: 0.3 Hohmann times exceed the 5,000-day cap; widen only these, the other ranges stay as they ran
+        lo, hi = min(lo, 3000.0), max(hi, t)
+    return [lo, hi]
 
 # ---- Tisserand-style screen (coplanar circular orbits, patched conics) ----
 def vcirc(a):
