@@ -210,7 +210,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
     <th data-k="type">Type</th><th data-k="from">From</th><th data-k="to">To</th><th data-k="leave">Leave</th><th data-k="arrive">Arrive</th><th data-k="days">Flight</th><th data-k="dv">km/s</th><th data-k="via">Via</th><th></th>
   </tr></thead><tbody id="tBody"></tbody></table></div>
 </section>
-<aside class="panel" id="panelBox" hidden><button type="button" class="pclose" id="panelClose" aria-label="Hide details">Hide ✕</button><div id="tripTabs" class="list tabs" role="tablist" hidden><button type="button" data-tab="routes">Direct routes</button><button type="button" data-tab="journey">With stops</button><button type="button" data-tab="cargo">Cargo round trip</button></div><div id="tripCtl" class="tripctl" hidden><select id="routeMode" aria-label="Route direction"><option value="from">Routes from</option><option value="to">Routes to</option></select><select id="routeFrom" aria-label="Site for routes"><option value="">none</option></select>
+<aside class="panel" id="panelBox" hidden><button type="button" class="pclose" id="panelClose" aria-label="Hide details">Hide ✕</button><div id="tripTabs" class="list tabs" role="tablist" hidden><button type="button" data-tab="routes">Direct routes</button><button type="button" data-tab="journey">With stops</button><button type="button" data-tab="cargo">Cargo round trip</button></div><div id="tripCtl" class="tripctl" hidden><select id="routeMode" aria-label="Route direction"><option value="from">Routes from</option><option value="to">Routes to</option></select><select id="routeFrom" aria-label="Site for routes"><option value="">none</option></select><select id="routeOther" aria-label="Other end of the routes"><option value="">to all destinations</option></select>
     <select id="horizon" aria-label="Waiting horizon"><option value="18">wait up to 6 months</option><option value="37" selected>wait up to 1 year</option><option value="79">wait up to 26 months</option></select><label class="sl"><input type="checkbox" id="sling" checked> slingshots</label><select id="bodySet" aria-label="Bodies"><option value="sites">12 sites</option><option value="all">all 30 bodies</option></select><select id="flightCap" aria-label="Longest flight"></select><span id="capMsg" class="lbl"></span></div><div id="panel" class="pbody" aria-live="polite"></div></aside>
 <div id="rideHud" class="hud" hidden aria-live="polite"><div id="rideTxt"></div><div class="list"><button type="button" id="ridePause">Pause</button><button type="button" id="rideCam">Free camera</button><button type="button" id="rideEnd">Leave ship</button></div></div>
 <button type="button" id="panelOpen" class="popen">Details</button>
@@ -761,7 +761,7 @@ function rebuildRoutes() {
   const k = Math.max(0, kOf(state.jd)), toMode = state.routeMode === 'to';
   const groups = [];
   for (const n of NET.nodes) {
-    if (n.id === site) continue;
+    if (n.id === site || (state.routeOther && n.id !== state.routeOther)) continue;   // one pair when the second list names a body
     const from = toMode ? n.id : site, to = toMode ? site : n.id;
     const wins = windowsDirect(from, to, k, state.H); if (!wins.length) continue;
     const rows = wins.map(b => {
@@ -794,7 +794,7 @@ function rebuildRoutes() {
   }
 }
 function updateRoutes() {
-  const key = [state.routeMode, state.routeFrom, Math.max(0, kOf(state.jd)), state.H, state.hl].join('|');
+  const key = [state.routeMode, state.routeFrom, state.routeOther, Math.max(0, kOf(state.jd)), state.H, state.hl].join('|');
   if (key !== routeKey) { routeKey = key; rebuildRoutes(); if (!state.sel && state.routeFrom) renderPanel(); }
   for (const f of state.flights) {                       // launched flights: a ship moves along its arc while in flight
     const t = state.jd - f.jdDep;
@@ -851,7 +851,7 @@ function routesPanel() {
       <div class="list"><button type="button" data-hl="${r.key}" aria-pressed="${state.hl === r.key}">Highlight</button><button type="button" data-launch="${r.key}" ${r.el ? '' : 'disabled'}>Launch a ship and ride along</button><button type="button" data-go="${r.key}">Jump to departure</button></div></div>`;
   }).join('');
   const fl = state.flights.map((f, i) => { const t = state.jd - f.jdDep; const st = t < 0 ? `departs in ${Math.ceil(-t)} days` : t <= f.tof ? `in flight, day ${Math.floor(t)} of ${f.tof}` : 'arrived'; return `<div class="meta">${esc(nodeName(f.from))} to ${esc(f.name)}: ${st}</div>`; }).join('');
-  return `<div><h2>Routes ${state.routeMode === 'to' ? 'to' : 'from'} ${esc(BY[from].name)}</h2><p class="caveat">Every launch window between ${isoOf(jdOfK(k))} and ${isoOf(jdOfK(k + state.H))}, each at its cheapest departure date; ${routeList.length} windows to ${new Set(routeList.map(r => r.site)).size} sites. Windows more than 3 km/s above a destination's best are left out. Dashed cyan paths are slingshot routes from the pykep flyby search, with a ring at each flyby planet; they exist so far for routes from Earth to Jupiter, Ceres, Vesta and Psyche. Δv includes the burn out of the parking orbit and into the destination's (rendezvous at small bodies); colours run from cheap (gold) to costly (red). Flyby alternatives come from the pykep search where it has run.</p></div>
+  return `<div><h2>Routes ${state.routeMode === 'to' ? 'to' : 'from'} ${esc(BY[from].name)}${state.routeOther && BY[state.routeOther] ? (state.routeMode === 'to' ? ' from ' : ' to ') + esc(BY[state.routeOther].name) : ''}</h2><p class="caveat">Every launch window between ${isoOf(jdOfK(k))} and ${isoOf(jdOfK(k + state.H))}, each at its cheapest departure date; ${routeList.length} windows to ${new Set(routeList.map(r => r.site)).size} sites. Windows more than 3 km/s above a destination's best are left out. Dashed cyan paths are slingshot routes from the pykep flyby search, with a ring at each flyby planet; they exist so far for routes from Earth to Jupiter, Ceres, Vesta and Psyche. Δv includes the burn out of the parking orbit and into the destination's (rendezvous at small bodies); colours run from cheap (gold) to costly (red). Flyby alternatives come from the pykep search where it has run.</p></div>
     ${state.flights.length ? `<div><h3>Your ships</h3>${fl}<div class="list"><button type="button" id="clearShips">Clear ships</button></div><p class="caveat">Press play to watch them fly, or launch another and ride along.</p></div>` : ''}
     <div class="res">${rows}</div>
     <p class="caveat">Costs: ${esc(NET.meta.ephemeris || '')}. ${esc(NET.meta.method)}</p>`;
@@ -898,7 +898,7 @@ async function routesFrom(id) {                            // dossier button: ro
   if (!NET.nodes.some(n => n.id === id) && !(await loadNet('all', state.cap))) return;
   state.sel = null; state.follow = null; resetView(); state.journey = true; state.jTab = 'routes';
   openPanel(true); $('btnJourney').setAttribute('aria-pressed', true);
-  state.routeFrom = id; state.routeMode = 'from'; $('routeMode').value = 'from'; $('routeFrom').value = id; state.hl = null; routeKey = ''; updateRoutes(); renderPanel();
+  state.routeFrom = id; state.routeMode = 'from'; $('routeMode').value = 'from'; $('routeFrom').value = id; state.routeOther = ''; fillRouteOther(); state.hl = null; routeKey = ''; updateRoutes(); renderPanel();
 }
 $('flightCap').addEventListener('change', e => setCap(e.target.value));
 $('bodySet').addEventListener('change', e => loadNet(e.target.value, state.cap));
@@ -912,16 +912,25 @@ function fillNodeSelects() {                               // every list of bodi
   const rf = keep('routeFrom'), tf = $('tFrom') && keep('tFrom'), tt = $('tTo') && keep('tTo'), has = id => NET.nodes.some(n => n.id === id);
   $('routeFrom').innerHTML = '<option value="">none</option>' + NET.nodes.map(n => `<option value="${n.id}">${esc(n.name)}</option>`).join('');
   $('routeFrom').value = has(rf) ? rf : ''; if (!has(rf)) state.routeFrom = '';
+  fillRouteOther();
   if ($('tFrom')) {
     const o = '<option value="">any</option>' + NET.nodes.map(n => `<option value="${n.id}">${esc(n.name)}</option>`).join('');
     $('tFrom').innerHTML = o; $('tTo').innerHTML = o; $('tFrom').value = has(tf) ? tf : ''; $('tTo').value = has(tt) ? tt : '';
   }
 }
+function fillRouteOther() {                               // the other end of the routes: all, or one body
+  const keep = state.routeOther, to = state.routeMode !== 'to';
+  $('routeOther').innerHTML = `<option value="">${to ? 'to all destinations' : 'from all origins'}</option>` + NET.nodes.filter(n => n.id !== state.routeFrom)
+    .map(n => `<option value="${n.id}">${to ? 'to' : 'from'} ${esc(n.name)}</option>`).join('');
+  const ok = keep && keep !== state.routeFrom && NET.nodes.some(n => n.id === keep); $('routeOther').value = ok ? keep : ''; state.routeOther = ok ? keep : '';
+}
+state.routeOther = '';
 fillNodeSelects();
-$('routeFrom').addEventListener('change', e => { state.routeFrom = e.target.value; state.hl = null; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
+$('routeFrom').addEventListener('change', e => { state.routeFrom = e.target.value; state.hl = null; fillRouteOther(); routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
+$('routeOther').addEventListener('change', e => { state.routeOther = e.target.value; state.hl = null; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
 $('horizon').addEventListener('change', e => { state.H = +e.target.value; routeKey = ''; updateRoutes(); });
 $('sling').addEventListener('change', e => { state.sling = e.target.checked; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
-$('routeMode').addEventListener('change', e => { state.routeMode = e.target.value; state.hl = null; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
+$('routeMode').addEventListener('change', e => { state.routeMode = e.target.value; state.hl = null; fillRouteOther(); routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
 
 /* ---------- controls ---------- */
 const DAY0 = Date.UTC(2026, 0, 1), DAY1 = Date.UTC(2100, 11, 31), TODAY = Date.UTC(2026, 9, 30);
@@ -1983,6 +1992,7 @@ async function openFromHash() {
   if (route) {
     const [a, b] = route.split('-'); if (!BY[a] || !BY[b]) return;
     await routesFrom(a);
+    state.routeOther = b; fillRouteOther();                // the link names one pair: show that pair only
     const r = routeList.find(x => x.site === b);
     if (r) { state.hl = r.key; state.hlScroll = true; routeKey = ''; updateRoutes(); renderPanel(); setTimeout(() => { state.hlScroll = false; }, 6000); }   // keeps the row in view through the switch to 30 bodies
   } else if (body && BY[body]) select(body);
