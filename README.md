@@ -19,6 +19,8 @@ Maps and documentation: https://bhanneke.github.io/solmaps/ · computation statu
 - The JPL Small-Body Database catalogue (1,582,717 objects) as the basis for screening every asteroid and comet.
 - Live missions: the trajectories of spacecraft in flight from JPL Horizons (`flyby/fetch_missions.py`), with their facts and
   sources, shown in the 3D atlas.
+- A guided tour of the 3D atlas on the first visit (six steps; the "?" button starts it again), with the speed change (Δv)
+  explained next to every cost and reference values from the data.
 - Daily network snapshots for apps and games (`python -m engine.daily snapshots`): for every day to 2100 the cheapest classic,
   cheapest overall and fastest option of all 870 routes, on Hugging Face under `api/v1`; the site's Data page lists every
   dataset with tested examples.

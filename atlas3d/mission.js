@@ -182,12 +182,13 @@ function mpDraw() {
     <div class="list mfront">${R.front.slice(0, 10).map(e => { const sh = mpSheet(R.m, R.plan, e.k); return `<button type="button" data-pick="k${e.k}" aria-pressed="${R.pick === 'k' + e.k || (R.pick === 'earliest' && e.k === R.earliest.k)}">${mpFmtDate(sh.end)} · ${mpFmtDays(sh.end - sh.start)} · ${e.p.toFixed(1)} t left</button>`; }).join('')}</div>
     <p class="caveat">The first entry returns earliest; each later one leaves at least 0.5 t more propellant, mostly by waiting for better launch windows or flying longer arcs.</p>
     <div class="list"><button type="button" id="mFly">Fly along in 3D</button><button type="button" id="mCsv">Export CSV</button><button type="button" id="mJson">Export JSON</button></div>
-    <div class="kpis">${kpi('Launch', mpFmtDate(S.start))}${kpi('End', mpFmtDate(S.end))}${kpi('Duration', mpFmtDays(S.end - S.start))}${kpi('Total Δv', fmt(S.dvSum) + ' km/s')}${kpi('Propellant used', fmt(S.used, 1) + ' t')}${kpi('Left in the tank', fmt(S.left, 1) + ' of ' + R.m.ship.tank + ' t')}${kpi('Peak acceleration', S.gmax.toFixed(2) + ' g')}</div>
+    <div class="kpis">${kpi('Launch', mpFmtDate(S.start))}${kpi('End', mpFmtDate(S.end))}${kpi('Duration', mpFmtDays(S.end - S.start))}${kpi('Total Δv (speed change)', fmt(S.dvSum) + ' km/s')}${kpi('Propellant used', fmt(S.used, 1) + ' t')}${kpi('Left in the tank', fmt(S.left, 1) + ' of ' + R.m.ship.tank + ' t')}${kpi('Peak acceleration', S.gmax.toFixed(2) + ' g')}</div>
     ${warn.length ? `<p class="caveat warn">${warn.map(esc).join('; ')}.</p>` : ''}
     <div class="twrap"><table class="ttab"><thead><tr><th>Date</th><th>Phase</th><th>Δv km/s</th><th>Propellant t</th><th>Mass after t</th><th>Duration</th><th></th></tr></thead><tbody>
-      ${S.rows.map(r => `<tr><td class="num">${mpFmtDate(r.date)}</td><td>${esc(r.phase)}</td><td class="num">${fmt(r.dv)}</td><td class="num">${fmt(r.used, 1)}</td><td class="num">${fmt(r.mass, 1)}</td><td class="num">${r.days != null ? mpFmtDays(r.days) : ''}</td><td>${esc(r.note || '')}</td></tr>`).join('')}
+      ${S.rows.map(r => `<tr><td class="num">${mpFmtDate(r.date)}</td><td><b>${esc(r.phase)}</b></td><td class="num" data-l="Δv km/s">${fmt(r.dv)}</td><td class="num" data-l="propellant t">${fmt(r.used, 1)}</td><td class="num" data-l="mass after t">${fmt(r.mass, 1)}</td><td class="num" data-l="duration">${r.days != null ? mpFmtDays(r.days) : ''}</td><td>${esc(r.note || '')}</td></tr>`).join('')}
     </tbody></table></div>
     <h3>Best mission by launch year</h3><div class="myrs" role="group" aria-label="Launch years">${yrs}</div>
+    <p class="caveat">Δv is the speed change the engines must deliver; the rocket equation turns it into propellant for this ship. ${DV_REF}</p>
     <p class="caveat">Bar height: propellant left at the end. Dates follow the transfer data's 10-day grid; each leg is the stored option on that date, priced at both ends for this ship. Departures and arrivals are impulsive burns; flybys and electric legs come in the next steps.</p>`;
 }
 function mpCsv() {
@@ -214,7 +215,7 @@ function mpStopRow(s = {}) {
   const opts = sel => MP.bodies.map(id => `<option value="${id}" ${id === sel ? 'selected' : ''}>${esc(mpName(id))}</option>`).join('');
   const d = document.createElement('div'); d.className = 'mstop';
   d.innerHTML = `<label>Stop <select data-f="body">${opts(s.id || 'mars')}</select></label><label>Stay, days <input data-f="stay" type="number" min="0" step="10" value="${s.stay ?? 30}"></label>
-    <label>Arrive <select data-f="how"><option value="orbit">into low orbit</option><option value="loose">into a loose orbit</option><option value="aero">braking in the atmosphere</option></select></label>
+    <label>Arrive <select data-f="how"><option value="orbit" title="a circular orbit close to the surface: the most fuel, the closest access">into low orbit</option><option value="loose" title="an orbit that only just stays bound: little fuel to enter and leave, far from the planet">into a loose orbit</option><option value="aero" title="the atmosphere brakes the ship (Earth up to 6 km/s, Mars up to 7 km/s), then a small burn">braking in the atmosphere</option></select></label>
     <label>Deliver, t <input data-f="deliver" type="number" min="0" step="1" value="${s.deliver ?? 0}"></label><label>Take on, t <input data-f="pickup" type="number" min="0" step="1" value="${s.pickup ?? 0}"></label>
     <label class="mchk"><input data-f="refuel" type="checkbox" ${s.refuel ? 'checked' : ''}> refuel here</label><button type="button" data-f="del" aria-label="Remove this stop">✕</button>`;
   if (s.how) d.querySelector('[data-f=how]').value = s.how;

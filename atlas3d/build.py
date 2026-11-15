@@ -46,5 +46,6 @@ html = html.replace('/*MISSION_DATA*/', j(mission)).replace('/*MISSION_JS*/', (h
 # live missions: the curated registry (facts and sources) embedded, the trajectories (missions_tracks.json) loaded on demand
 live = json.load(open(here / 'missions_registry.json')) if (here / 'missions_registry.json').exists() else {'missions': []}
 html = html.replace('/*LIVE_DATA*/', j(live)).replace('/*LIVE_JS*/', (here / 'live.js').read_text())
+html = html.replace('/*TOUR_JS*/', (here / 'tour.js').read_text())   # the guided tour on the first visit
 (here / 'solar-system-3d.html').write_text(html)
 print('built', len(html), 'bytes;', len(flyby), 'flyby routes;', sum('path' in r for r in flyby), 'with sampled trajectories')

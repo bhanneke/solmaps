@@ -95,7 +95,7 @@ a{color:var(--c-water)}
 .tripctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)}
 .hud{z-index:4;position:fixed;left:50%;transform:translateX(-50%);top:110px;background:var(--deck);border:1px solid var(--sun);border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;gap:6px;max-width:min(560px,calc(100vw - 32px));font-size:13px;backdrop-filter:blur(4px)}
 .hud b{color:var(--sun);font-weight:600}.hud .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-.tview{position:fixed;left:0;right:0;bottom:0;top:100px;z-index:2;background:var(--void);overflow:auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box}
+.tview{position:fixed;left:0;right:0;bottom:0;top:max(100px,var(--toph,0px));z-index:2;background:var(--void);overflow:auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box}
 .tfilters{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end}.tfilters label{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--dim)}
 .tfilters input[type=number]{width:6.5em;background:var(--deck-solid);border:1px solid var(--rule);border-radius:4px;padding:4px 6px}
 .tchk{display:flex;gap:10px}.tchk label{flex-direction:row;align-items:center;gap:4px;font-size:13px;color:var(--ink)}
@@ -123,14 +123,16 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
   .panel{bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 52px)}
   .popen{bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 56px)}
   .n3card{bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 52px)}
-  .tview{top:96px;bottom:60px}
+  .tview{top:max(96px,var(--toph,0px));bottom:60px;padding-bottom:72px}
   .xcharts{grid-template-columns:1fr}#xC{height:320px}
   .hud{top:auto;bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 56px);width:calc(100vw - 24px);max-width:none}
   .hint{display:none}
   .brand{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
-.reach{font-family:var(--f-mono,monospace);font-size:11.5px;color:var(--dim,#8d99b0);margin-left:4px}.reach.never{color:#e0605a}#reachB{font-size:12px;padding:1px 4px}.mh{font-size:16px;margin:2px 0 8px}.mstop{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end;margin:8px 0;padding:8px;border:1px solid var(--rule);border-radius:8px}.mstop label{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--dim)}.mstop input[type=number]{width:6.5em}.mchk{flex-direction:row!important;align-items:center;gap:6px!important}#missionView .tfilters{margin:6px 0}#missionView .tfilters input[type=date]{background:var(--deck-solid);border:1px solid var(--rule);border-radius:4px;padding:3px 6px;color:inherit}.primary{border-color:var(--sun)!important;color:var(--sun)}.warn{color:#e0905a}.myrs{display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end}.myr{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;padding:2px 3px;min-width:22px}.myr span{display:block;width:12px;background:#f2b84b;border-radius:2px}.myr[disabled]{opacity:.35}.myr[aria-pressed=true]{border-color:var(--sun)}#missionView .kpis{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}#missionView .kpi{border:1px solid var(--rule);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;font-size:12px;color:var(--dim)}#missionView .kpi b{font-size:15px;color:var(--ink,#dfe5ef);font-family:var(--f-mono,monospace)}.lab.live span:first-child{color:#8fe9f5}.r.live{border-left-color:#4fd6e8}.r.planned .name{opacity:.8}.r.planned{border-left-style:dashed}.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
+.reach{font-family:var(--f-mono,monospace);font-size:11.5px;color:var(--dim,#8d99b0);margin-left:4px}.reach.never{color:#e0605a}#reachB{font-size:12px;padding:1px 4px}.mh{font-size:16px;margin:2px 0 8px}.mstop{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end;margin:8px 0;padding:8px;border:1px solid var(--rule);border-radius:8px}.mstop label{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--dim)}.mstop input[type=number]{width:6.5em}.mchk{flex-direction:row!important;align-items:center;gap:6px!important}#missionView .tfilters{margin:6px 0}#missionView .tfilters input[type=date]{background:var(--deck-solid);border:1px solid var(--rule);border-radius:4px;padding:3px 6px;color:inherit}.primary{border-color:var(--sun)!important;color:var(--sun)}.warn{color:#e0905a}.myrs{display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end}.myr{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;padding:2px 3px;min-width:22px}.myr span{display:block;width:12px;background:#f2b84b;border-radius:2px}.myr[disabled]{opacity:.35}.myr[aria-pressed=true]{border-color:var(--sun)}#missionView .kpis{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}#missionView .kpi{border:1px solid var(--rule);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;font-size:12px;color:var(--dim)}#missionView .kpi b{font-size:15px;color:var(--ink,#dfe5ef);font-family:var(--f-mono,monospace)}.lab.live span:first-child{color:#8fe9f5}.r.live{border-left-color:#4fd6e8}.r.planned .name{opacity:.8}.r.planned{border-left-style:dashed}#tour{position:fixed;z-index:40;box-sizing:border-box;left:max(12px,env(safe-area-inset-left,0px));bottom:max(22px,env(safe-area-inset-bottom,0px));width:min(560px,calc(100vw - 24px));background:var(--deck-solid);border:1px solid var(--sun);border-radius:12px;padding:12px 16px;box-shadow:0 10px 32px rgba(0,0,0,.55)}#tour h3{margin:2px 0 4px;font-size:18px;color:var(--sun)}#tour p{margin:0 0 10px;font-size:14.5px;line-height:1.5}#tour .tstep{font-size:11.5px;color:var(--dim);letter-spacing:.04em}#btnTour{min-width:30px;font-weight:600}
+@media (max-width:820px){#tour{bottom:calc(max(10px,env(safe-area-inset-bottom,0px)) + 58px)}#missionView .ttab thead{display:none}#missionView .ttab tr{display:block;border-bottom:1px solid var(--rule);padding:6px 0}#missionView .ttab td{display:block;border:0;padding:1px 8px;white-space:normal}#missionView .ttab td[data-l]:not(:empty)::before{content:attr(data-l) ": ";color:var(--dim)}#missionView .kpi{flex:1 1 40%}}
+.dgrp{margin:6px 0}.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;margin:4px 0 0 4px;font-size:13px}.dlist label{white-space:nowrap}
 #dispPop{max-height:70vh;overflow:auto;min-width:280px}
 </style>
 
@@ -147,6 +149,7 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
   </div></details>
   <button type="button" id="btnJourney" aria-pressed="false">Trips</button>
   <button type="button" id="btnLive" aria-pressed="false">Live missions</button>
+  <button type="button" id="btnTour" title="Guided tour" aria-label="Guided tour">?</button>
   <details class="menu" id="mCamera"><summary>Camera</summary><div class="pop"><div class="grp"><button type="button" id="btnTop">Top view</button><button type="button" id="btnReset">Whole system</button><button type="button" id="btnLabels" aria-pressed="true">Labels</button></div></div></details>
   <div class="grp" id="viewOpts"><details class="menu" id="mDisplay" hidden><summary>Display</summary><div class="pop" id="dispPop"></div></details><span id="n3ctl" class="grp" hidden><select id="n3Color" aria-label="Line colour in the whole-network view"><option value="imbalance">colour = go-return imbalance</option><option value="time">colour = travel time</option><option value="cost">colour = km/s</option></select></span><select id="n3Scale" aria-label="Distance scale in the network views" hidden><option value="log">log scale</option><option value="sqrt">square-root scale</option><option value="linear">linear scale</option></select><select id="nvMetric" aria-label="Distance in the network view" hidden><option value="time">distance = travel time</option><option value="fuel">distance = fuel</option></select></div>
   <div class="grp datebar"><span class="lbl">Date</span><input type="range" id="dateSlider" min="0" max="1" step="1" aria-label="Date"><span class="date" id="dateOut"></span>
@@ -223,6 +226,10 @@ figcaption{font-size:12.5px;color:var(--dim);margin:0 0 4px}.xsurf{margin-top:14
 <script id="stn-journey" type="application/json">/*STNJ*/</script>
 <script id="mission-data" type="application/json">/*MISSION_DATA*/</script>
 <script id="live-data" type="application/json">/*LIVE_DATA*/</script>
+<script>/* plain-language help on km/s; numbers: best classic window 2026-2100 from a 300 km Earth orbit, transfer data */
+const DV_TIP = 'speed change the engines must deliver (Δv); more km/s means more fuel';
+const DV_REF = 'For comparison, the best launch windows 2026–2100 from a 300 km Earth orbit: Mars 5.7, Eros 6.0, Venus 6.9, Vesta 8.9, Ceres 9.9, Jupiter 10.9, Pallas 13.5 km/s.';
+</script>
 <script>/*ENGINE*/</script>
 <script>
 const DATA = JSON.parse(document.getElementById('atlas-data').textContent);
@@ -741,12 +748,12 @@ function routesPanel() {
         <div class="meta">${d > 0 ? 'saves ' + d.toFixed(2) + ' km/s' : 'costs ' + (-d).toFixed(2) + ' km/s more'} · leave ${isoOf(r.fly.launch_mjd2000 + 2451544.5)} · ${Math.round(r.fly.tof_days)} days${r.flyPath ? (r.flyPath.estimated ? ' · flyby dates estimated' : '') : ' · path not drawn'}</div>
         <div class="list"><button type="button" data-hl="${r.key}~" aria-pressed="${state.hl === r.key + '~'}">Highlight</button><button type="button" data-sling="${r.key}" ${r.flyPath ? '' : 'disabled'}>Launch on slingshot</button></div></div>`;
     }
-    return `<div class="r" style="border-left-color:#${rampColor(r.dv).getHexString()}"><div class="head"><span class="name">${first ? esc(r.name) : '<span class="meta">next window</span>'}</span><span class="vt">${r.dv.toFixed(2)} km/s</span></div>
+    return `<div class="r" style="border-left-color:#${rampColor(r.dv).getHexString()}"><div class="head"><span class="name">${first ? esc(r.name) : '<span class="meta">next window</span>'}</span><span class="vt" title="${DV_TIP}">${r.dv.toFixed(2)} km/s</span></div>
       <div class="meta">leave ${isoOf(r.jdDep)} · ${r.tof} days${r.el ? '' : ' · no arc drawn'}</div>${flyTxt}
       <div class="list"><button type="button" data-hl="${r.key}" aria-pressed="${state.hl === r.key}">Highlight</button><button type="button" data-launch="${r.key}" ${r.el ? '' : 'disabled'}>Launch a ship and ride along</button><button type="button" data-go="${r.key}">Jump to departure</button></div></div>`;
   }).join('');
   const fl = state.flights.map((f, i) => { const t = state.jd - f.jdDep; const st = t < 0 ? `departs in ${Math.ceil(-t)} days` : t <= f.tof ? `in flight, day ${Math.floor(t)} of ${f.tof}` : 'arrived'; return `<div class="meta">${esc(nodeName(f.from))} to ${esc(f.name)}: ${st}</div>`; }).join('');
-  return `<div><h2>Routes ${state.routeMode === 'to' ? 'to' : 'from'} ${esc(BY[from].name)}${state.routeOther && BY[state.routeOther] ? (state.routeMode === 'to' ? ' from ' : ' to ') + esc(BY[state.routeOther].name) : ''}</h2><p class="caveat">Every launch window between ${isoOf(jdOfK(k))} and ${isoOf(jdOfK(k + state.H))}, each at its cheapest departure date; ${routeList.length} windows to ${new Set(routeList.map(r => r.site)).size} sites. Windows more than 3 km/s above a destination's best are left out. Dashed cyan paths are slingshot routes from the pykep flyby search, with a ring at each flyby planet; they exist so far for routes from Earth to Jupiter, Ceres, Vesta and Psyche. Δv includes the burn out of the parking orbit and into the destination's (rendezvous at small bodies); colours run from cheap (gold) to costly (red). Flyby alternatives come from the pykep search where it has run.</p></div>
+  return `<div><h2>Routes ${state.routeMode === 'to' ? 'to' : 'from'} ${esc(BY[from].name)}${state.routeOther && BY[state.routeOther] ? (state.routeMode === 'to' ? ' from ' : ' to ') + esc(BY[state.routeOther].name) : ''}</h2><p class="caveat">Every launch window between ${isoOf(jdOfK(k))} and ${isoOf(jdOfK(k + state.H))}, each at its cheapest departure date. Costs are the speed change the engines must deliver (Δv): the more km/s, the more fuel. ${DV_REF} ${routeList.length} windows to ${new Set(routeList.map(r => r.site)).size} sites. Windows more than 3 km/s above a destination's best are left out. Dashed cyan paths are slingshot routes from the pykep flyby search, with a ring at each flyby planet; they exist so far for routes from Earth to Jupiter, Ceres, Vesta and Psyche. Δv includes the burn out of the parking orbit and into the destination's (rendezvous at small bodies); colours run from cheap (gold) to costly (red). Flyby alternatives come from the pykep search where it has run.</p></div>
     ${state.flights.length ? `<div><h3>Your ships</h3>${fl}<div class="list"><button type="button" id="clearShips">Clear ships</button></div><p class="caveat">Press play to watch them fly, or launch another and ride along.</p></div>` : ''}
     <div class="res">${rows}</div>
     <p class="caveat">Costs: ${esc(NET.meta.ephemeris || '')}. ${esc(NET.meta.method)}</p>`;
@@ -853,6 +860,9 @@ renderer.domElement.addEventListener('pointerup', e => {
 
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize);
+// table-like views start below the header, which wraps into several rows on a phone
+const topH = () => document.documentElement.style.setProperty('--toph', Math.ceil(document.querySelector('header.top').getBoundingClientRect().bottom + 6) + 'px');
+addEventListener('resize', topH); topH(); new ResizeObserver(topH).observe(document.querySelector('header.top'));
 
 /* ---------- ride along ---------- */
 var GLOW_TEX = null;                                      // var: shipMesh can run before this line during setup
@@ -1897,3 +1907,4 @@ if (location.hash.length > 1) openFromHash();
 </script>
 <script>/*MISSION_JS*/</script>
 <script>/*LIVE_JS*/</script>
+<script>/*TOUR_JS*/</script>

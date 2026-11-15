@@ -5,15 +5,12 @@ Development follows user journeys; new computation results flow in on the side. 
 
 ## Next, in this order
 
-1. **Curious visitor.** A guided tour on the first visit (the solar system, one route, a ride past a flyby planet, the
-   network, live missions, then "plan your own"); plain explanations, with the speed change (Δv) and reference values
-   (Moon, Mars, Pallas) where numbers appear; the mission planner and the trade-offs view usable on a phone.
-2. **Electric ships in the mission planner,** from the low-thrust atlas (four reference accelerations, scaled to the ship).
-3. **Business-case analyst.** Start from a resource and a budget, get ranked candidate bodies with a round-trip mission
+1. **Electric ships in the mission planner,** from the low-thrust atlas (four reference accelerations, scaled to the ship).
+2. **Business-case analyst.** Start from a resource and a budget, get ranked candidate bodies with a round-trip mission
    each, and supply runs as a timetable (tonnes per year to a destination).
-4. **Strategy researcher.** An analysis view over 2026–2100: reach within a budget, temporal betweenness, chokepoints and
+3. **Strategy researcher.** An analysis view over 2026–2100: reach within a budget, temporal betweenness, chokepoints and
    inflection dates, per body and scenario, with CSV export.
-5. **Data release v0.2** (after Björn's go): the screening of 1.58 million small bodies, the first flyby routes, the
+4. **Data release v0.2** (after Björn's go): the screening of 1.58 million small bodies, the first flyby routes, the
    low-thrust atlas; datasheet and audits as for v0.1.
 
 ## Mission planner, further
@@ -45,3 +42,5 @@ Development follows user journeys; new computation results flow in on the side. 
 - 2026-11-11 Live missions (17 spacecraft, JPL Horizons); Data page and daily network snapshots; documentation check.
 - 2026-11-12 Technical page brought up to date; three independent flyby runs per window decided.
 - 2026-11-14 Overnight flyby runs on the laptop (automatic, mains power only); Trips with a single destination.
+- 2026-11-15 Curious visitor: guided tour in six steps; Δv explained at every cost with reference values from the data;
+  mission planner and mission sheet usable on a phone; views start below the header on narrow screens.
