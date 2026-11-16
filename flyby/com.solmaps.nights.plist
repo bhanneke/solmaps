@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- solmaps: laptop help for the compute host's flyby search. Calls the controller every 10 minutes and at login; the
-     controller decides by itself (night all in, day capped, paused on battery or away from home). Install: copy to
+<!-- solmaps: laptop help for the compute host's flyby search. Calls the controller every 2 minutes and at login; the
+     controller decides by itself (all in when nobody uses the laptop, 2 cores in use, paused on battery or away). Install: copy to
      ~/Library/LaunchAgents and `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.solmaps.nights.plist`.
      Remove: launchctl bootout gui/$(id -u)/com.solmaps.nights && rm ~/Library/LaunchAgents/com.solmaps.nights.plist -->
 <plist version="1.0">
@@ -12,7 +12,7 @@
     <string>/bin/zsh</string>
     <string>/Users/hanneke/Library/Application Support/solmaps-nights/flyby/run_macbook_nights.sh</string>
   </array>
-  <key>StartInterval</key><integer>600</integer>
+  <key>StartInterval</key><integer>120</integer>
   <key>RunAtLoad</key><true/>
   <!-- keep the caffeinate the controller leaves behind (no idle sleep until the next call) -->
   <key>AbandonProcessGroup</key><true/>
