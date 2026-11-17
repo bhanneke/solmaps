@@ -801,6 +801,7 @@ function rebuildRoutes() {
   }
 }
 function updateRoutes() {
+  routeGroup.visible = !state.ride;                       // only the ship's own path while riding
   const key = [state.routeMode, state.routeFrom, state.routeOther, Math.max(0, kOf(state.jd)), state.H, state.hl].join('|');
   if (key !== routeKey) { routeKey = key; rebuildRoutes(); if (!state.sel && state.routeFrom) renderPanel(); }
   for (const f of state.flights) {                       // launched flights: a ship moves along its arc while in flight
@@ -903,6 +904,7 @@ function syncNetSelects() { $('flightCap').value = state.cap; $('bodySet').value
 const setCap = cap => loadNet(state.bodies, cap);
 async function routesFrom(id) {                            // dossier button: routes from a body, loading all 30 bodies if needed
   if (!NET.nodes.some(n => n.id === id) && !(await loadNet('all', state.cap))) return;
+  if (state.ride) endRide();                              // new routes: leave the ship, or they stay hidden
   state.sel = null; state.follow = null; resetView(); state.journey = true; state.jTab = 'routes';
   openPanel(true); $('btnJourney').setAttribute('aria-pressed', true);
   state.routeFrom = id; state.routeMode = 'from'; $('routeMode').value = 'from'; $('routeFrom').value = id; state.routeOther = ''; fillRouteOther(); state.hl = null; routeKey = ''; updateRoutes(); renderPanel();
@@ -933,11 +935,12 @@ function fillRouteOther() {                               // the other end of th
 }
 state.routeOther = '';
 fillNodeSelects();
-$('routeFrom').addEventListener('change', e => { state.routeFrom = e.target.value; state.hl = null; fillRouteOther(); routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
-$('routeOther').addEventListener('change', e => { state.routeOther = e.target.value; state.hl = null; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
-$('horizon').addEventListener('change', e => { state.H = +e.target.value; routeKey = ''; updateRoutes(); });
-$('sling').addEventListener('change', e => { state.sling = e.target.checked; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
-$('routeMode').addEventListener('change', e => { state.routeMode = e.target.value; state.hl = null; fillRouteOther(); routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
+const leaveShip = () => { if (state.ride) endRide(); };   // a new choice of routes ends a ride
+$('routeFrom').addEventListener('change', e => { leaveShip(); state.routeFrom = e.target.value; state.hl = null; fillRouteOther(); routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
+$('routeOther').addEventListener('change', e => { leaveShip(); state.routeOther = e.target.value; state.hl = null; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
+$('horizon').addEventListener('change', e => { leaveShip(); state.H = +e.target.value; routeKey = ''; updateRoutes(); });
+$('sling').addEventListener('change', e => { leaveShip(); state.sling = e.target.checked; routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
+$('routeMode').addEventListener('change', e => { leaveShip(); state.routeMode = e.target.value; state.hl = null; fillRouteOther(); routeKey = ''; updateRoutes(); if (!state.sel) renderPanel(); });
 
 /* ---------- controls ---------- */
 const DAY0 = Date.UTC(2026, 0, 1), DAY1 = Date.UTC(2100, 11, 31), TODAY = Date.UTC(2026, 9, 30);
