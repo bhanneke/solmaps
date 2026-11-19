@@ -18,7 +18,7 @@ err = lambda m: errors.append(m)
 warn = lambda m: warnings.append(m)
 plain = lambda t: re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', t))
 
-# 1. every view and menu of the 3D atlas appears in How it works
+# 1. every view and menu of solmaps appears in How it works
 atlas = (ROOT / 'atlas3d' / 'solar3d_template.html').read_text()
 seg = re.search(r'aria-label="View">(.*?)</div>', atlas, re.S)
 views = re.findall(r'<button[^>]*>([^<]+)</button>', seg.group(1)) if seg else []
@@ -27,7 +27,7 @@ if not views:
 how = plain(TEXT['site/how-it-works.html']).lower().replace('-', ' ')
 for v in views + ['Trips', 'Display', 'Bodies', 'Live missions']:
     if v.lower().replace('-', ' ') not in how:
-        err(f'how-it-works.html does not describe the 3D atlas view or menu "{v}"')
+        err(f'how-it-works.html does not describe the solmaps view or menu "{v}"')
 
 # 2. every engine command and every mode of engine.daily and engine.lt_atlas appears in README.md or docs/ENGINE.md
 eng = TEXT['README.md'] + TEXT['docs/ENGINE.md']

@@ -38,7 +38,7 @@ Development follows user journeys; new computation results flow in on the side. 
 ## Done
 
 - 2026-11-09 Data release v0.1 (Zenodo DOI 10.5281/zenodo.24030357, Hugging Face).
-- 2026-11-10 3D atlas with all 30 bodies; Display menu with reach per body; mission planner (impulsive legs).
+- 2026-11-10 solmaps with all 30 bodies; Display menu with reach per body; mission planner (impulsive legs).
 - 2026-11-11 Live missions (17 spacecraft, JPL Horizons); Data page and daily network snapshots; documentation check.
 - 2026-11-12 Technical page brought up to date; three independent flyby runs per window decided.
 - 2026-11-14 Overnight flyby runs on the laptop (automatic, mains power only); Trips with a single destination.

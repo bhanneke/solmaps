@@ -12,14 +12,14 @@ Maps and documentation: https://solmaps.deepspacestrategy.org/ · computation st
   Trojans), every day from November 2026 to 2100, flights up to 100 years: up to 18.8 billion Lambert problems. Nine
   moons and Earth–Moon L1 share their planet's legs; 40 places in all. Released as open data (Zenodo,
   [10.5281/zenodo.24030357](https://doi.org/10.5281/zenodo.24030357)).
-- A mission planner in the 3D atlas: ships, stops, cargo, refuelling and return, with the mass carried through every
+- A mission planner in solmaps: ships, stops, cargo, refuelling and return, with the mass carried through every
   burn; its leg files live on Hugging Face (`planner/v0.1`, built by `python -m engine.daily planner`).
 - Flyby (slingshot) routes with an evolutionary optimiser, Earth–Mars cyclers, low-thrust transfers with an
   independent check (and a low-thrust atlas of heliocentric legs for four reference accelerations), station siting, and chronological journeys for ships with fuel, payload and refuelling.
 - The JPL Small-Body Database catalogue (1,582,717 objects) as the basis for screening every asteroid and comet.
 - Live missions: the trajectories of spacecraft in flight from JPL Horizons (`flyby/fetch_missions.py`), with their facts and
-  sources, shown in the 3D atlas.
-- A guided tour of the 3D atlas on the first visit (six steps; the "?" button starts it again), with the speed change (Δv)
+  sources, shown in solmaps.
+- A guided tour of solmaps on the first visit (six steps; the "?" button starts it again), with the speed change (Δv)
   explained next to every cost and reference values from the data.
 - Daily network snapshots for apps and games (`python -m engine.daily snapshots`): for every day to 2100 the cheapest classic,
   cheapest overall and fastest option of all 870 routes, on Hugging Face under `api/v1`; the site's Data page lists every
@@ -36,7 +36,7 @@ assumptions and limits.
 | `engine/` | Routing engine: end-state conventions, daily precompute (`daily.py`), transfer alternatives, ships, journeys, low thrust, refinement cache, comparison service (`docs/ENGINE.md`) |
 | `flyby/` | Bodies (DE440, JPL Horizons), ephemeris and catalogue fetchers, flyby search, cyclers, trajectories, compute queues |
 | `atlas/` | Resource atlas: verified dataset (`atlas_dataset.json`, every entry with evidence level and source) and its map |
-| `atlas3d/` | The 3D atlas: routes, slingshots, journeys, round trips, network views, trade-offs, mission planner (`mission.js`) |
+| `atlas3d/` | solmaps: routes, slingshots, journeys, round trips, network views, trade-offs, mission planner (`mission.js`) |
 | `network/` | Growth map and the JavaScript transfer engine used by the pages |
 | `stations/` | Station siting: candidate orbits, objectives, station-to-station edges |
 | `surrogate/` | Route dataset generator and a first learned surrogate |
