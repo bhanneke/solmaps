@@ -9,7 +9,7 @@ abstract: >
   Deep Space Strategy.
 license: MIT
 repository-code: "https://github.com/bhanneke/solmaps"
-url: "https://bhanneke.github.io/solmaps/"
+url: "https://solmaps.deepspacestrategy.org/"
 authors:
   - family-names: Hanneke
     given-names: Björn

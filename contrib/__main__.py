@@ -16,7 +16,7 @@ from contrib.jobs import JOBS, BY_ID
 
 ROOT = '/work'
 REPO = os.environ.get('SOLMAPS_CONTRIB_REPO', 'Deep-Space-Strategy/solmaps-contrib')   # Hugging Face dataset
-PROGRESS = os.environ.get('SOLMAPS_PROGRESS', 'https://bhanneke.github.io/solmaps/progress.json')
+PROGRESS = os.environ.get('SOLMAPS_PROGRESS', 'https://solmaps.deepspacestrategy.org/progress.json')
 OUT = f'{ROOT}/contrib/out'
 
 def progress():

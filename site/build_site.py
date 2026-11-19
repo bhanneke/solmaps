@@ -38,6 +38,7 @@ for p in sorted((root / 'network').glob('network_*.json')) + sorted((root / 'net
 if (root / 'site' / 'progress.json').exists():
     shutil.copy(root / 'site' / 'progress.json', docs / 'progress.json')     # read by python -m contrib
 (docs / '.nojekyll').write_text('')          # serve the files as they are
+(docs / 'CNAME').write_text('solmaps.deepspacestrategy.org\n')   # GitHub Pages custom domain
 for p in sorted(docs.iterdir()):
     print(f'{p.name:24s} {p.stat().st_size:>10,d} bytes')
 # the documentation check runs with every build (GitHub Actions also runs it, when the account can run workflows)

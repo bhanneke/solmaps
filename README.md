@@ -1,10 +1,10 @@
 # solmaps
 
 solmaps computes what it costs to travel between places in the solar system on any day until 2100, and draws the maps
-that follow from it. It is the open map and route engine of [Deep Space Strategy](https://bhanneke.github.io/deep-space-strategy/),
+that follow from it. It is the open map and route engine of [Deep Space Strategy](https://deepspacestrategy.org/),
 which studies where humanity should build in the solar system, and in which order.
 
-Maps and documentation: https://bhanneke.github.io/solmaps/ · computation status: https://bhanneke.github.io/solmaps/status.html
+Maps and documentation: https://solmaps.deepspacestrategy.org/ · computation status: https://solmaps.deepspacestrategy.org/status.html
 
 ## What it computes
 
