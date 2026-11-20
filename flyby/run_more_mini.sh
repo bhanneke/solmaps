@@ -14,7 +14,7 @@ run() {   # run NAME CMD...: one container, guarded, up to three attempts
   for attempt in 1 2 3; do
     while ! room; do log "waiting: root volume below 40 GB free"; sleep 1800; done
     log "start $name (attempt $attempt)"
-    docker run --rm --name solmaps-$name --memory=2000m -e SOLMAPS_POOL=$POOL ${=RUNENV} -v ~/solmaps-flyby:/work -w /work $IMAGE "$@" >> flyby/q_$name.log 2>&1 &
+    docker run --rm --name solmaps-$name --memory=3000m -e SOLMAPS_POOL=$POOL ${=RUNENV} -v ~/solmaps-flyby:/work -w /work $IMAGE "$@" >> flyby/q_$name.log 2>&1 &
     pid=$!
     while kill -0 $pid 2>/dev/null; do
       if ! room; then log "stopping $name: root volume below 40 GB free"; docker stop solmaps-$name > /dev/null; fi
