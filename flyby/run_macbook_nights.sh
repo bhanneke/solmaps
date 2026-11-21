@@ -37,7 +37,19 @@ cpus() {                        # sets CPUS_N and MODE_TXT
 }
 cd "$RUN" || exit 1
 if [ -n "$TEST" ]; then log "test: docker $(docker info --format '{{.NCPU}} CPUs' 2>&1 | head -1), ssh $(ssh $SSHO $MINI echo ok 2>&1 | head -1), on AC: $(on_ac && echo yes || echo no), at home: $(at_home && echo yes || echo no), idle $(idle_s) s, screen kept on: $(screen_kept && echo yes || echo no), others $(others) cores"; exit 0; fi
-docker info > /dev/null 2>&1 || exit 0                                     # Docker not up yet (after a restart): next call
+# Docker must answer within 30 s. On 2026-11-20 its virtual machine died and every docker call hung for a day; now the
+# controller logs it, and after three calls in a row without an answer (about 6 minutes) it restarts Docker Desktop.
+docker info > /dev/null 2>&1 & dpid=$!
+( sleep 30; kill $dpid 2>/dev/null ) > /dev/null 2>&1 &!
+if ! wait $dpid; then
+  n=$(( $(cat $RUN/docker_silent 2>/dev/null || echo 0) + 1 )); echo $n > $RUN/docker_silent
+  if (( n >= 3 )); then
+    log "Docker does not answer ($n checks): restarting Docker Desktop"; echo 0 > $RUN/docker_silent
+    osascript -e 'quit app "Docker Desktop"' > /dev/null 2>&1; sleep 20; pkill -x "Docker Desktop"; open -a "Docker Desktop"
+  else log "Docker does not answer (check $n)"; fi
+  exit 0
+fi
+echo 0 > $RUN/docker_silent
 ok=1; on_ac || ok=0; at_home || ok=0
 why() { on_ac || { echo "on battery"; return; }; echo "away from home"; }
 state=$(docker inspect -f '{{.State.Status}}' $C 2>/dev/null)
