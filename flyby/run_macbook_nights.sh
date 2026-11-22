@@ -50,6 +50,7 @@ if ! wait $dpid; then
   exit 0
 fi
 echo 0 > $RUN/docker_silent
+[ -f $RUN/hold ] && exit 0                     # a test or maintenance holds the laptop: leave everything as it is
 ok=1; on_ac || ok=0; at_home || ok=0
 why() { on_ac || { echo "on battery"; return; }; echo "away from home"; }
 state=$(docker inspect -f '{{.State.Status}}' $C 2>/dev/null)
