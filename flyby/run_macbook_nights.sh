@@ -45,7 +45,7 @@ if ! wait $dpid; then
   n=$(( $(cat $RUN/docker_silent 2>/dev/null || echo 0) + 1 )); echo $n > $RUN/docker_silent
   if (( n >= 3 )); then
     log "Docker does not answer ($n checks): restarting Docker Desktop"; echo 0 > $RUN/docker_silent
-    osascript -e 'quit app "Docker Desktop"' > /dev/null 2>&1; sleep 20; pkill -x "Docker Desktop"; open -a "Docker Desktop"
+    osascript -e 'quit app "Docker Desktop"' > /dev/null 2>&1; sleep 20; pkill -x "Docker Desktop"; open -g -j -a "Docker Desktop"   # hidden, in the background
   else log "Docker does not answer (check $n)"; fi
   exit 0
 fi
