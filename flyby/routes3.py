@@ -204,6 +204,36 @@ def solve(seq, t0, arrival, islands, gens, pop, evolves, seed):
         refine.push_back(algo=pg.algorithm(pg.mbh(inner, stop=5, perturb=0.05, seed=seed + 2000 + i)), pop=p)
     for _ in range(2):
         refine.evolve(); refine.wait_check()
+    return _result(udp, seq, arrival, refine)
+
+def solve_many(seq, t0, arrival, seeds, islands, gens, pop, evolves):
+    """The independent starts of one window side by side: the same two stages, settings and seeds as solve(), with the
+    rounds of all starts in step. One start keeps only `islands` workers busy and waits for its slowest island after every
+    round; several starts together keep the whole pool busy. Each start's result is solve()'s for that seed."""
+    udps = [Route(seq, t0, arrival) for _ in seeds]
+    archis = [pg.archipelago(n=islands, t=pg.ring(), algo=pg.algorithm(pg.sade(gen=gens, variant=6, variant_adptv=2, memory=True)),
+                             prob=pg.problem(u), pop_size=pop, seed=s) for u, s in zip(udps, seeds)]
+    for _ in range(evolves):
+        for a in archis: a.evolve()
+        for a in archis: a.wait_check()
+    refines = []
+    for u, a, seed in zip(udps, archis, seeds):
+        prob, refine = pg.problem(u), pg.archipelago()
+        for i, isl in enumerate(a):
+            src = isl.get_population()
+            top = sorted(range(len(src)), key=lambda j: src.get_f()[j][0])[:5]
+            p = pg.population(prob, 0, seed=seed + 1000 + i)
+            for j in top:
+                p.push_back(src.get_x()[j], src.get_f()[j])
+            inner = pg.algorithm(pg.compass_search(max_fevals=10000, start_range=0.05, stop_range=1e-6))
+            refine.push_back(algo=pg.algorithm(pg.mbh(inner, stop=5, perturb=0.05, seed=seed + 2000 + i)), pop=p)
+        refines.append(refine)
+    for _ in range(2):
+        for r in refines: r.evolve()
+        for r in refines: r.wait_check()
+    return [_result(u, seq, arrival, r) for u, r in zip(udps, refines)]
+
+def _result(udp, seq, arrival, refine):
     best = min((isl.get_population() for isl in refine), key=lambda q: q.champion_f[0])
     x = best.champion_x; f = udp.python_fitness(x)[0]        # the stored value always comes from the Python model
     tofs = [x[5]] + [x[9 + 4 * (i - 1)] for i in range(1, len(seq) - 1)]
@@ -242,7 +272,7 @@ def main():
                     t = time.time()
                     # optimizer_study*.log: three independent runs, five for two-flyby sequences (the least reliable)
                     n = starts + (9 if len(seq) > 3 else 0)      # two-flyby sequences: 12 starts beat 5 on five of six test routes
-                    runs = [solve(seq, t0, arrival, seed=y * 100 + k + 1_000_000 * rerun, **budget) for k in range(n)]
+                    runs = solve_many(seq, t0, arrival, [y * 100 + k + 1_000_000 * rerun for k in range(n)], **budget)
                     r = min(runs, key=lambda s: s['dv'])
                     r.update(origin=origin, target=tgt, bin=f'{y}-{y + width - 1}', feasible=bool(r['dv'] < OUT_OF_RANGE),
                              starts_dv=[s['dv'] for s in runs], seconds=round(time.time() - t, 1))
