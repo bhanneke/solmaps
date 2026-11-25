@@ -272,7 +272,8 @@ def main():
                     t = time.time()
                     # optimizer_study*.log: three independent runs, five for two-flyby sequences (the least reliable)
                     n = starts + (9 if len(seq) > 3 else 0)      # two-flyby sequences: 12 starts beat 5 on five of six test routes
-                    runs = solve_many(seq, t0, arrival, [y * 100 + k + 1_000_000 * rerun for k in range(n)], **budget)
+                    # solve_many (starts side by side) is 1.8x faster but ran out of memory on both machines (2026-11-24): not used yet
+                    runs = [solve(seq, t0, arrival, seed=y * 100 + k + 1_000_000 * rerun, **budget) for k in range(n)]
                     r = min(runs, key=lambda s: s['dv'])
                     r.update(origin=origin, target=tgt, bin=f'{y}-{y + width - 1}', feasible=bool(r['dv'] < OUT_OF_RANGE),
                              starts_dv=[s['dv'] for s in runs], seconds=round(time.time() - t, 1))

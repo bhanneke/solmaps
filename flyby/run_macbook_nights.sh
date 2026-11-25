@@ -60,6 +60,11 @@ name=$(docker inspect -f '{{index .Config.Labels "job"}}' $C 2>/dev/null)
 if [ "$state" = exited ]; then
   code=$(docker inspect -f '{{.State.ExitCode}}' $C); res=$(docker inspect -f '{{index .Config.Labels "result"}}' $C)
   docker rm $C > /dev/null; log "end $name exit $code"
+  # three memory kills in a row (exit 137) set the origin aside instead of restarting it endlessly (2026-11-25: ~70 restarts);
+  # stops by tests or a dead Docker (143, 255) do not count. Remove the marker file to try that origin again.
+  if [ "$code" -eq 137 ] && (( $(grep " end $name exit " nights.log | tail -3 | grep -c " exit 137$") >= 3 )); then
+    touch "$RUN/set_aside_$name"; log "SET ASIDE $name: killed for memory three times in a row"
+  fi
   [ "$code" -eq 0 ] || exit 1
   f=$(ls -t flyby/routes3_${res}_*_2027_2097.json | head -1)
   if ssh $SSHO $MINI "grep -q 'start $name ' $REMOTE/queue.log"; then log "not copied: the compute host has started $name meanwhile"
@@ -86,6 +91,7 @@ jobs=("${(@f)$(grep '^run other_' flyby/run_more_mini.sh | sed 's/^run //' | tai
 for line in $jobs; do
   name=${line%% *}; cmd=${line#* }
   grep -q " end $name exit 0$" nights.log 2>/dev/null && continue
+  [ -f "$RUN/set_aside_$name" ] && continue
   if ssh $SSHO $MINI "grep -q 'start $name ' $REMOTE/queue.log"; then log "stop: the compute host has reached $name"; break; fi
   res=${${cmd#*routes3.py }%% *}
   cpus

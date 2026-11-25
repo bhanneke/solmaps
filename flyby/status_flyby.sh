@@ -10,7 +10,7 @@ progress() {   # $1 log file: routes so far, destinations started of 29, current
   echo "$n routes, destination $(echo "$d" | grep -c .) of 29 ($(echo "$d" | tail -1))"
 }
 echo "== MacBook"
-awk -v s="$since" '($1 " " $2) >= s && /end |start |copied|COPY|could not|paused|resumed|stop:|nothing left/' "$R/nights.log" | grep -v "test:"
+awk -v s="$since" '($1 " " $2) >= s && /end |start |copied|COPY|could not|paused|resumed|stop:|nothing left|SET ASIDE/' "$R/nights.log" | grep -v "test:"
 c=$(docker inspect -f '{{.State.Status}} {{index .Config.Labels "job"}} cores={{.HostConfig.NanoCpus}}' solmaps-nights 2>/dev/null)
 if [ -n "$c" ]; then j=$(echo $c | awk '{print $2}'); echo "container: ${c/000000000/}; $(progress "$R/flyby/n_$j.log")"; else echo "container: none"; fi
 launchctl print gui/$(id -u)/com.solmaps.nights 2>/dev/null | grep -E "last exit code" | head -1
