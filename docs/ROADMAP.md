@@ -27,6 +27,10 @@ Development follows user journeys; new computation results flow in on the side. 
 - A view of the screening: the cheapest asteroids and comets to reach from Earth, Mars or Ceres, and when.
 - Live missions: refresh the trajectories from JPL Horizons regularly.
 - The Hugging Face query example on the Data page, once that service answers reliably.
+- Four more bodies as full network members (Björn, 2026-11-26): the dwarf planets Eris, Haumea, Makemake and Quaoar
+  (Arrokoth optional), with orbits from the JPL Small-Body Database, daily transfer data to and from all 30 bodies, and
+  flyby searches. They orbit at 40–68 AU, so direct flights take 15 to over 30 years: this needs a longer flight-time
+  limit than the current ones, or most of their routes come out empty. After the first flyby run.
 
 ## Science and engine, longer term
 
